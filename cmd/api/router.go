@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"database/sql"
 	"net/http"
 	"path"
 	"strings"
@@ -19,60 +19,31 @@ func ShiftPath(p string) (head, tail string) {
 	return p[1:i], p[i:]
 }
 
-type Api struct {
-	LoginHandler *LoginHandler
-	UserHandler  *UserHandler
+type Serve struct {
+	DB *sql.DB
 }
 
-func (h *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	middleware(w, r)
+func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// return 404 Not Found for any URL with a trailing slash (except "/" itself).
+	if r.URL.Path != "/" && strings.HasSuffix(r.URL.Path, "/") {
+		http.NotFound(w, r)
+		return
+	}
+
+	Middleware(w, r)
 	var head string
 	head, r.URL.Path = ShiftPath(r.URL.Path)
 	switch head {
+	case "product":
+		serveProduct(w, r, h.DB)
+		return
 	case "user":
-		h.UserHandler.ServeHTTP(w, r)
+		serveUser(w, r, h.DB)
 		return
 	case "login":
-		h.LoginHandler.ServeHTTP(w, r)
+		serveLogin(w, r, h.DB)
 		return
 	default:
 		http.Error(w, "Not Found", http.StatusNotFound)
-	}
-}
-
-// Accepts: POST, DELETE
-// POST accepts new user payloads - responds with jwt or error
-// DELETE removes the account of the authenticated user
-func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		userPost(w, r, h.DB)
-		return
-	case http.MethodDelete:
-		userDelete(w, r, h.DB)
-		return
-	case http.MethodOptions:
-		return
-	default:
-		http.Error(w, fmt.Sprintf("Expected method POST, OPTIONS or DELETE, got %v", r.Method), http.StatusMethodNotAllowed)
-		fmt.Printf("Expected method POST, OPTIONS or DELETE, got %v", r.Method)
-		return
-	}
-
-}
-
-// Accepts: POST
-// POST requests expect user credentials - responds with a jwt or error
-func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	login_middleware(w, r)
-	switch r.Method {
-	case http.MethodPost:
-		loginPost(w, r, h.DB)
-		return
-	case http.MethodOptions:
-		return
-	default:
-		http.Error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
-		return
 	}
 }

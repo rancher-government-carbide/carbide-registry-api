@@ -2,6 +2,7 @@ package api
 
 import (
 	"carbide-api/cmd/api/objects"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -13,11 +14,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func middleware(w http.ResponseWriter, r *http.Request) {
+func Middleware(w http.ResponseWriter, r *http.Request) {
 	enableCors(w)
 }
 
-func login_middleware(w http.ResponseWriter, r *http.Request) {
+func Login_middleware(w http.ResponseWriter, r *http.Request) {
 	_, err := verifyJWT(r)
 	if err == nil {
 		log.Print("User is already logged in\n")
@@ -109,4 +110,32 @@ func verifyJWT(r *http.Request) (int64, error) {
 
 func terminateJWT() {
 	// replace jwt with another that expires immediately
+}
+
+type Response struct {
+	Message string
+}
+
+func respondFailure(w http.ResponseWriter) error {
+	var success Response
+	success.Message = "FAILURE"
+	json, err := json.Marshal(success)
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
+	return nil
+}
+
+func respondSuccess(w http.ResponseWriter) error {
+	var success Response
+	success.Message = "SUCCESS"
+	json, err := json.Marshal(success)
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
+	return nil
 }

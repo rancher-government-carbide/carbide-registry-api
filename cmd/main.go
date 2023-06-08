@@ -11,24 +11,32 @@ import (
 )
 
 func main() {
-	dbuser := os.Getenv("DBUSER")
-	if dbuser == "" {
-		dbuser = "root"
+	db_user := os.Getenv("DBUSER")
+	if db_user == "" {
+		db_user = "clayton"
 	}
-	dbpass := os.Getenv("DBPASS")
-	if dbpass == "" {
-		dbpass = ""
+	db_pass := os.Getenv("DBPASS")
+	if db_pass == "" {
+		db_pass = "applevisioncurescancer"
 	}
-	dburl := os.Getenv("DBURL")
-	if dburl == "" {
-		dburl = "0.0.0.0:26257"
+	db_host := os.Getenv("DBHOST")
+	if db_host == "" {
+		db_host = "127.0.0.1"
+	}
+	db_port := os.Getenv("DBPORT")
+	if db_port == "" {
+		db_port = "3306"
+	}
+	db_name := os.Getenv("DBNAME")
+	if db_name == "" {
+		db_name = "carbide"
 	}
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "4000"
+		port = "5000"
 	}
 
-	db, err := api.DatabaseInit(dbuser, dbpass, dburl)
+	db, err := api.DatabaseInit(db_user, db_pass, db_host, db_port, db_name)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,12 +44,6 @@ func main() {
 	defer db.Close()
 
 	fmt.Printf("Starting Server...\n")
-
-	a := &api.Api{
-		LoginHandler: &api.LoginHandler{DB: db},
-		UserHandler:  &api.UserHandler{DB: db},
-	}
-
-	http.ListenAndServe("0.0.0.0:"+port, a)
+	http.ListenAndServe("0.0.0.0:"+port, &api.Serve{DB: db})
 	fmt.Printf("Now listening on port " + port + ".")
 }
