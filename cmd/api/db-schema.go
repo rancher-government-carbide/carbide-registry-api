@@ -3,12 +3,14 @@ package api
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
-func DatabaseInit(db_user string, db_pass string, db_url string) (*sql.DB, error) {
+func DatabaseInit(db_user string, db_pass string, db_host string, db_port string, db_name string) (*sql.DB, error) {
 
 	// Initialize database connection
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s)", db_user, db_pass, db_url)
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", db_user, db_pass, db_host, db_port, db_name)
 	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		return db, err
@@ -29,7 +31,7 @@ func DatabaseInit(db_user string, db_pass string, db_url string) (*sql.DB, error
 
 	// Ensure existence of releases table.
 	if _, err := db.Exec(`
-		CREATE TABLE IF NOT EXSTS releases (
+		CREATE TABLE IF NOT EXISTS releases (
 		  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 		  product_id INT NOT NULL,
 		  name VARCHAR(255) NOT NULL,
@@ -58,12 +60,12 @@ func DatabaseInit(db_user string, db_pass string, db_url string) (*sql.DB, error
 		return db, err
 	}
 
-	// Ensure constraint on images table
-	if _, err := db.Exec(`
-		ALTER TABLE images ADD CONSTRAINT IF NOT EXISTS unique_image_name UNIQUE (image_name)
-		)`); err != nil {
-		return db, err
-	}
+	// TODO: make indepmotent
+	//// Ensure constraint on images table
+	// _, err = db.Exec(`ALTER TABLE images ADD CONSTRAINT unique_image_name UNIQUE (image_name)`)
+	// if err != nil {
+	// 	return db, err
+	// }
 
 	// Ensure existence of release_image_mapping table
 	if _, err := db.Exec(`
@@ -79,163 +81,161 @@ func DatabaseInit(db_user string, db_pass string, db_url string) (*sql.DB, error
 		return db, err
 	}
 
-	// Ensure existence of create_update_image procedure
-	if _, err := db.Exec(`
-		CREATE PROCEDURE create_update_image(
-		    IN p_product_name VARCHAR(255),
-		    IN p_release_name VARCHAR(255),
-		    IN p_image_name VARCHAR(255)
-		)
-		BEGIN
-		    DECLARE p_product_id INT;
-		    DECLARE p_release_id INT;
-		    DECLARE p_image_id INT;
-		    DECLARE p_mapping_id INT;
-		
-		    -- Check if the product exists
-		    SELECT id INTO p_product_id
-		    FROM product
-		    WHERE name = p_product_name;
-		    
-		    -- If the product doesn't exist, insert a new record
-		    IF p_product_id IS NULL THEN
-		        INSERT INTO product (name)
-		        VALUES (p_product_name);
-		        SET p_product_id = LAST_INSERT_ID();
-		    END IF;
-		    
-		    -- Check if the release exists
-		    SELECT id INTO p_release_id
-		    FROM releases
-		    WHERE product_id = p_product_id AND name = p_release_name;
-		    
-		    -- If the release doesn't exist, insert a new record
-		    IF p_release_id IS NULL THEN
-		        INSERT INTO releases (product_id, name)
-		        VALUES (p_product_id, p_release_name);
-		        SET p_release_id = LAST_INSERT_ID();
-		    END IF;
-		    
-		    -- Check if the image exists
-		    SELECT id INTO p_image_id
-		    FROM images
-		    WHERE image_name = TRIM(p_image_name);
-		    
-		    -- If the image doesn't exist, insert a new record
-		    IF p_image_id IS NULL THEN
-		        INSERT INTO images (image_name)
-		        VALUES (TRIM(p_image_name));
-		        SET p_image_id = LAST_INSERT_ID();
-		    END IF;
-		
-		    -- Check if the release image mapping record exists
-		    SELECT id INTO p_mapping_id
-		    FROM release_image_mapping
-		    WHERE release_id = p_release_id and image_id = p_image_id;
-		
-		    -- If the mapping doesn't exist, insert a new record
-		    IF p_mapping_id IS NULL THEN
-		        INSERT INTO release_image_mapping (release_id, image_id)
-		        VALUES (p_release_id, p_image_id);
-		        SET p_mapping_id = LAST_INSERT_ID();
-		    END IF;
-		
-		END //
-		)`); err != nil {
-		return db, err
-	}
+	// TODO: make procedure creation indepmotent
+	// // Ensure existence of create_update_image procedure
+	// if _, err := db.Exec(`
+	// 	CREATE PROCEDURE create_update_image(
+	// 	    IN p_product_name VARCHAR(255),
+	// 	    IN p_release_name VARCHAR(255),
+	// 	    IN p_image_name VARCHAR(255)
+	// 	)
+	// 	BEGIN
+	// 	    DECLARE p_product_id INT;
+	// 	    DECLARE p_release_id INT;
+	// 	    DECLARE p_image_id INT;
+	// 	    DECLARE p_mapping_id INT;
+	//
+	// 	    -- Check if the product exists
+	// 	    SELECT id INTO p_product_id
+	// 	    FROM product
+	// 	    WHERE name = p_product_name;
+	//
+	// 	    -- If the product doesn't exist, insert a new record
+	// 	    IF p_product_id IS NULL THEN
+	// 	        INSERT INTO product (name)
+	// 	        VALUES (p_product_name);
+	// 	        SET p_product_id = LAST_INSERT_ID();
+	// 	    END IF;
+	//
+	// 	    -- Check if the release exists
+	// 	    SELECT id INTO p_release_id
+	// 	    FROM releases
+	// 	    WHERE product_id = p_product_id AND name = p_release_name;
+	//
+	// 	    -- If the release doesn't exist, insert a new record
+	// 	    IF p_release_id IS NULL THEN
+	// 	        INSERT INTO releases (product_id, name)
+	// 	        VALUES (p_product_id, p_release_name);
+	// 	        SET p_release_id = LAST_INSERT_ID();
+	// 	    END IF;
+	//
+	// 	    -- Check if the image exists
+	// 	    SELECT id INTO p_image_id
+	// 	    FROM images
+	// 	    WHERE image_name = TRIM(p_image_name);
+	//
+	// 	    -- If the image doesn't exist, insert a new record
+	// 	    IF p_image_id IS NULL THEN
+	// 	        INSERT INTO images (image_name)
+	// 	        VALUES (TRIM(p_image_name));
+	// 	        SET p_image_id = LAST_INSERT_ID();
+	// 	    END IF;
+	//
+	// 	    -- Check if the release image mapping record exists
+	// 	    SELECT id INTO p_mapping_id
+	// 	    FROM release_image_mapping
+	// 	    WHERE release_id = p_release_id and image_id = p_image_id;
+	//
+	// 	    -- If the mapping doesn't exist, insert a new record
+	// 	    IF p_mapping_id IS NULL THEN
+	// 	        INSERT INTO release_image_mapping (release_id, image_id)
+	// 	        VALUES (p_release_id, p_image_id);
+	// 	        SET p_mapping_id = LAST_INSERT_ID();
+	// 	    END IF;
+	// 	END
+	// 	`); err != nil {
+	// 	return db, err
+	// }
 
-	if _, err := db.Exec(`
-		CREATE PROCEDURE update_image_signed(
-		    IN p_image_name VARCHAR(255),
-		    IN p_image_signed BOOLEAN
-		)
-		BEGIN
-		    DECLARE p_image_id INT;
-		
-		    -- Check if the image exists
-		    SELECT id INTO p_image_id
-		    FROM images
-		    WHERE image_name = TRIM(p_image_name);
-		    
-		    -- If the image doesn't exist, insert a new record
-		    IF p_image_id IS NULL THEN
-		        INSERT INTO images (image_name, image_signed)
-		        VALUES (TRIM(p_image_name), p_image_signed);
-		    ELSE
-		        -- Update the record
-		        UPDATE images
-		        SET image_signed = p_image_signed
-		        WHERE image_name = TRIM(p_image_name);
-		    END IF;
-		
-		END //
-		)`); err != nil {
-		return db, err
-	}
+	// if _, err := db.Exec(`
+	// 	CREATE PROCEDURE update_image_signed(
+	// 	    IN p_image_name VARCHAR(255),
+	// 	    IN p_image_signed BOOLEAN
+	// 	)
+	// 	BEGIN
+	// 	    DECLARE p_image_id INT;
+	//
+	// 	    -- Check if the image exists
+	// 	    SELECT id INTO p_image_id
+	// 	    FROM images
+	// 	    WHERE image_name = TRIM(p_image_name);
+	//
+	// 	    -- If the image doesn't exist, insert a new record
+	// 	    IF p_image_id IS NULL THEN
+	// 	        INSERT INTO images (image_name, image_signed)
+	// 	        VALUES (TRIM(p_image_name), p_image_signed);
+	// 	    ELSE
+	// 	        -- Update the record
+	// 	        UPDATE images
+	// 	        SET image_signed = p_image_signed
+	// 	        WHERE image_name = TRIM(p_image_name);
+	// 	    END IF;
+	// 	END
+	// 	`); err != nil {
+	// 	return db, err
+	// }
 
-	if _, err := db.Exec(`
-		CREATE PROCEDURE update_trivy_flags(
-		    IN p_image_name VARCHAR(255),
-		    IN p_trivy_signed BOOLEAN,
-		    IN p_trivy_valid BOOLEAN
-		)
-		BEGIN
-		    DECLARE p_image_id INT;
-		
-		    -- Check if the image exists
-		    SELECT id INTO p_image_id
-		    FROM images
-		    WHERE image_name = TRIM(p_image_name);
-		    
-		    -- If the image doesn't exist, insert a new record
-		    IF p_image_id IS NULL THEN
-		        INSERT INTO images (image_name, trivy_signed, trivy_valid, last_scanned_at)
-		        VALUES (TRIM(p_image_name), p_trivy_signed, p_trivy_valid, CURRENT_TIMESTAMP);
-		    ELSE
-		        -- Update the record
-		        UPDATE images
-		        SET trivy_signed = p_trivy_signed,
-		            trivy_valid = p_trivy_valid,
-		            last_scanned_at = CURRENT_TIMESTAMP
-		        WHERE image_name = TRIM(p_image_name);
-		    END IF;
-		    
-		END //
-		)`); err != nil {
-		return db, err
-	}
+	// if _, err := db.Exec(`
+	// 	CREATE PROCEDURE update_trivy_flags(
+	// 	    IN p_image_name VARCHAR(255),
+	// 	    IN p_trivy_signed BOOLEAN,
+	// 	    IN p_trivy_valid BOOLEAN
+	// 	)
+	// 	BEGIN
+	// 	    DECLARE p_image_id INT;
+	//
+	// 	    -- Check if the image exists
+	// 	    SELECT id INTO p_image_id
+	// 	    FROM images
+	// 	    WHERE image_name = TRIM(p_image_name);
+	//
+	// 	    -- If the image doesn't exist, insert a new record
+	// 	    IF p_image_id IS NULL THEN
+	// 	        INSERT INTO images (image_name, trivy_signed, trivy_valid, last_scanned_at)
+	// 	        VALUES (TRIM(p_image_name), p_trivy_signed, p_trivy_valid, CURRENT_TIMESTAMP);
+	// 	    ELSE
+	// 	        -- Update the record
+	// 	        UPDATE images
+	// 	        SET trivy_signed = p_trivy_signed,
+	// 	            trivy_valid = p_trivy_valid,
+	// 	            last_scanned_at = CURRENT_TIMESTAMP
+	// 	        WHERE image_name = TRIM(p_image_name);
+	// 	    END IF;
+	// 	END
+	// 	`); err != nil {
+	// 	return db, err
+	// }
 
-	if _, err := db.Exec(`
-		CREATE PROCEDURE update_sbom_flags(
-		    IN p_image_name VARCHAR(255),
-		    IN p_sbom_signed BOOLEAN,
-		    IN p_sbom_valid BOOLEAN
-		)
-		BEGIN
-		    DECLARE p_image_id INT;
-		
-		    -- Check if the image exists
-		    SELECT id INTO p_image_id
-		    FROM images
-		    WHERE image_name = TRIM(p_image_name);
-		    
-		    -- If the image doesn't exist, insert a new record
-		    IF p_image_id IS NULL THEN
-		        INSERT INTO images (image_name, sbom_signed, sbom_valid)
-		        VALUES (TRIM(p_image_name), p_sbom_signed, p_sbom_valid);
-		    ELSE
-		        -- Update the record
-		        UPDATE images
-		        SET sbom_signed = p_sbom_signed,
-		            sbom_valid = p_sbom_valid
-		        WHERE image_name = TRIM(p_image_name);
-		    END IF;
-		
-		END //
-		)`); err != nil {
-		return db, err
-	}
+	// if _, err := db.Exec(`
+	// 	CREATE PROCEDURE update_sbom_flags(
+	// 	    IN p_image_name VARCHAR(255),
+	// 	    IN p_sbom_signed BOOLEAN,
+	// 	    IN p_sbom_valid BOOLEAN
+	// 	)
+	// 	BEGIN
+	// 	    DECLARE p_image_id INT;
+	//
+	// 	    -- Check if the image exists
+	// 	    SELECT id INTO p_image_id
+	// 	    FROM images
+	// 	    WHERE image_name = TRIM(p_image_name);
+	//
+	// 	    -- If the image doesn't exist, insert a new record
+	// 	    IF p_image_id IS NULL THEN
+	// 	        INSERT INTO images (image_name, sbom_signed, sbom_valid)
+	// 	        VALUES (TRIM(p_image_name), p_sbom_signed, p_sbom_valid);
+	// 	    ELSE
+	// 	        -- Update the record
+	// 	        UPDATE images
+	// 	        SET sbom_signed = p_sbom_signed,
+	// 	            sbom_valid = p_sbom_valid
+	// 	        WHERE image_name = TRIM(p_image_name);
+	// 	    END IF;
+	//
+	// 	END //
+	// 	`); err != nil {
+	// 	return db, err
+	// }
 
 	return db, err
 }
