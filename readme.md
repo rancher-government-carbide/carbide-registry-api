@@ -5,6 +5,12 @@ longterm goal is to leverage that API and build a UI where users could things li
 - validate the images in the registry are signed and when they were lasted trivy scanned
 - download a pre-compiled tarball for a specific release of a product
 
+## Development
+```bash
+# This will start the api and hot reload such whenver changes are saved to a .go file.
+./reload.sh
+```
+
 ## REST Schema
 >prefix: https://\<backendurl\>/api/v0/)
 
