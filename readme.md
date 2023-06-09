@@ -7,7 +7,7 @@ longterm goal is to leverage that API and build a UI where users could things li
 
 ## Development
 ```bash
-# This will start the api and hot reload such whenver changes are saved to a .go file.
+# This will start the api and hot reload such whenever changes are saved to a .go file.
 ./reload.sh
 ```
 
@@ -29,6 +29,15 @@ core api:
     - GET: get release
     - PUT: update release
     - DELETE: delete release
+- /image
+    - GET: get all images
+    - POST: create new image
+- /image/{image_name}
+    - GET: get image
+    - PUT: update image
+    - DELETE: delete image
+
+other:
 - /product/{product_name}/release/{release_name}/image
     - GET: get all images for product release
     - POST: create new image for product release
@@ -36,8 +45,6 @@ core api:
     - GET: get image from product release
     - PUT: update image from product release
     - DELETE: delete image from product release
-
-other:
 - /releaseimgmapping
     - GET: get all images for product release
     - POST: create new image for product release
