@@ -31,7 +31,7 @@ func GetProduct(db *sql.DB, name string) (Product, error) {
 	return product, nil
 }
 
-func GetProducts(db *sql.DB) ([]Product, error) {
+func GetAllProducts(db *sql.DB) ([]Product, error) {
 	var products []Product
 	rows, err := db.Query(`SELECT * FROM product`)
 	if err != nil {
@@ -55,6 +55,15 @@ func GetProducts(db *sql.DB) ([]Product, error) {
 	}
 
 	return products, nil
+}
+
+func UpdateProduct(db *sql.DB, updated_product Product) error {
+	if _, err := db.Exec(
+		`UPDATE product SET tarball_link = ?, WHERE name = ?;`,
+		updated_product.TarballLink, updated_product.Name); err != nil {
+		return err
+	}
+	return nil
 }
 
 func DeleteProduct(db *sql.DB, name string) error {

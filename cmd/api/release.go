@@ -15,8 +15,6 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, product_na
 		var head string
 		head, r.URL.Path = ShiftPath(r.URL.Path)
 		switch head {
-		case "image":
-			serveImage(w, r, db, product_name, release_name)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -24,7 +22,7 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, product_na
 	}
 	switch r.Method {
 	case http.MethodPost:
-		releasePost(w, r, db)
+		releasePost(w, r, db, release_name)
 		return
 	case http.MethodOptions:
 		return
@@ -34,7 +32,7 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, product_na
 	}
 }
 
-func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, release_name string) {
 
 	var release objects.Release
 	err := json.NewDecoder(r.Body).Decode(&release)
@@ -42,6 +40,7 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	release.Name = release_name
 
 	return
 }

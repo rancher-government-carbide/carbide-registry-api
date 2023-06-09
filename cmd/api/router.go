@@ -37,6 +37,9 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "product":
 		serveProduct(w, r, h.DB)
 		return
+	case "image":
+		serveImage(w, r, h.DB)
+		return
 	case "user":
 		serveUser(w, r, h.DB)
 		return
