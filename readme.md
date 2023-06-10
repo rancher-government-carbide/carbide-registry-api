@@ -45,6 +45,13 @@ other:
     - GET: get image from product release
     - PUT: update image from product release
     - DELETE: delete image from product release
+- /release
+    - GET: get all releases
+    - POST: create new release
+- /release/{release_name}
+    - GET: get release
+    - PUT: update release
+    - DELETE: delete release
 - /releaseimgmapping
     - GET: get all images for product release
     - POST: create new image for product release
