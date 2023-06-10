@@ -42,7 +42,7 @@ func GetImage(db *sql.DB, name string) (Image, error) {
 	return image, nil
 }
 
-func GetImages(db *sql.DB) ([]Image, error) {
+func GetAllImages(db *sql.DB) ([]Image, error) {
 	var images []Image
 	rows, err := db.Query(`SELECT * FROM images`)
 	if err != nil {

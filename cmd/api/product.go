@@ -86,13 +86,11 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	err = objects.AddProduct(db, product)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-
 	product, err = objects.GetProduct(db, product.Name)
 	if err != nil {
 		log.Print(err)
@@ -159,104 +157,3 @@ func productDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_
 	log.Printf("Product %s has been successfully deleted", product_name)
 	return
 }
-
-// {
-// 	if listname == "" {
-// 		switch r.Method {
-// 		case http.MethodGet:
-//
-// 			// get array of list objects
-// 			lists, err := getLists(h.db, userid)
-// 			if err != nil {
-// 				log.Print("Error getting lists from database")
-// 				log.Print(err)
-// 				return
-// 			}
-// 			// send array of lists as http response
-// 			if err := renderJSON(w, lists); err != nil {
-// 				log.Print(err)
-// 				return
-// 			}
-//
-// 			return
-// 		case http.MethodPost:
-//
-// 			var newlist List
-//
-// 			// parse payload into newlist object
-// 			if err := parseJSON(w, r, &newlist); err != nil {
-// 				log.Print(err)
-// 				return
-// 			}
-//
-// 			// set userid to jwt result to prevent impersonation
-// 			newlist.Userid = userid
-//
-// 			// add list to database
-// 			if err := addList(h.db, newlist); err != nil {
-// 				log.Print(err)
-// 				return
-// 			}
-//
-// 			log.Printf("Added \"%s\" to lists!", newlist.Name)
-// 			respondSuccess(w)
-//
-// 			return
-// 		case http.MethodOptions:
-// 			return
-// 		default:
-// 			http.Error(w, fmt.Sprintf("Expected method GET, POST, or OPTIONS got %v", r.Method), http.StatusMethodNotAllowed)
-// 			return
-// 		}
-// 	}
-// 	switch r.Method {
-// 	case http.MethodGet:
-//
-// 		list, err := getList(h.db, listname, userid)
-// 		if err != nil {
-// 			log.Print("Error getting list from database")
-// 			log.Print(err)
-// 			return
-// 		}
-// 		if err := renderJSON(w, list); err != nil {
-// 			log.Print(err)
-// 			return
-// 		}
-//
-// 		return
-// 	case http.MethodPut:
-//
-// 		var updatedlist List
-// 		if err := parseJSON(w, r, &updatedlist); err != nil {
-// 			log.Print("Error parsing json payload\n")
-// 			log.Print(err)
-// 			return
-// 		}
-// 		if err := updateList(h.db, updatedlist, listname, userid); err != nil {
-// 			log.Printf("Error updating list %s\n", listname)
-// 			log.Print(err)
-// 			return
-// 		}
-// 		log.Printf("Updated list \"%s\"\n", updatedlist.Name)
-// 		respondSuccess(w)
-//
-// 		return
-// 	case http.MethodDelete:
-// 		var list List
-// 		list.Userid = userid
-// 		list.Name = listname
-// 		if err := deleteList(h.db, list); err != nil {
-// 			log.Print(err)
-// 			log.Print("Failed to delete list\n")
-// 		}
-// 		log.Printf("Deleted list %s\n", list.Name)
-// 		respondSuccess(w)
-//
-// 		return
-// 	case http.MethodOptions:
-// 		return
-// 	default:
-// 		http.Error(w, fmt.Sprintf("Expected method GET, POST, PUT, OPTIONS, or DELETE, got %v", r.Method), http.StatusMethodNotAllowed)
-// 		return
-// 	}
-// }
