@@ -10,6 +10,9 @@ longterm goal is to leverage that API and build a UI where users could things li
 # This will start the api and hot reload such whenever changes are saved to a .go file.
 ./reload.sh
 ```
+## TODO: 
+- all fields from json payloads should be treated as optional
+- better input validation
 
 ## REST Schema
 >prefix: https://\<backendurl\>/api/v0/)
