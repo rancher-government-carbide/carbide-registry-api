@@ -22,7 +22,7 @@ type Image struct {
 
 func AddImage(db *sql.DB, new_image Image) error {
 	_, err := db.Exec("INSERT INTO images (id, image_name, image_signed, trivy_signed, trivy_valid, sbom_signed, sbom_valid, last_scanned_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-		new_image.Id, new_image.ImageName, new_image.ImageSigned, new_image.TrivySigned, new_image.TrivyValid, new_image.SbomSigned, new_image.SbomValid, new_image.LastScannedAt.Format("2006-01-02 15:04:05"), new_image.CreatedAt.Format("2006-01-02 15:04:05"), new_image.UpdatedAt.Format("2006-01-02 15:04:05"))
+		new_image.Id, new_image.ImageName, new_image.ImageSigned, new_image.TrivySigned, new_image.TrivyValid, new_image.SbomSigned, new_image.SbomValid, new_image.LastScannedAt.Format("2006-01-02 15:04:05"))
 	if err != nil {
 		return err
 	}
@@ -95,10 +95,38 @@ func GetAllImagesforProduct(db *sql.DB, product_name string, release_name string
 }
 
 func UpdateImage(db *sql.DB, updated_image Image) error {
-	if _, err := db.Exec(
-		`UPDATE images SET image_signed = ?, trivy_signed = ?, trivy_valid = ?, sbom_signed = ?, sbom_valid = ?, last_scanned_at = ?, WHERE image_name = ?;`,
-		updated_image.ImageSigned, updated_image.TrivySigned, updated_image.TrivyValid, updated_image.SbomSigned, updated_image.SbomValid, updated_image.LastScannedAt, updated_image.ImageName); err != nil {
-		return err
+	if updated_image.ImageSigned {
+		stmt, err := db.Prepare("CALL update_image_signed(?, ?)")
+		if err != nil {
+			return err
+		}
+		defer stmt.Close()
+		_, err = stmt.Exec(updated_image.ImageName, updated_image.ImageSigned)
+		if err != nil {
+			return err
+		}
+	}
+	if updated_image.TrivySigned || updated_image.TrivyValid {
+		stmt, err := db.Prepare("CALL update_trivy_flags(?, ?, ?)")
+		if err != nil {
+			return err
+		}
+		defer stmt.Close()
+		_, err = stmt.Exec(updated_image.ImageName, updated_image.TrivySigned, updated_image.TrivyValid)
+		if err != nil {
+			return err
+		}
+	}
+	if updated_image.SbomSigned || updated_image.SbomValid {
+		stmt, err := db.Prepare("CALL update_sbom_flags(?, ?, ?)")
+		if err != nil {
+			return err
+		}
+		defer stmt.Close()
+		_, err = stmt.Exec(updated_image.ImageName, updated_image.SbomSigned, updated_image.SbomValid)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
