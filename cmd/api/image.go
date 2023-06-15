@@ -82,7 +82,7 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	image, err = objects.GetImage(db, image.ImageName)
+	image, err = objects.GetImage(db, *image.ImageName)
 	if err != nil {
 		log.Print(err)
 		return
@@ -114,7 +114,7 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image string)
 		return
 	}
 	// ImageName field cannot be overwritten with json payload
-	updated_image.ImageName = image
+	*updated_image.ImageName = image
 	err = objects.UpdateImage(db, updated_image)
 	if err != nil {
 		log.Print(err)

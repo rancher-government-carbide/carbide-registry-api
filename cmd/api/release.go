@@ -90,12 +90,12 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		log.Print(err)
 		return
 	}
-	release, err = objects.GetRelease(db, release.Name)
+	release, err = objects.GetRelease(db, release)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	log.Printf("New release %s has been successfully created", release.Name)
+	log.Printf("New release %s has been successfully created", *release.Name)
 
 	return
 }
@@ -103,7 +103,8 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 func releaseGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string, release_name string) {
 
 	var release objects.Release
-	release, err := objects.GetRelease(db, release_name)
+	*release.Name = release_name
+	release, err := objects.GetRelease(db, release)
 	if err != nil {
 		log.Print(err)
 		return
@@ -129,25 +130,28 @@ func releasePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	release.Name = release_name
+	*release.Name = release_name
 	err = objects.UpdateRelease(db, release)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	release, err = objects.GetRelease(db, release.Name)
+	release, err = objects.GetRelease(db, release)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	log.Printf("Release %s has been successfully updated", release.Name)
+	log.Printf("Release %s has been successfully updated", *release.Name)
 
 	return
 }
 
 func releaseDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string, release_name string) {
 
-	err := objects.DeleteRelease(db, release_name)
+	var release_to_delete objects.Release
+	*release_to_delete.Name = release_name
+	// get product id and assign to release.ProductId
+	err := objects.DeleteRelease(db, release_to_delete)
 	if err != nil {
 		log.Print(err)
 		return

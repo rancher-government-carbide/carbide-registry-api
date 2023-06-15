@@ -91,7 +91,7 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Print(err)
 		return
 	}
-	product, err = objects.GetProduct(db, product.Name)
+	product, err = objects.GetProduct(db, *product.Name)
 	if err != nil {
 		log.Print(err)
 		return
@@ -131,13 +131,13 @@ func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	product.Name = product_name
-	err = objects.UpdateProduct(db, product)
+	*product.Name = product_name
+	err = objects.UpdateProduct(db, *product.Name, product_name)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	product, err = objects.GetProduct(db, product.Name)
+	product, err = objects.GetProduct(db, *product.Name)
 	if err != nil {
 		log.Print(err)
 		return
