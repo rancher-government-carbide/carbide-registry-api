@@ -1,8 +1,8 @@
-.PHONY: dependencies test container container-push linux darwin windows env run clean help 
+.PHONY: dependencies test container container-push linux darwin windows run clean help 
 
 BINARY_NAME=carbide-api
 CONTAINERTAG=clanktron/$(BINARY_NAME)
-SRC=$(shell git ls-files ./cmd)
+SRC=./cmd
 VERSION=0.1.0
 GOENV=GOARCH=amd64 CGO_ENABLED=0
 BUILD_FLAGS=-ldflags="-X 'main.Version=$(VERSION)'"
@@ -11,20 +11,13 @@ BUILD_FLAGS=-ldflags="-X 'main.Version=$(VERSION)'"
 $(BINARY_NAME):
 	$(GOENV) go build $(BUILD_FLAGS) -o $(BINARY_NAME) $(SRC)
 
-dependencies:
-	go mod tidy && go get -v -d ./...
+# Clean the binary
+clean:
+	rm -f $(BINARY_NAME) $(BINARY_NAME)-linux $(BINARY_NAME)-darwin $(BINARY_NAME)-windows
 
 # Test the binary
 test: $(BINARY_NAME)
 	go test $(SRC)
-
-# Build the container image
-container:
-	docker build -t $(CONTAINERTAG):$(VERSION) . && docker image tag $(CONTAINERTAG):$(VERSION) $(CONTAINERTAG):latest
-	
-# Push the binary
-container-push: container
-	docker push $(CONTAINERTAG):$(VERSION) && docker push $(CONTAINERTAG):latest 
 
 # Build the binary for Linux
 linux:
@@ -36,23 +29,28 @@ darwin:
 windows:
 	GOOS=windows $(GOENV) go build $(BUILD_FLAGS) -o $(BINARY_NAME)-windows $(SRC)
 
-env:
-	set -a; source .env; set +a
+# # Build the container image
+# container:
+# 	docker build -t $(CONTAINERTAG):$(VERSION) . && docker image tag $(CONTAINERTAG):$(VERSION) $(CONTAINERTAG):latest
+# 	
+# # Push the binary
+# container-push: container
+# 	docker push $(CONTAINERTAG):$(VERSION) && docker push $(CONTAINERTAG):latest 
 
-# Clean the binary
-clean:
-	rm -f $(BINARY_NAME)
+# Ensure dependencies are available
+dependencies:
+	go mod tidy && go get -v -d ./...
 
 # Show help
 help:
 	@printf "Available targets:\n"
-	@printf "  releasebot 		Build the binary\n"
+	@printf "  $(BINARY_NAME) 		Build the binary (default)\n"
+	@printf "  clean 		Clean build results\n"
 	@printf "  test 			Build and test the binary\n"
 	@printf "  linux 		Build the binary for Linux\n"
 	@printf "  darwin 		Build the binary for MacOS\n"
 	@printf "  windows 		Build the binary for Windows\n"
-	@printf "  container 		Build the container\n"
-	@printf "  container-push 	Build and push the container\n"
-	@printf "  env 			apply .env file in PWD\n"
-	@printf "  clean 		Clean build results\n"
+# 	@printf "  container 		Build the container\n"
+# 	@printf "  container-push 	Build and push the container\n"
+	@printf "  dependencies 		Ensure dependencies are available\n"
 	@printf "  help 			Show help\n"
