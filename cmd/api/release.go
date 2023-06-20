@@ -85,6 +85,13 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	parent_product, err := objects.GetProduct(db, product_name)
+	if err != nil {
+		log.Print(err)
+	}
+	release.ProductId = &parent_product.Id
+
 	err = objects.AddRelease(db, release)
 	if err != nil {
 		log.Print(err)
@@ -103,8 +110,15 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 func releaseGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string, release_name string) {
 
 	var release objects.Release
-	*release.Name = release_name
-	release, err := objects.GetRelease(db, release)
+	release.Name = &release_name
+
+	parent_product, err := objects.GetProduct(db, product_name)
+	if err != nil {
+		log.Print(err)
+	}
+	release.ProductId = &parent_product.Id
+
+	release, err = objects.GetRelease(db, release)
 	if err != nil {
 		log.Print(err)
 		return
@@ -130,7 +144,14 @@ func releasePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	*release.Name = release_name
+	release.Name = &release_name
+
+	parent_product, err := objects.GetProduct(db, product_name)
+	if err != nil {
+		log.Print(err)
+	}
+	release.ProductId = &parent_product.Id
+
 	err = objects.UpdateRelease(db, release)
 	if err != nil {
 		log.Print(err)
@@ -149,9 +170,15 @@ func releasePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 func releaseDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string, release_name string) {
 
 	var release_to_delete objects.Release
-	*release_to_delete.Name = release_name
-	// get product id and assign to release.ProductId
-	err := objects.DeleteRelease(db, release_to_delete)
+	release_to_delete.Name = &release_name
+
+	parent_product, err := objects.GetProduct(db, product_name)
+	if err != nil {
+		log.Print(err)
+	}
+	release_to_delete.ProductId = &parent_product.Id
+
+	err = objects.DeleteRelease(db, release_to_delete)
 	if err != nil {
 		log.Print(err)
 		return

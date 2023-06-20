@@ -25,11 +25,11 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	if product_name == "" {
 		switch r.Method {
-		case http.MethodPost:
-			productPost(w, r, db)
-			return
 		case http.MethodGet:
 			productGet(w, r, db)
+			return
+		case http.MethodPost:
+			productPost(w, r, db)
 			return
 		case http.MethodOptions:
 			return
@@ -96,7 +96,7 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Print(err)
 		return
 	}
-	log.Printf("New product %s has been successfully created", product.Name)
+	log.Printf("New product %s has been successfully created", *product.Name)
 
 	return
 }
@@ -131,7 +131,6 @@ func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	*product.Name = product_name
 	err = objects.UpdateProduct(db, *product.Name, product_name)
 	if err != nil {
 		log.Print(err)
@@ -142,7 +141,7 @@ func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		log.Print(err)
 		return
 	}
-	log.Printf("Product %s has been successfully updated", product.Name)
+	log.Printf("Product %s has been successfully updated", *product.Name)
 
 	return
 }

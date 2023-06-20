@@ -10,7 +10,7 @@ import (
 func DatabaseInit(db_user string, db_pass string, db_host string, db_port string, db_name string) (*sql.DB, error) {
 
 	// Initialize database connection
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", db_user, db_pass, db_host, db_port, db_name)
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", db_user, db_pass, db_host, db_port, db_name)
 	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		return db, err

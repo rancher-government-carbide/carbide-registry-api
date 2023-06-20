@@ -31,7 +31,7 @@ func AddProduct(db *sql.DB, new_product Product) error {
 
 func GetProduct(db *sql.DB, name string) (Product, error) {
 	var retrieved_product Product
-	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrieved_product.Id, retrieved_product.Name, &retrieved_product.CreatedAt, &retrieved_product.UpdatedAt)
+	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrieved_product.Id, &retrieved_product.Name, &retrieved_product.CreatedAt, &retrieved_product.UpdatedAt)
 	if err != nil {
 		return retrieved_product, err
 	}
@@ -66,7 +66,7 @@ func GetAllProducts(db *sql.DB) ([]Product, error) {
 
 func UpdateProduct(db *sql.DB, new_name string, name string) error {
 	if _, err := db.Exec(
-		`UPDATE product SET name = ?, WHERE name = ?;`, new_name, name); err != nil {
+		`UPDATE product SET name = ? WHERE name = ?`, new_name, name); err != nil {
 		return err
 	}
 	return nil

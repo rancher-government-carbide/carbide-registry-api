@@ -1,23 +1,23 @@
-# Pipeline Database API 
+# Secure Pipeline Database API 
 
-longterm goal is to leverage that API and build a UI where users could things like:
-- see what versions of RKE2 are in the secured registry
-- validate the images in the registry are signed and when they were lasted trivy scanned
-- download a pre-compiled tarball for a specific release of a product
+## Build
+
+```bash
+make
+# for more options try
+make help
+```
 
 ## Development
 ```bash
 # This will start the api and hot reload such whenever changes are saved to a .go file.
 ./reload.sh
 ```
-## TODO: 
-- all fields from json payloads should be treated as optional
-- better input validation
 
 ## REST Schema
->prefix: https://\<backendurl\>/api/v0/)
+>prefix: https://\<backendurl\>/api/v0/
 
-core api:
+#### Functional Endpoints:
 - /product
     - GET: get all products
     - POST: create new product
@@ -35,12 +35,18 @@ core api:
 - /image
     - GET: get all images
     - POST: create new image
-- /image/{image_name}
+- /image/{image_id}
     - GET: get image
     - PUT: update image
     - DELETE: delete image
 
-other:
+#### Possible Additions:
+- /user
+    - POST: should accept username and password
+        - only returns cookie first time user is created
+- /login
+    - POST: should accept username and password
+        - returns authentication cookie/token (stored in browser by frontend)
 - /product/{product_name}/release/{release_name}/image
     - GET: get all images for product release
     - POST: create new image for product release
@@ -62,9 +68,3 @@ other:
     - GET: get releaseimgmapping
     - PUT: update releaseimgmapping
     - DELETE: delete releaseimgmapping
-- /user
-    - POST: should accept username and password
-        - only returns cookie first time user is created
-- /login
-    - POST: should accept username and password
-        - returns authentication cookie/token (stored in browser by frontend)

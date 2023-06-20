@@ -40,10 +40,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Database Connected!")
+	fmt.Println("Database connected!")
 	defer db.Close()
 
-	fmt.Printf("Starting Server...\n")
+	fmt.Printf("Starting server on port " + port + "...")
 	http.ListenAndServe("0.0.0.0:"+port, &api.Serve{DB: db})
-	fmt.Printf("Now listening on port " + port + ".")
 }

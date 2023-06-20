@@ -14,6 +14,8 @@ type Release struct {
 	TarballLink *string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+
+	Images []Image
 }
 
 func AddRelease(db *sql.DB, new_release Release) error {
@@ -59,9 +61,13 @@ func GetRelease(db *sql.DB, release Release) (Release, error) {
 	}
 	err := db.QueryRow(
 		`SELECT * FROM releases WHERE name = ? AND product_id = ?`, *release.Name, *release.ProductId).Scan(
-		&retrieved_release.Id, retrieved_release.ProductId, retrieved_release.Name, retrieved_release.TarballLink, &retrieved_release.CreatedAt, &retrieved_release.UpdatedAt)
+		&retrieved_release.Id, &retrieved_release.ProductId, &retrieved_release.Name, &retrieved_release.TarballLink, &retrieved_release.CreatedAt, &retrieved_release.UpdatedAt)
 	if err != nil {
 		return retrieved_release, fmt.Errorf(sql_error, err)
+	}
+	retrieved_release.Images, err = GetAllImagesforRelease(db, retrieved_release.Id)
+	if err != nil {
+		return retrieved_release, err
 	}
 	return retrieved_release, nil
 }
@@ -81,7 +87,7 @@ func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]Release, error
 
 	for rows.Next() {
 		var release Release
-		err = rows.Scan(&release.Id, release.ProductId, release.Name, release.TarballLink, &release.CreatedAt, &release.UpdatedAt)
+		err = rows.Scan(&release.Id, &release.ProductId, &release.Name, &release.TarballLink, &release.CreatedAt, &release.UpdatedAt)
 		if err != nil {
 			releases = nil
 			return releases, err
@@ -164,4 +170,38 @@ func DeleteRelease(db *sql.DB, release_to_delete Release) error {
 		return err
 	}
 	return nil
+}
+
+func GetReleaseWithoutImages(db *sql.DB, release_id int32) (Release, error) {
+	var retrieved_release Release
+	const sql_error string = "Error fetching release: %w"
+	err := db.QueryRow(
+		`SELECT * FROM releases WHERE id = ?`, release_id).Scan(
+		&retrieved_release.Id, &retrieved_release.ProductId, &retrieved_release.Name, &retrieved_release.TarballLink, &retrieved_release.CreatedAt, &retrieved_release.UpdatedAt)
+	if err != nil {
+		return retrieved_release, fmt.Errorf(sql_error, err)
+	}
+	return retrieved_release, nil
+
+}
+
+func GetAllReleasesforImage(db *sql.DB, image_id int32) ([]Release, error) {
+
+	var fetched_releases []Release
+
+	var release_img_mappings []Release_Image_Mapping
+	release_img_mappings, err := GetReleaseMappings(db, image_id)
+	if err != nil {
+		return fetched_releases, err
+	}
+
+	for _, release_image_mapping := range release_img_mappings {
+		release, err := GetReleaseWithoutImages(db, release_image_mapping.ReleaseId)
+		if err != nil {
+			return fetched_releases, err
+		}
+		fetched_releases = append(fetched_releases, release)
+	}
+
+	return fetched_releases, nil
 }
