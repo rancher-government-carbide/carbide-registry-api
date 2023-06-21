@@ -8,10 +8,16 @@ make
 make help
 ```
 
-## Development
+## Develop
 ```bash
 # This will start the api and hot reload such whenever changes are saved to a .go file.
 ./reload.sh
+```
+
+## Deploy
+Bare-metal, docker, and k8s deployments are all supported - though k8s is recommended.
+```bash
+helm install carbide-api ./chart --values <values-file>
 ```
 
 ## REST Schema
