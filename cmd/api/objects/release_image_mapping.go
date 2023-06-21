@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// TODO: change releaseid and imageid to pointers
 type Release_Image_Mapping struct {
 	Id        int32
 	ReleaseId int32
@@ -13,9 +14,10 @@ type Release_Image_Mapping struct {
 	UpdatedAt time.Time
 }
 
+// TODO: add input validation for releaseid and imageid
 func AddReleaseImgMapping(db *sql.DB, new_release_img_mapping Release_Image_Mapping) error {
-	_, err := db.Exec("INSERT INTO release_image_mapping (id, release_id, image_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-		new_release_img_mapping.Id, new_release_img_mapping.ReleaseId, new_release_img_mapping.ImageId, new_release_img_mapping.CreatedAt.Format("2006-01-02 15:04:05"), new_release_img_mapping.UpdatedAt.Format("2006-01-02 15:04:05"))
+	_, err := db.Exec("INSERT INTO release_image_mapping (release_id, image_id) VALUES (?, ?)",
+		new_release_img_mapping.ReleaseId, new_release_img_mapping.ImageId)
 	if err != nil {
 		return err
 	}
@@ -100,8 +102,8 @@ func GetAllReleaseImgMappings(db *sql.DB) ([]Release_Image_Mapping, error) {
 	return release_img_mappings, nil
 }
 
-func DeleteReleaseImgMapping(db *sql.DB, name string) error {
-	_, err := db.Exec(`DELETE FROM release_image_mapping WHERE release_image_mapping_name = ?`, name)
+func DeleteReleaseImgMapping(db *sql.DB, release_img_mapping_id int32) error {
+	_, err := db.Exec(`DELETE FROM release_image_mapping WHERE id = ?`, release_img_mapping_id)
 	if err != nil {
 		return err
 	}
