@@ -6,6 +6,8 @@ SRC=./cmd
 VERSION=0.1.0
 GOENV=GOARCH=amd64 CGO_ENABLED=0
 BUILD_FLAGS=-ldflags="-X 'main.Version=$(VERSION)'"
+# change to docker if not using rancher desktop
+CONTAINER_CLI=nerdctl
 
 # Build the binary
 $(BINARY_NAME):
@@ -29,13 +31,13 @@ darwin:
 windows:
 	GOOS=windows $(GOENV) go build $(BUILD_FLAGS) -o $(BINARY_NAME)-windows $(SRC)
 
-# # Build the container image
-# container:
-# 	docker build -t $(CONTAINERTAG):$(VERSION) . && docker image tag $(CONTAINERTAG):$(VERSION) $(CONTAINERTAG):latest
-# 	
-# # Push the binary
-# container-push: container
-# 	docker push $(CONTAINERTAG):$(VERSION) && docker push $(CONTAINERTAG):latest 
+# Build the container image
+container:
+	$(CONTAINER_CLI) build -t $(CONTAINERTAG):$(VERSION) . && $(CONTAINER_CLI) image tag $(CONTAINERTAG):$(VERSION) $(CONTAINERTAG):latest
+	
+# Push the binary
+container-push: container
+	$(CONTAINER_CLI) push $(CONTAINERTAG):$(VERSION) && $(CONTAINER_CLI) push $(CONTAINERTAG):latest 
 
 # Ensure dependencies are available
 dependencies:
@@ -50,7 +52,7 @@ help:
 	@printf "  linux 		Build the binary for Linux\n"
 	@printf "  darwin 		Build the binary for MacOS\n"
 	@printf "  windows 		Build the binary for Windows\n"
-# 	@printf "  container 		Build the container\n"
-# 	@printf "  container-push 	Build and push the container\n"
+	@printf "  container 		Build the container\n"
+	@printf "  container-push 	Build and push the container\n"
 	@printf "  dependencies 		Ensure dependencies are available\n"
 	@printf "  help 			Show help\n"
