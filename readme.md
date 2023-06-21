@@ -3,6 +3,7 @@
 ## Build
 
 ```bash
+# compile the binary
 make
 # for more options try
 make help
