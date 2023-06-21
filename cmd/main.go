@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"carbide-api/cmd/api"
 	"log"
 	"net/http"
-
-	// "net/http"
-	"carbide-api/cmd/api"
 	"os"
 )
 
@@ -40,9 +37,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Database connected!")
+	log.Printf("Database connected!")
 	defer db.Close()
 
-	fmt.Printf("Starting server on port " + port + "...")
+	log.Printf("Starting server on port " + port + "...")
 	http.ListenAndServe("0.0.0.0:"+port, &api.Serve{DB: db})
 }
