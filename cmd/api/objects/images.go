@@ -91,13 +91,26 @@ func AddImage(db *sql.DB, new_image Image) error {
 	return nil
 }
 
-func GetImage(db *sql.DB, image_id int32) (Image, error) {
+func GetImagebyId(db *sql.DB, image_id int32) (Image, error) {
 	var image Image
 	err := db.QueryRow(`SELECT * FROM images WHERE id = ?`, image_id).Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
 	if err != nil {
 		return image, err
 	}
 	image.Releases, err = GetAllReleasesforImage(db, image_id)
+	if err != nil {
+		return image, err
+	}
+	return image, nil
+}
+
+func GetImagebyName(db *sql.DB, image_name string) (Image, error) {
+	var image Image
+	err := db.QueryRow(`SELECT * FROM images WHERE image_name = ?`, image_name).Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
+	if err != nil {
+		return image, err
+	}
+	image.Releases, err = GetAllReleasesforImage(db, image.Id)
 	if err != nil {
 		return image, err
 	}
