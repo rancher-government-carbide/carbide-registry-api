@@ -8,6 +8,16 @@ make
 # for more options try
 make help
 ```
+## Environment
+
+| Environment Variable  | Description               | Optional                  |
+| --------------------  | -----------               | --------                  |
+| DBUSER                | MySQL/MariaDB username    | false                     |
+| DBPASS                | MySQL/MariaDB password    | false                     |
+| DBHOST                | MySQL/MariaDB host        | false                     |
+| DBPORT                | MySQL/MariaDB port        | false                     |
+| DBNAME                | MySQL/MariaDB name        | false                     |
+| PORT                  | port to serve api         | true (defaults to 5000)   |
 
 ## Develop
 ```bash
