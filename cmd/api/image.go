@@ -91,6 +91,11 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Print(err)
 		return
 	}
+	if new_image.ImageName == nil {
+		http_json_error(w, "missing image name", http.StatusBadRequest)
+		log.Print(err)
+		return
+	}
 	err = objects.AddImage(db, new_image)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)

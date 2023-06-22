@@ -196,7 +196,7 @@ func GetAllReleasesforImage(db *sql.DB, image_id int32) ([]Release, error) {
 	}
 
 	for _, release_image_mapping := range release_img_mappings {
-		release, err := GetReleaseWithoutImages(db, release_image_mapping.ReleaseId)
+		release, err := GetReleaseWithoutImages(db, *release_image_mapping.ReleaseId)
 		if err != nil {
 			return fetched_releases, err
 		}

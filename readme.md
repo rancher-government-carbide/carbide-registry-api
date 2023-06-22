@@ -46,6 +46,10 @@ helm install carbide-api ./chart --values <values-file>
     - GET: get image
     - PUT: update image
     - DELETE: delete image
+- /releaseimgmapping
+    - GET: get all releaseimgmappings
+    - POST: create new releaseimgmapping
+    - DELETE: delete releaseimgmapping
 
 #### Possible Additions:
 - /user
@@ -68,10 +72,3 @@ helm install carbide-api ./chart --values <values-file>
     - GET: get release
     - PUT: update release
     - DELETE: delete release
-- /releaseimgmapping
-    - GET: get all images for product release
-    - POST: create new image for product release
-- /releaseimgmapping/{releaseimgmapping_id}
-    - GET: get releaseimgmapping
-    - PUT: update releaseimgmapping
-    - DELETE: delete releaseimgmapping

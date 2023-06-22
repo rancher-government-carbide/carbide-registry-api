@@ -40,12 +40,15 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "image":
 		serveImage(w, r, h.DB)
 		return
-	case "user":
-		serveUser(w, r, h.DB)
+	case "release_image_mapping":
+		serveReleaseImageMapping(w, r, h.DB)
 		return
-	case "login":
-		serveLogin(w, r, h.DB)
-		return
+		// 	case "user":
+		// 		serveUser(w, r, h.DB)
+		// 		return
+		// 	case "login":
+		// 		serveLogin(w, r, h.DB)
+		// 		return
 	default:
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
