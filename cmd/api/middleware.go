@@ -15,7 +15,7 @@ import (
 )
 
 func Middleware(w http.ResponseWriter, r *http.Request) {
-	enableCors(w)
+	enableCors(w, r)
 }
 
 func Login_middleware(w http.ResponseWriter, r *http.Request) {
@@ -27,14 +27,13 @@ func Login_middleware(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func enableCors(w http.ResponseWriter) {
+func enableCors(w http.ResponseWriter, r *http.Request) {
+	origin := r.Header.Get("Origin")
+	(w).Header().Set("Access-Control-Allow-Origin", origin)
 	(w).Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Charset, Accept-Language, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, Content-Length, Content-Type, Cookie, Date, Forwarded, Origin, User-Agent")
-	(w).Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	(w).Header().Set("Access-Control-Allow-Credentials", "true")
+	// TODO: Separate allowed methods (and maybe headers) by endpoint
 	(w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	(w).Header().Set("Vary", "Origin")
-	(w).Header().Set("Vary", "Access-Control-Request-Method")
-	(w).Header().Set("Vary", "Access-Control-Request-Headers")
 }
 
 // generate JWT from given user - returns err and token

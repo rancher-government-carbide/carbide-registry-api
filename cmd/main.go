@@ -39,7 +39,6 @@ func main() {
 	}
 	log.Printf("Database connected!")
 	defer db.Close()
-
 	log.Printf("Starting server on port " + port + "...")
-	http.ListenAndServe("0.0.0.0:"+port, &api.Serve{DB: db})
+	log.Fatal(http.ListenAndServe(":"+port, &api.Serve{DB: db}))
 }
