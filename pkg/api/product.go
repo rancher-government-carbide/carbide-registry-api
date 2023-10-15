@@ -1,12 +1,14 @@
 package api
 
 import (
-	"carbide-api/cmd/api/objects"
+	DB "carbide-api/pkg/database"
+	"carbide-api/pkg/objects"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -61,22 +63,22 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 //
 // Success Code: 200 OK
 func productGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	products, err := objects.GetAllProducts(db)
+	products, err := DB.GetAllProducts(db)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
 	products_json, err := json.Marshal(products)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(products_json)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 	}
 	return
 }
@@ -91,19 +93,19 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http_json_error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = objects.AddProduct(db, created_product)
+	err = DB.AddProduct(db, created_product)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	created_product, err = objects.GetProduct(db, *created_product.Name)
+	created_product, err = DB.GetProduct(db, *created_product.Name)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	log.Printf("New product %s has been successfully created", *created_product.Name)
+	log.Info("New product %s has been successfully created", *created_product.Name)
 	created_product_json, err := json.Marshal(created_product)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -113,7 +115,7 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(created_product_json)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 	}
 	return
 }
@@ -123,9 +125,9 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 // Success Code: 200 OK
 func productGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
 	var retrieved_product objects.Product
-	retrieved_product, err := objects.GetProduct(db, product_name)
+	retrieved_product, err := DB.GetProduct(db, product_name)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
 	retrieved_product_json, err := json.Marshal(retrieved_product)
@@ -136,7 +138,7 @@ func productGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(retrieved_product_json)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 	}
 	return
 }
@@ -151,17 +153,17 @@ func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = objects.UpdateProduct(db, *updated_product.Name, product_name)
+	err = DB.UpdateProduct(db, *updated_product.Name, product_name)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	updated_product, err = objects.GetProduct(db, *updated_product.Name)
+	updated_product, err = DB.GetProduct(db, *updated_product.Name)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	log.Printf("Product %s has been successfully updated", *updated_product.Name)
+	log.Info("Product %s has been successfully updated", *updated_product.Name)
 	updated_product_json, err := json.Marshal(updated_product)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -171,7 +173,7 @@ func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(updated_product_json)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 	}
 	return
 }
@@ -180,13 +182,13 @@ func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 //
 // Success Code: 204 No Content
 func productDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
-	err := objects.DeleteProduct(db, product_name)
+	err := DB.DeleteProduct(db, product_name)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	log.Printf("Product %s has been successfully deleted", product_name)
+	log.Info("Product %s has been successfully deleted", product_name)
 	w.WriteHeader(http.StatusNoContent)
 	return
 }

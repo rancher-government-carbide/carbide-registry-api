@@ -1,24 +1,13 @@
-package objects
+package database
 
 import (
+	"carbide-api/pkg/objects"
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 )
 
-type Release struct {
-	Id          int32
-	ProductId   *int32
-	Name        *string
-	TarballLink *string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-
-	Images []Image
-}
-
-func AddRelease(db *sql.DB, new_release Release) error {
+func AddRelease(db *sql.DB, new_release objects.Release) error {
 	const required_field string = "Missing field \"%s\" required when creating a new release"
 	const sql_error string = "Error creating new release: %w"
 	if new_release.ProductId == nil {
@@ -47,10 +36,10 @@ func AddRelease(db *sql.DB, new_release Release) error {
 	return nil
 }
 
-func GetRelease(db *sql.DB, release Release) (Release, error) {
+func GetRelease(db *sql.DB, release objects.Release) (objects.Release, error) {
 	const required_field string = "Missing field \"%s\" required when retrieving a release"
 	const sql_error string = "Error finding release: %w"
-	var retrieved_release Release
+	var retrieved_release objects.Release
 	if release.ProductId == nil {
 		err_msg := fmt.Sprintf(required_field, "Product Id")
 		return retrieved_release, errors.New(err_msg)
@@ -72,12 +61,12 @@ func GetRelease(db *sql.DB, release Release) (Release, error) {
 	return retrieved_release, nil
 }
 
-func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]Release, error) {
+func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]objects.Release, error) {
 
 	product, err := GetProduct(db, product_name)
 	product_id := product.Id
 
-	var releases []Release
+	var releases []objects.Release
 	rows, err := db.Query(`SELECT * FROM releases WHERE product_id = ?`, product_id)
 	if err != nil {
 		releases = nil
@@ -86,7 +75,7 @@ func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]Release, error
 	defer rows.Close()
 
 	for rows.Next() {
-		var release Release
+		var release objects.Release
 		err = rows.Scan(&release.Id, &release.ProductId, &release.Name, &release.TarballLink, &release.CreatedAt, &release.UpdatedAt)
 		if err != nil {
 			releases = nil
@@ -102,8 +91,8 @@ func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]Release, error
 	return releases, nil
 }
 
-func GetAllReleases(db *sql.DB) ([]Release, error) {
-	var releases []Release
+func GetAllReleases(db *sql.DB) ([]objects.Release, error) {
+	var releases []objects.Release
 	rows, err := db.Query(`SELECT * FROM releases`)
 	if err != nil {
 		releases = nil
@@ -112,7 +101,7 @@ func GetAllReleases(db *sql.DB) ([]Release, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var release Release
+		var release objects.Release
 		err = rows.Scan(&release.Id, &release.ProductId, &release.Name, &release.TarballLink, &release.CreatedAt, &release.UpdatedAt)
 		if err != nil {
 			releases = nil
@@ -128,7 +117,7 @@ func GetAllReleases(db *sql.DB) ([]Release, error) {
 	return releases, nil
 }
 
-func UpdateRelease(db *sql.DB, updated_release Release) error {
+func UpdateRelease(db *sql.DB, updated_release objects.Release) error {
 	const missing_field string = "Missing field %s (needed to locate release in DB)"
 	const sql_error string = "Error updating new release: %w"
 	if updated_release.ProductId == nil {
@@ -152,7 +141,7 @@ func UpdateRelease(db *sql.DB, updated_release Release) error {
 	return nil
 }
 
-func DeleteRelease(db *sql.DB, release_to_delete Release) error {
+func DeleteRelease(db *sql.DB, release_to_delete objects.Release) error {
 	const missing_field string = "Missing field %s (needed to locate release in DB)"
 	const sql_error string = "Error updating new release: %w"
 	if release_to_delete.ProductId == nil {
@@ -172,8 +161,8 @@ func DeleteRelease(db *sql.DB, release_to_delete Release) error {
 	return nil
 }
 
-func GetReleaseWithoutImages(db *sql.DB, release_id int32) (Release, error) {
-	var retrieved_release Release
+func GetReleaseWithoutImages(db *sql.DB, release_id int32) (objects.Release, error) {
+	var retrieved_release objects.Release
 	const sql_error string = "Error fetching release: %w"
 	err := db.QueryRow(
 		`SELECT * FROM releases WHERE id = ?`, release_id).Scan(
@@ -185,11 +174,11 @@ func GetReleaseWithoutImages(db *sql.DB, release_id int32) (Release, error) {
 
 }
 
-func GetAllReleasesforImage(db *sql.DB, image_id int32) ([]Release, error) {
+func GetAllReleasesforImage(db *sql.DB, image_id int32) ([]objects.Release, error) {
 
-	var fetched_releases []Release
+	var fetched_releases []objects.Release
 
-	var release_img_mappings []Release_Image_Mapping
+	var release_img_mappings []objects.Release_Image_Mapping
 	release_img_mappings, err := GetReleaseMappings(db, image_id)
 	if err != nil {
 		return fetched_releases, err

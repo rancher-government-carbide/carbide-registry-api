@@ -1,10 +1,12 @@
 package main
 
 import (
-	"carbide-api/cmd/api"
-	"log"
+	"carbide-api/pkg/api"
+	"carbide-api/pkg/database"
 	"net/http"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -33,12 +35,19 @@ func main() {
 		port = "5000"
 	}
 
-	db, err := api.DatabaseInit(db_user, db_pass, db_host, db_port, db_name)
+	db, err := database.Init(db_user, db_pass, db_host, db_port, db_name)
 	if err != nil {
+		log.Error("Database connection failed, exiting...")
 		log.Fatal(err)
 	}
-	log.Printf("Database connected!")
+	log.Info("Database connected!")
 	defer db.Close()
-	log.Printf("Starting server on port " + port + "...")
+	log.Info("Initializing db schema...")
+	err = database.SchemaInit(db)
+	if err != nil {
+		log.Error("Database schema init failed, exiting...")
+		log.Fatal(err)
+	}
+	log.Info("Starting server on port " + port + "...")
 	log.Fatal(http.ListenAndServe(":"+port, &api.Serve{DB: db}))
 }

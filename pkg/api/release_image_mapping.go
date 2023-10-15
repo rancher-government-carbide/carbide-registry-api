@@ -1,12 +1,14 @@
 package api
 
 import (
-	"carbide-api/cmd/api/objects"
+	DB "carbide-api/pkg/database"
+	"carbide-api/pkg/objects"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -32,23 +34,23 @@ func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB
 //
 // Success Code: 200 OK
 func release_image_mappingGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	all_release_image_mappings, err := objects.GetAllReleaseImgMappings(db)
+	all_release_image_mappings, err := DB.GetAllReleaseImgMappings(db)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
 	all_release_image_mappings_json, err := json.Marshal(all_release_image_mappings)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(all_release_image_mappings_json)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 	}
 	return
 }
@@ -61,33 +63,33 @@ func release_image_mappingPost(w http.ResponseWriter, r *http.Request, db *sql.D
 	err := json.NewDecoder(r.Body).Decode(&received_release_image_mapping)
 	if err != nil || received_release_image_mapping.ReleaseId == nil || received_release_image_mapping.ImageId == nil {
 		http_json_error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	err = objects.AddReleaseImgMapping(db, received_release_image_mapping)
+	err = DB.AddReleaseImgMapping(db, received_release_image_mapping)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	new_release_image_mapping, err := objects.GetReleaseImageMapping(db, received_release_image_mapping)
+	new_release_image_mapping, err := DB.GetReleaseImageMapping(db, received_release_image_mapping)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	log.Printf("Release_image_mapping %d has been successfully created", new_release_image_mapping.Id)
+	log.Info("Release_image_mapping %d has been successfully created", new_release_image_mapping.Id)
 	new_release_image_mapping_json, err := json.Marshal(new_release_image_mapping)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(new_release_image_mapping_json)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 	}
 	return
 }
@@ -100,16 +102,16 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 	err := json.NewDecoder(r.Body).Decode(&received_release_image_mapping)
 	if err != nil || received_release_image_mapping.ReleaseId == nil || received_release_image_mapping.ImageId == nil {
 		http_json_error(w, err.Error(), http.StatusBadRequest)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	err = objects.DeleteReleaseImgMapping(db, received_release_image_mapping)
+	err = DB.DeleteReleaseImgMapping(db, received_release_image_mapping)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	log.Printf("Release_image_mapping has been successfully deleted")
+	log.Info("Release_image_mapping has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
 	return
 }
@@ -122,20 +124,20 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 // 	retrieved_release_image_mapping, err := objects.GetReleaseImageMappingbyId(db, release_image_mapping_id)
 // 	if err != nil {
 // 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-// 		log.Print(err)
+// 		log.Error(err)
 // 		return
 // 	}
 // 	retrieved_release_image_mapping_json, err := json.Marshal(retrieved_release_image_mapping)
 // 	if err != nil {
 // 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-// 		log.Print(err)
+// 		log.Error(err)
 // 		return
 // 	}
 // 	w.WriteHeader(http.StatusOK)
 // 	w.Header().Set("Content-Type", "application/json")
 // 	_, err = w.Write(retrieved_release_image_mapping_json)
 // 	if err != nil {
-// 		log.Print(err)
+// 		log.Error(err)
 // 	}
 // 	return
 // }
@@ -148,7 +150,7 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 // 	err := json.NewDecoder(r.Body).Decode(&updated_image)
 // 	if err != nil {
 // 		http_json_error(w, err.Error(), http.StatusBadRequest)
-// 		log.Print(err)
+// 		log.Error(err)
 // 		return
 // 	}
 // 	// image id cannot be overwritten with json payload
@@ -156,26 +158,26 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 // 	err = objects.UpdateImage(db, updated_image)
 // 	if err != nil {
 // 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-// 		log.Print(err)
+// 		log.Error(err)
 // 		return
 // 	}
 // 	updated_image, err = objects.GetImagebyId(db, updated_image.Id)
 // 	if err != nil {
-// 		log.Print(err)
+// 		log.Error(err)
 // 		return
 // 	}
-// 	log.Printf("Image %s has been successfully updated", *updated_image.ImageName)
+// 	log.Info("Image %s has been successfully updated", *updated_image.ImageName)
 // 	updated_image_json, err := json.Marshal(updated_image)
 // 	if err != nil {
 // 		http_json_error(w, err.Error(), http.StatusInternalServerError)
-// 		log.Print(err)
+// 		log.Error(err)
 // 		return
 // 	}
 // 	w.WriteHeader(http.StatusOK)
 // 	w.Header().Set("Content-Type", "application/json")
 // 	_, err = w.Write(updated_image_json)
 // 	if err != nil {
-// 		log.Print(err)
+// 		log.Error(err)
 // 	}
 // 	return
 // }

@@ -1,20 +1,13 @@
-package objects
+package database
 
 import (
+	"carbide-api/pkg/objects"
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 )
 
-type Product struct {
-	Id        int32
-	Name      *string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-func AddProduct(db *sql.DB, new_product Product) error {
+func AddProduct(db *sql.DB, new_product objects.Product) error {
 	const required_field string = "Missing field \"%s\" required when creating a new product"
 	const sql_error string = "Error creating new product: %w"
 	if new_product.Name == nil {
@@ -29,8 +22,8 @@ func AddProduct(db *sql.DB, new_product Product) error {
 	return nil
 }
 
-func GetProduct(db *sql.DB, name string) (Product, error) {
-	var retrieved_product Product
+func GetProduct(db *sql.DB, name string) (objects.Product, error) {
+	var retrieved_product objects.Product
 	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrieved_product.Id, &retrieved_product.Name, &retrieved_product.CreatedAt, &retrieved_product.UpdatedAt)
 	if err != nil {
 		return retrieved_product, err
@@ -38,8 +31,8 @@ func GetProduct(db *sql.DB, name string) (Product, error) {
 	return retrieved_product, nil
 }
 
-func GetAllProducts(db *sql.DB) ([]Product, error) {
-	var products []Product
+func GetAllProducts(db *sql.DB) ([]objects.Product, error) {
+	var products []objects.Product
 	rows, err := db.Query(`SELECT * FROM product`)
 	if err != nil {
 		products = nil
@@ -48,7 +41,7 @@ func GetAllProducts(db *sql.DB) ([]Product, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var product Product
+		var product objects.Product
 		err = rows.Scan(&product.Id, &product.Name, &product.CreatedAt, &product.UpdatedAt)
 		if err != nil {
 			products = nil

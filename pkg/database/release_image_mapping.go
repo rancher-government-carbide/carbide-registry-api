@@ -1,22 +1,14 @@
-package objects
+package database
 
 import (
+	"carbide-api/pkg/objects"
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 )
 
-type Release_Image_Mapping struct {
-	Id        int32
-	ReleaseId *int32
-	ImageId   *int32
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-func GetReleaseImageMappingbyId(db *sql.DB, release_image_mapping_id int32) (Release_Image_Mapping, error) {
-	var release_image_mapping Release_Image_Mapping
+func GetReleaseImageMappingbyId(db *sql.DB, release_image_mapping_id int32) (objects.Release_Image_Mapping, error) {
+	var release_image_mapping objects.Release_Image_Mapping
 	err := db.QueryRow(`SELECT * FROM release_image_mapping WHERE id = ?`, release_image_mapping_id).Scan(
 		&release_image_mapping.Id,
 		&release_image_mapping.ReleaseId,
@@ -30,10 +22,10 @@ func GetReleaseImageMappingbyId(db *sql.DB, release_image_mapping_id int32) (Rel
 	return release_image_mapping, nil
 }
 
-func GetReleaseImageMapping(db *sql.DB, release_image_mapping Release_Image_Mapping) (Release_Image_Mapping, error) {
+func GetReleaseImageMapping(db *sql.DB, release_image_mapping objects.Release_Image_Mapping) (objects.Release_Image_Mapping, error) {
 	const required_field string = "Missing field \"%s\" required when retrieving a release_image_mapping"
 	const sql_error string = "Error retrieving release_image_mapping: %w"
-	var retrieved_release_image_mapping Release_Image_Mapping
+	var retrieved_release_image_mapping objects.Release_Image_Mapping
 	if release_image_mapping.ReleaseId == nil {
 		err_msg := fmt.Sprintf(required_field, "ReleaseId")
 		return retrieved_release_image_mapping, errors.New(err_msg)
@@ -55,7 +47,7 @@ func GetReleaseImageMapping(db *sql.DB, release_image_mapping Release_Image_Mapp
 	return retrieved_release_image_mapping, nil
 }
 
-func AddReleaseImgMapping(db *sql.DB, new_release_img_mapping Release_Image_Mapping) error {
+func AddReleaseImgMapping(db *sql.DB, new_release_img_mapping objects.Release_Image_Mapping) error {
 	const required_field string = "Missing field \"%s\" required when creating a release_image_mapping"
 	const sql_error string = "Error creating release_image_mapping: %w"
 	if new_release_img_mapping.ReleaseId == nil {
@@ -74,8 +66,8 @@ func AddReleaseImgMapping(db *sql.DB, new_release_img_mapping Release_Image_Mapp
 	return nil
 }
 
-func GetImgMappings(db *sql.DB, release_id int32) ([]Release_Image_Mapping, error) {
-	var release_img_mappings []Release_Image_Mapping
+func GetImgMappings(db *sql.DB, release_id int32) ([]objects.Release_Image_Mapping, error) {
+	var release_img_mappings []objects.Release_Image_Mapping
 	rows, err := db.Query(`SELECT * FROM release_image_mapping WHERE release_id = ?`, release_id)
 	if err != nil {
 		release_img_mappings = nil
@@ -84,7 +76,7 @@ func GetImgMappings(db *sql.DB, release_id int32) ([]Release_Image_Mapping, erro
 	defer rows.Close()
 
 	for rows.Next() {
-		var release_img_mapping Release_Image_Mapping
+		var release_img_mapping objects.Release_Image_Mapping
 		err = rows.Scan(&release_img_mapping.Id, &release_img_mapping.ReleaseId, &release_img_mapping.ImageId, &release_img_mapping.CreatedAt, &release_img_mapping.UpdatedAt)
 		if err != nil {
 			release_img_mappings = nil
@@ -100,8 +92,8 @@ func GetImgMappings(db *sql.DB, release_id int32) ([]Release_Image_Mapping, erro
 	return release_img_mappings, nil
 }
 
-func GetReleaseMappings(db *sql.DB, image_id int32) ([]Release_Image_Mapping, error) {
-	var release_img_mappings []Release_Image_Mapping
+func GetReleaseMappings(db *sql.DB, image_id int32) ([]objects.Release_Image_Mapping, error) {
+	var release_img_mappings []objects.Release_Image_Mapping
 	rows, err := db.Query(`SELECT * FROM release_image_mapping WHERE image_id = ?`, image_id)
 	if err != nil {
 		release_img_mappings = nil
@@ -110,7 +102,7 @@ func GetReleaseMappings(db *sql.DB, image_id int32) ([]Release_Image_Mapping, er
 	defer rows.Close()
 
 	for rows.Next() {
-		var release_img_mapping Release_Image_Mapping
+		var release_img_mapping objects.Release_Image_Mapping
 		err = rows.Scan(&release_img_mapping.Id, &release_img_mapping.ReleaseId, &release_img_mapping.ImageId, &release_img_mapping.CreatedAt, &release_img_mapping.UpdatedAt)
 		if err != nil {
 			release_img_mappings = nil
@@ -126,8 +118,8 @@ func GetReleaseMappings(db *sql.DB, image_id int32) ([]Release_Image_Mapping, er
 	return release_img_mappings, nil
 }
 
-func GetAllReleaseImgMappings(db *sql.DB) ([]Release_Image_Mapping, error) {
-	var release_img_mappings []Release_Image_Mapping
+func GetAllReleaseImgMappings(db *sql.DB) ([]objects.Release_Image_Mapping, error) {
+	var release_img_mappings []objects.Release_Image_Mapping
 	rows, err := db.Query(`SELECT * FROM release_image_mapping`)
 	if err != nil {
 		release_img_mappings = nil
@@ -136,7 +128,7 @@ func GetAllReleaseImgMappings(db *sql.DB) ([]Release_Image_Mapping, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var release_img_mapping Release_Image_Mapping
+		var release_img_mapping objects.Release_Image_Mapping
 		err = rows.Scan(&release_img_mapping.Id, &release_img_mapping.ReleaseId, &release_img_mapping.ImageId, &release_img_mapping.CreatedAt, &release_img_mapping.UpdatedAt)
 		if err != nil {
 			release_img_mappings = nil
@@ -160,7 +152,7 @@ func DeleteReleaseImgMappingbyId(db *sql.DB, release_img_mapping_id int32) error
 	return nil
 }
 
-func DeleteReleaseImgMapping(db *sql.DB, release_image_mapping_to_delete Release_Image_Mapping) error {
+func DeleteReleaseImgMapping(db *sql.DB, release_image_mapping_to_delete objects.Release_Image_Mapping) error {
 	const required_field string = "Missing field \"%s\" required when deleting a release_image_mapping"
 	const sql_error string = "Error deleting release_image_mapping: %w"
 	if release_image_mapping_to_delete.ReleaseId == nil {

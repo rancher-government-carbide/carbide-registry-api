@@ -1,29 +1,14 @@
-package objects
+package database
 
 import (
+	"carbide-api/pkg/objects"
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 )
 
-type Image struct {
-	Id            int32
-	ImageName     *string
-	ImageSigned   *bool
-	TrivySigned   *bool
-	TrivyValid    *bool
-	SbomSigned    *bool
-	SbomValid     *bool
-	LastScannedAt *time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-
-	Releases []Release
-}
-
-func GetImagebyId(db *sql.DB, image_id int32) (Image, error) {
-	var image Image
+func GetImagebyId(db *sql.DB, image_id int32) (objects.Image, error) {
+	var image objects.Image
 	err := db.QueryRow(`SELECT * FROM images WHERE id = ?`, image_id).Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
 	if err != nil {
 		return image, err
@@ -35,7 +20,7 @@ func GetImagebyId(db *sql.DB, image_id int32) (Image, error) {
 	return image, nil
 }
 
-func AddImage(db *sql.DB, new_image Image) error {
+func AddImage(db *sql.DB, new_image objects.Image) error {
 	const required_field string = "Missing field \"%s\" required when creating a new image"
 	const sql_error string = "Error creating new image: %w"
 
@@ -104,8 +89,8 @@ func AddImage(db *sql.DB, new_image Image) error {
 	return nil
 }
 
-func GetImagebyName(db *sql.DB, image_name string) (Image, error) {
-	var image Image
+func GetImagebyName(db *sql.DB, image_name string) (objects.Image, error) {
+	var image objects.Image
 	err := db.QueryRow(`SELECT * FROM images WHERE image_name = ?`, image_name).Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
 	if err != nil {
 		return image, err
@@ -117,8 +102,8 @@ func GetImagebyName(db *sql.DB, image_name string) (Image, error) {
 	return image, nil
 }
 
-func GetAllImages(db *sql.DB) ([]Image, error) {
-	var images []Image
+func GetAllImages(db *sql.DB) ([]objects.Image, error) {
+	var images []objects.Image
 	rows, err := db.Query(`SELECT * FROM images`)
 	if err != nil {
 		images = nil
@@ -127,7 +112,7 @@ func GetAllImages(db *sql.DB) ([]Image, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var image Image
+		var image objects.Image
 		err = rows.Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
 		if err != nil {
 			images = nil
@@ -169,7 +154,7 @@ func GetAllImages(db *sql.DB) ([]Image, error) {
 // 	return products, nil
 // }
 
-func UpdateImage(db *sql.DB, updated_image Image) error {
+func UpdateImage(db *sql.DB, updated_image objects.Image) error {
 
 	const required_field string = "Missing field \"%s\" required when updating an image"
 	const sql_error string = "Error updating image: %w"
@@ -254,8 +239,8 @@ func DeleteImage(db *sql.DB, id int32) error {
 	return nil
 }
 
-func GetImageWithoutReleases(db *sql.DB, image_id int32) (Image, error) {
-	var retrieved_image Image
+func GetImageWithoutReleases(db *sql.DB, image_id int32) (objects.Image, error) {
+	var retrieved_image objects.Image
 	const sql_error string = "Error fetching image: %w"
 	err := db.QueryRow(`SELECT * FROM images WHERE id = ?`, image_id).Scan(&retrieved_image.Id, &retrieved_image.ImageName, &retrieved_image.ImageSigned, &retrieved_image.TrivySigned, &retrieved_image.TrivyValid, &retrieved_image.SbomSigned, &retrieved_image.SbomValid, &retrieved_image.LastScannedAt, &retrieved_image.CreatedAt, &retrieved_image.UpdatedAt)
 	if err != nil {
@@ -264,10 +249,10 @@ func GetImageWithoutReleases(db *sql.DB, image_id int32) (Image, error) {
 	return retrieved_image, nil
 }
 
-func GetAllImagesforRelease(db *sql.DB, release_id int32) ([]Image, error) {
-	var fetched_images []Image
+func GetAllImagesforRelease(db *sql.DB, release_id int32) ([]objects.Image, error) {
+	var fetched_images []objects.Image
 
-	var release_img_mappings []Release_Image_Mapping
+	var release_img_mappings []objects.Release_Image_Mapping
 	release_img_mappings, err := GetImgMappings(db, release_id)
 	if err != nil {
 		return fetched_images, err
