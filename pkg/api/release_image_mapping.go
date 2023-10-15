@@ -78,7 +78,11 @@ func release_image_mappingPost(w http.ResponseWriter, r *http.Request, db *sql.D
 		log.Error(err)
 		return
 	}
-	log.Info("Release_image_mapping %d has been successfully created", new_release_image_mapping.Id)
+	log.WithFields(log.Fields{
+		"release_image_mapping_id": new_release_image_mapping.Id,
+		"release_id":               *new_release_image_mapping.ReleaseId,
+		"image_id":                 *new_release_image_mapping.ImageId,
+	}).Info("Release_image_mapping has been successfully created")
 	new_release_image_mapping_json, err := json.Marshal(new_release_image_mapping)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -111,7 +115,11 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 		log.Error(err)
 		return
 	}
-	log.Info("Release_image_mapping has been successfully deleted")
+	log.WithFields(log.Fields{
+		"release_image_mapping_id": received_release_image_mapping.Id,
+		"release_id":               *received_release_image_mapping.ReleaseId,
+		"image_id":                 *received_release_image_mapping.ImageId,
+	}).Info("Release_image_mapping has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
 	return
 }

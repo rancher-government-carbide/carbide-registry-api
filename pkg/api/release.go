@@ -112,7 +112,9 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		log.Error(err)
 		return
 	}
-	log.Info("New release %s has been successfully created", *created_release.Name)
+	log.WithFields(log.Fields{
+		"release": *created_release.Name,
+	}).Info("New release has been successfully created")
 	created_release_json, err := json.Marshal(created_release)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -191,7 +193,9 @@ func releasePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		log.Error(err)
 		return
 	}
-	log.Info("Release %s has been successfully updated", *updated_release.Name)
+	log.WithFields(log.Fields{
+		"release": *updated_release.Name,
+	}).Info("Release has been successfully updated")
 	updated_release_json, err := json.Marshal(updated_release)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -223,7 +227,9 @@ func releaseDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_
 		log.Error(err)
 		return
 	}
-	log.Info("Release %s has been successfully deleted", release_name)
+	log.WithFields(log.Fields{
+		"release": release_name,
+	}).Info("Release has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
 	return
 }

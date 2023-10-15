@@ -105,7 +105,9 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Error(err)
 		return
 	}
-	log.Info("New product %s has been successfully created", *created_product.Name)
+	log.WithFields(log.Fields{
+		"product": *created_product.Name,
+	}).Info("Product has been successfully created")
 	created_product_json, err := json.Marshal(created_product)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -163,7 +165,9 @@ func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 		log.Error(err)
 		return
 	}
-	log.Info("Product %s has been successfully updated", *updated_product.Name)
+	log.WithFields(log.Fields{
+		"product": *updated_product.Name,
+	}).Info("Product has been successfully updated")
 	updated_product_json, err := json.Marshal(updated_product)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -188,7 +192,9 @@ func productDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_
 		log.Error(err)
 		return
 	}
-	log.Info("Product %s has been successfully deleted", product_name)
+	log.WithFields(log.Fields{
+		"product": product_name,
+	}).Info("Product has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
 	return
 }

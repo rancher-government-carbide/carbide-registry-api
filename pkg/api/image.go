@@ -110,7 +110,9 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Error(err)
 		return
 	}
-	log.Printf("Image %s has been successfully created", *created_image.ImageName)
+	log.WithFields(log.Fields{
+		"image": *created_image.ImageName,
+	}).Info("Image has been successfully created")
 	created_image_json, err := json.Marshal(created_image)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -176,7 +178,9 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 		log.Error(err)
 		return
 	}
-	log.Info("Image %s has been successfully updated", *updated_image.ImageName)
+	log.WithFields(log.Fields{
+		"image": *updated_image.ImageName,
+	}).Info("Image has been successfully updated")
 	updated_image_json, err := json.Marshal(updated_image)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)
@@ -202,7 +206,9 @@ func imageDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id i
 		log.Error(err)
 		return
 	}
-	log.Info("Image %d has been successfully deleted", image_id)
+	log.WithFields(log.Fields{
+		"image": image_id,
+	}).Info("Image has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
 	return
 }
