@@ -81,3 +81,6 @@ helm install carbide-api ./chart --values <values-file>
     - GET: get release
     - PUT: update release
     - DELETE: delete release
+
+## Misc notes
+- move entire DB schema to this api (for portability)
