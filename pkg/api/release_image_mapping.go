@@ -16,13 +16,13 @@ import (
 func release_image_mappingGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	all_release_image_mappings, err := DB.GetAllReleaseImgMappings(db)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	all_release_image_mappings_json, err := json.Marshal(all_release_image_mappings)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -42,19 +42,19 @@ func release_image_mappingPost(w http.ResponseWriter, r *http.Request, db *sql.D
 	var received_release_image_mapping objects.Release_Image_Mapping
 	err := json.NewDecoder(r.Body).Decode(&received_release_image_mapping)
 	if err != nil || received_release_image_mapping.ReleaseId == nil || received_release_image_mapping.ImageId == nil {
-		http_json_error(w, err.Error(), http.StatusBadRequest)
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
 	err = DB.AddReleaseImgMapping(db, received_release_image_mapping)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	new_release_image_mapping, err := DB.GetReleaseImageMapping(db, received_release_image_mapping)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -65,7 +65,7 @@ func release_image_mappingPost(w http.ResponseWriter, r *http.Request, db *sql.D
 	}).Info("Release_image_mapping has been successfully created")
 	new_release_image_mapping_json, err := json.Marshal(new_release_image_mapping)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -85,13 +85,13 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 	var received_release_image_mapping objects.Release_Image_Mapping
 	err := json.NewDecoder(r.Body).Decode(&received_release_image_mapping)
 	if err != nil || received_release_image_mapping.ReleaseId == nil || received_release_image_mapping.ImageId == nil {
-		http_json_error(w, err.Error(), http.StatusBadRequest)
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
 	err = DB.DeleteReleaseImgMapping(db, received_release_image_mapping)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -111,13 +111,13 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 // 	var retrieved_release_image_mapping objects.Release_Image_Mapping
 // 	retrieved_release_image_mapping, err := objects.GetReleaseImageMappingbyId(db, release_image_mapping_id)
 // 	if err != nil {
-// 		http_json_error(w, err.Error(), http.StatusInternalServerError)
+// 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 // 		log.Error(err)
 // 		return
 // 	}
 // 	retrieved_release_image_mapping_json, err := json.Marshal(retrieved_release_image_mapping)
 // 	if err != nil {
-// 		http_json_error(w, err.Error(), http.StatusInternalServerError)
+// 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 // 		log.Error(err)
 // 		return
 // 	}
@@ -137,7 +137,7 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 // 	var updated_image objects.Image
 // 	err := json.NewDecoder(r.Body).Decode(&updated_image)
 // 	if err != nil {
-// 		http_json_error(w, err.Error(), http.StatusBadRequest)
+// 		httpJSONError(w, err.Error(), http.StatusBadRequest)
 // 		log.Error(err)
 // 		return
 // 	}
@@ -145,7 +145,7 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 // 	updated_image.Id = image_id
 // 	err = objects.UpdateImage(db, updated_image)
 // 	if err != nil {
-// 		http_json_error(w, err.Error(), http.StatusInternalServerError)
+// 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 // 		log.Error(err)
 // 		return
 // 	}
@@ -157,7 +157,7 @@ func release_image_mappingDelete(w http.ResponseWriter, r *http.Request, db *sql
 // 	log.Info("Image %s has been successfully updated", *updated_image.ImageName)
 // 	updated_image_json, err := json.Marshal(updated_image)
 // 	if err != nil {
-// 		http_json_error(w, err.Error(), http.StatusInternalServerError)
+// 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 // 		log.Error(err)
 // 		return
 // 	}

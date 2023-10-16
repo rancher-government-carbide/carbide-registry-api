@@ -16,13 +16,13 @@ import (
 func imageGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	images, err := DB.GetAllImages(db)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	images_json, err := json.Marshal(images)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -42,24 +42,24 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var new_image objects.Image
 	err := json.NewDecoder(r.Body).Decode(&new_image)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusBadRequest)
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
 	if new_image.ImageName == nil {
-		http_json_error(w, "missing image name", http.StatusBadRequest)
+		httpJSONError(w, "missing image name", http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
 	err = DB.AddImage(db, new_image)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	created_image, err := DB.GetImagebyName(db, *new_image.ImageName)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -68,7 +68,7 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}).Info("Image has been successfully created")
 	created_image_json, err := json.Marshal(created_image)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -88,13 +88,13 @@ func imageGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 	var image objects.Image
 	image, err := DB.GetImagebyId(db, image_id)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	image_json, err := json.Marshal(image)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -114,7 +114,7 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 	var updated_image objects.Image
 	err := json.NewDecoder(r.Body).Decode(&updated_image)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusBadRequest)
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
@@ -122,7 +122,7 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 	updated_image.Id = image_id
 	err = DB.UpdateImage(db, updated_image)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -136,7 +136,7 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 	}).Info("Image has been successfully updated")
 	updated_image_json, err := json.Marshal(updated_image)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -155,7 +155,7 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 func imageDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int32) {
 	err := DB.DeleteImage(db, image_id)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}

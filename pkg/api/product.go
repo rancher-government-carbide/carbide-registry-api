@@ -16,13 +16,13 @@ import (
 func productGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	products, err := DB.GetAllProducts(db)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	products_json, err := json.Marshal(products)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -41,18 +41,18 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var created_product objects.Product
 	err := json.NewDecoder(r.Body).Decode(&created_product)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusBadRequest)
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	err = DB.AddProduct(db, created_product)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	created_product, err = DB.GetProduct(db, *created_product.Name)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -61,7 +61,7 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}).Info("Product has been successfully created")
 	created_product_json, err := json.Marshal(created_product)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -121,7 +121,7 @@ func productPutByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	}).Info("Product has been successfully updated")
 	updated_product_json, err := json.Marshal(updated_product)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -139,7 +139,7 @@ func productPutByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 func productDeleteByName(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
 	err := DB.DeleteProduct(db, product_name)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}

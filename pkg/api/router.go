@@ -166,7 +166,7 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		case http.MethodOptions:
 			return
 		default:
-			http_json_error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+			httpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
 			return
 		}
 	} else {
@@ -191,7 +191,7 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		case http.MethodOptions:
 			return
 		default:
-			http_json_error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+			httpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
 			return
 		}
 	}
@@ -211,7 +211,7 @@ func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB
 	case http.MethodOptions:
 		return
 	default:
-		http_json_error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+		httpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
 		return
 	}
 }

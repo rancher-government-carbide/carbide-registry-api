@@ -17,13 +17,13 @@ func releaseGet(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name
 	var all_releases []objects.Release
 	all_releases, err := DB.GetAllReleasesforProduct(db, product_name)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	all_releases_json, err := json.Marshal(all_releases)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -42,26 +42,26 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 	var new_release objects.Release
 	err := json.NewDecoder(r.Body).Decode(&new_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusBadRequest)
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
 	parent_product, err := DB.GetProduct(db, product_name)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	new_release.ProductId = &parent_product.Id
 	err = DB.AddRelease(db, new_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	created_release, err := DB.GetRelease(db, new_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -70,7 +70,7 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 	}).Info("New release has been successfully created")
 	created_release_json, err := json.Marshal(created_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -91,13 +91,14 @@ func releaseGetByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	retrieved_release.Name = &release_name
 	parent_product, err := DB.GetProduct(db, product_name)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
+		return
 	}
 	retrieved_release.ProductId = &parent_product.Id
 	retrieved_release, err = DB.GetRelease(db, retrieved_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -123,26 +124,27 @@ func releasePutByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	var recieved_release objects.Release
 	err := json.NewDecoder(r.Body).Decode(&recieved_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusBadRequest)
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
 	recieved_release.Name = &release_name
 	parent_product, err := DB.GetProduct(db, product_name)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
+		return
 	}
 	recieved_release.ProductId = &parent_product.Id
 	err = DB.UpdateRelease(db, recieved_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	updated_release, err := DB.GetRelease(db, recieved_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -151,7 +153,7 @@ func releasePutByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	}).Info("Release has been successfully updated")
 	updated_release_json, err := json.Marshal(updated_release)
 	if err != nil {
-		http_json_error(w, err.Error(), http.StatusInternalServerError)
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
@@ -172,11 +174,14 @@ func releaseDeleteByName(w http.ResponseWriter, r *http.Request, db *sql.DB, pro
 	release_to_delete.Name = &release_name
 	parent_product, err := DB.GetProduct(db, product_name)
 	if err != nil {
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
+		return
 	}
 	release_to_delete.ProductId = &parent_product.Id
 	err = DB.DeleteRelease(db, release_to_delete)
 	if err != nil {
+		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
