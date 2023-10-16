@@ -18,7 +18,7 @@ $(BINARY_NAME):
 check: test lint
 
 # Test the binary
-test: $(BINARY_NAME)
+test:
 	go test $(SRC)
 
 # Run linters
