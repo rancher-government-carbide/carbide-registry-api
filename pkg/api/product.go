@@ -5,59 +5,10 @@ import (
 	"carbide-api/pkg/objects"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
 )
-
-func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var product_name string
-	product_name, r.URL.Path = ShiftPath(r.URL.Path)
-	if r.URL.Path != "/" {
-		var head string
-		head, r.URL.Path = ShiftPath(r.URL.Path)
-		switch head {
-		case "release":
-			serveRelease(w, r, db, product_name)
-		default:
-			http.Error(w, "Not Found", http.StatusNotFound)
-		}
-		return
-	}
-	if product_name == "" {
-		switch r.Method {
-		case http.MethodGet:
-			productGet(w, r, db)
-			return
-		case http.MethodPost:
-			productPost(w, r, db)
-			return
-		case http.MethodOptions:
-			return
-		default:
-			http.Error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
-			return
-		}
-	} else {
-		switch r.Method {
-		case http.MethodGet:
-			productGet1(w, r, db, product_name)
-			return
-		case http.MethodPut:
-			productPut1(w, r, db, product_name)
-			return
-		case http.MethodDelete:
-			productDelete1(w, r, db, product_name)
-			return
-		case http.MethodOptions:
-			return
-		default:
-			http.Error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
-			return
-		}
-	}
-}
 
 // Responds with a JSON array of all products in the database
 //
@@ -125,7 +76,7 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 // Responds with the JSON representation of a product
 //
 // Success Code: 200 OK
-func productGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
+func productGetByName(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
 	var retrieved_product objects.Product
 	retrieved_product, err := DB.GetProduct(db, product_name)
 	if err != nil {
@@ -148,7 +99,7 @@ func productGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 // Responds with the JSON representation of a product
 //
 // Success Code: 200 OK
-func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
+func productPutByName(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
 	var updated_product objects.Product
 	err := json.NewDecoder(r.Body).Decode(&updated_product)
 	if err != nil {
@@ -185,7 +136,7 @@ func productPut1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_nam
 // Deletes the product and responds with an empty payload
 //
 // Success Code: 204 No Content
-func productDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
+func productDeleteByName(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
 	err := DB.DeleteProduct(db, product_name)
 	if err != nil {
 		http_json_error(w, err.Error(), http.StatusInternalServerError)

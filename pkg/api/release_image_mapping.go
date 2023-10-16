@@ -5,30 +5,10 @@ import (
 	"carbide-api/pkg/objects"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
 )
-
-func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	switch r.Method {
-	case http.MethodGet:
-		release_image_mappingGet(w, r, db)
-		return
-	case http.MethodPost:
-		release_image_mappingPost(w, r, db)
-		return
-	case http.MethodDelete:
-		release_image_mappingDelete(w, r, db)
-		return
-	case http.MethodOptions:
-		return
-	default:
-		http_json_error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
-		return
-	}
-}
 
 // Responds with a JSON array of all images in the database
 //

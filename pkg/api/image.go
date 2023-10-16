@@ -5,57 +5,10 @@ import (
 	"carbide-api/pkg/objects"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strconv"
 
 	log "github.com/sirupsen/logrus"
 )
-
-func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var image_id_string string
-	image_id_string, r.URL.Path = ShiftPath(r.URL.Path)
-	if image_id_string == "" {
-		switch r.Method {
-		case http.MethodGet:
-			imageGet(w, r, db)
-			return
-		case http.MethodPost:
-			imagePost(w, r, db)
-			return
-		case http.MethodOptions:
-			return
-		default:
-			http_json_error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
-			return
-		}
-	} else {
-
-		image_id_64, err := strconv.ParseInt(image_id_string, 10, 32)
-		if err != nil {
-			log.Error(err)
-			return
-		}
-		image_id := int32(image_id_64)
-
-		switch r.Method {
-		case http.MethodGet:
-			imageGet1(w, r, db, image_id)
-			return
-		case http.MethodPut:
-			imagePut1(w, r, db, image_id)
-			return
-		case http.MethodDelete:
-			imageDelete1(w, r, db, image_id)
-			return
-		case http.MethodOptions:
-			return
-		default:
-			http_json_error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
-			return
-		}
-	}
-}
 
 // Responds with a JSON array of all images in the database
 //
