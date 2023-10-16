@@ -19,6 +19,11 @@ Bare-metal, docker, and k8s deployments are all supported - though k8s is recomm
 ```bash
 helm install carbide-api ./chart --values <values-file>
 ```
+## Testing
+For now an insomnia file can be found at `./example/exampleQueries.json`.
+If you prefer to use the OSS version try [insomnium](https://github.com/ArchGPT/insomnium)
+If you prefer to use cURL or a programming language to test the endpoints the queries can be exported to those as well.
+
 ## Environment
 | Variable              | Description               | Optional                  |
 | --------------------  | -----------               | --------                  |
@@ -28,7 +33,6 @@ helm install carbide-api ./chart --values <values-file>
 | DBPORT                | MySQL/MariaDB port        | false                     |
 | DBNAME                | MySQL/MariaDB name        | false                     |
 | PORT                  | port to serve api         | true (defaults to 5000)   |
-
 
 ## REST Schema
 >prefix: https://\<backendurl\>/api/v0/
@@ -55,7 +59,7 @@ helm install carbide-api ./chart --values <values-file>
     - GET: get image
     - PUT: update image
     - DELETE: delete image
-- /releaseimgmapping
+- /releaseImageMapping
     - GET: get all releaseimgmappings
     - POST: create new releaseimgmapping
     - DELETE: delete releaseimgmapping
