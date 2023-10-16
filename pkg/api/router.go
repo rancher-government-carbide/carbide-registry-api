@@ -44,7 +44,7 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "image":
 		serveImage(w, r, h.DB)
 		return
-	case "release_image_mapping":
+	case "releaseImageMapping":
 		serveReleaseImageMapping(w, r, h.DB)
 		return
 		// 	case "user":
@@ -200,13 +200,13 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	switch r.Method {
 	case http.MethodGet:
-		release_image_mappingGet(w, r, db)
+		releaseImageMappingGet(w, r, db)
 		return
 	case http.MethodPost:
-		release_image_mappingPost(w, r, db)
+		releaseImageMappingPost(w, r, db)
 		return
 	case http.MethodDelete:
-		release_image_mappingDelete(w, r, db)
+		releaseImageMappingDelete(w, r, db)
 		return
 	case http.MethodOptions:
 		return

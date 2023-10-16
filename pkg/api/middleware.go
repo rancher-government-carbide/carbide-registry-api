@@ -19,7 +19,7 @@ func Middleware(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r)
 }
 
-func Login_middleware(w http.ResponseWriter, r *http.Request) {
+func loginMiddleware(w http.ResponseWriter, r *http.Request) {
 	_, err := verifyJWT(r)
 	if err == nil {
 		log.Info("User is already logged in\n")
@@ -39,24 +39,24 @@ func enableCors(w http.ResponseWriter, r *http.Request) {
 
 // generate JWT from given user - returns err and token
 // func generateJWT(user objects.User) (string, error) {
-// 
+//
 // 	// pull secret from environment
 // 	secret := os.Getenv("JWTSECRET")
-// 
+//
 // 	// generate new jwt
 // 	token := jwt.New(jwt.SigningMethodHS256)
 // 	claims := token.Claims.(jwt.MapClaims)
-// 
+//
 // 	// add claims payload
 // 	claims["exp"] = time.Now().Add(time.Minute * 60).Unix()
 // 	claims["userid"] = fmt.Sprint(user.Id)
-// 
+//
 // 	// stringify token
 // 	tokenString, err := token.SignedString([]byte(secret))
 // 	if err != nil {
 // 		return "", err
 // 	}
-// 
+//
 // 	return tokenString, nil
 // }
 

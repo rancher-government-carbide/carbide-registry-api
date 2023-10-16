@@ -20,7 +20,7 @@ func imageGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Error(err)
 		return
 	}
-	images_json, err := json.Marshal(images)
+	imagesJSON, err := json.Marshal(images)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
@@ -28,7 +28,7 @@ func imageGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(images_json)
+	_, err = w.Write(imagesJSON)
 	if err != nil {
 		log.Error(err)
 	}
@@ -39,34 +39,34 @@ func imageGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 //
 // Success Code: 201 Created
 func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var new_image objects.Image
-	err := json.NewDecoder(r.Body).Decode(&new_image)
+	var newImage objects.Image
+	err := json.NewDecoder(r.Body).Decode(&newImage)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
-	if new_image.ImageName == nil {
+	if newImage.ImageName == nil {
 		httpJSONError(w, "missing image name", http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
-	err = DB.AddImage(db, new_image)
+	err = DB.AddImage(db, newImage)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
-	created_image, err := DB.GetImagebyName(db, *new_image.ImageName)
+	createdImage, err := DB.GetImagebyName(db, *newImage.ImageName)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	log.WithFields(log.Fields{
-		"image": *created_image.ImageName,
+		"image": *createdImage.ImageName,
 	}).Info("Image has been successfully created")
-	created_image_json, err := json.Marshal(created_image)
+	createdImageJSON, err := json.Marshal(createdImage)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
@@ -74,7 +74,7 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(created_image_json)
+	_, err = w.Write(createdImageJSON)
 	if err != nil {
 		log.Error(err)
 	}
@@ -84,15 +84,15 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 // Responds with the JSON representation of an image (includes associated releases)
 //
 // Success Code: 200 OK
-func imageGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int32) {
+func imageGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, imageId int32) {
 	var image objects.Image
-	image, err := DB.GetImagebyId(db, image_id)
+	image, err := DB.GetImagebyId(db, imageId)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
-	image_json, err := json.Marshal(image)
+	imageJSON, err := json.Marshal(image)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
@@ -100,7 +100,7 @@ func imageGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(image_json)
+	_, err = w.Write(imageJSON)
 	if err != nil {
 		log.Error(err)
 	}
@@ -110,31 +110,31 @@ func imageGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 // Accepts a JSON payload of the updated image and responds with the new JSON object after it's been successfully updated in the database
 //
 // Success Code: 200 OK
-func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int32) {
-	var updated_image objects.Image
-	err := json.NewDecoder(r.Body).Decode(&updated_image)
+func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, imageId int32) {
+	var updatedImage objects.Image
+	err := json.NewDecoder(r.Body).Decode(&updatedImage)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
 	// image id cannot be overwritten with json payload
-	updated_image.Id = image_id
-	err = DB.UpdateImage(db, updated_image)
+	updatedImage.Id = imageId
+	err = DB.UpdateImage(db, updatedImage)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
-	updated_image, err = DB.GetImagebyId(db, updated_image.Id)
+	updatedImage, err = DB.GetImagebyId(db, updatedImage.Id)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 	log.WithFields(log.Fields{
-		"image": *updated_image.ImageName,
+		"image": *updatedImage.ImageName,
 	}).Info("Image has been successfully updated")
-	updated_image_json, err := json.Marshal(updated_image)
+	updatedImageJSON, err := json.Marshal(updatedImage)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
@@ -142,7 +142,7 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(updated_image_json)
+	_, err = w.Write(updatedImageJSON)
 	if err != nil {
 		log.Error(err)
 	}
@@ -152,15 +152,15 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int3
 // Deletes the image and responds with an empty payload
 //
 // Success Code: 204 No Content
-func imageDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, image_id int32) {
-	err := DB.DeleteImage(db, image_id)
+func imageDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, imageId int32) {
+	err := DB.DeleteImage(db, imageId)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
 		log.Error(err)
 		return
 	}
 	log.WithFields(log.Fields{
-		"image": image_id,
+		"image": imageId,
 	}).Info("Image has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
 	return
