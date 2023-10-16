@@ -7,22 +7,22 @@ import (
 	"fmt"
 )
 
-func GetImagebyId(db *sql.DB, image_id int32) (objects.Image, error) {
+func GetImagebyId(db *sql.DB, imageId int32) (objects.Image, error) {
 	var image objects.Image
-	err := db.QueryRow(`SELECT * FROM images WHERE id = ?`, image_id).Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
+	err := db.QueryRow(`SELECT * FROM images WHERE id = ?`, imageId).Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
 	if err != nil {
 		return image, err
 	}
-	image.Releases, err = GetAllReleasesforImage(db, image_id)
+	image.Releases, err = GetAllReleasesforImage(db, imageId)
 	if err != nil {
 		return image, err
 	}
 	return image, nil
 }
 
-func AddImage(db *sql.DB, new_image objects.Image) error {
-	const required_field string = "Missing field \"%s\" required when creating a new image"
-	const sql_error string = "Error creating new image: %w"
+func AddImage(db *sql.DB, newImage objects.Image) error {
+	const requiredField string = "Missing field \"%s\" required when creating a new image"
+	const sqlError string = "Error creating new image: %w"
 
 	var (
 		imageName     sql.NullString
@@ -43,35 +43,35 @@ func AddImage(db *sql.DB, new_image objects.Image) error {
 	}
 	defer stmt.Close()
 
-	if new_image.ImageName == nil {
-		err_msg := fmt.Sprintf(required_field, "ImageName")
-		return errors.New(err_msg)
+	if newImage.ImageName == nil {
+		errMsg := fmt.Sprintf(requiredField, "ImageName")
+		return errors.New(errMsg)
 	} else {
-		imageName.String = *new_image.ImageName
+		imageName.String = *newImage.ImageName
 		imageName.Valid = true
 	}
-	if new_image.ImageSigned != nil {
-		imageSigned.Bool = *new_image.ImageSigned
+	if newImage.ImageSigned != nil {
+		imageSigned.Bool = *newImage.ImageSigned
 		imageSigned.Valid = true
 	}
-	if new_image.TrivySigned != nil {
-		trivySigned.Bool = *new_image.TrivySigned
+	if newImage.TrivySigned != nil {
+		trivySigned.Bool = *newImage.TrivySigned
 		trivySigned.Valid = true
 	}
-	if new_image.TrivyValid != nil {
-		trivyValid.Bool = *new_image.TrivyValid
+	if newImage.TrivyValid != nil {
+		trivyValid.Bool = *newImage.TrivyValid
 		trivyValid.Valid = true
 	}
-	if new_image.SbomSigned != nil {
-		sbomSigned.Bool = *new_image.SbomSigned
+	if newImage.SbomSigned != nil {
+		sbomSigned.Bool = *newImage.SbomSigned
 		sbomSigned.Valid = true
 	}
-	if new_image.SbomValid != nil {
-		sbomValid.Bool = *new_image.SbomValid
+	if newImage.SbomValid != nil {
+		sbomValid.Bool = *newImage.SbomValid
 		sbomValid.Valid = true
 	}
-	if new_image.LastScannedAt != nil {
-		lastScannedAt.Time = *new_image.LastScannedAt
+	if newImage.LastScannedAt != nil {
+		lastScannedAt.Time = *newImage.LastScannedAt
 		lastScannedAt.Valid = true
 	}
 	_, err = stmt.Exec(
@@ -89,9 +89,9 @@ func AddImage(db *sql.DB, new_image objects.Image) error {
 	return nil
 }
 
-func GetImagebyName(db *sql.DB, image_name string) (objects.Image, error) {
+func GetImagebyName(db *sql.DB, imageName string) (objects.Image, error) {
 	var image objects.Image
-	err := db.QueryRow(`SELECT * FROM images WHERE image_name = ?`, image_name).Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
+	err := db.QueryRow(`SELECT * FROM images WHERE image_name = ?`, imageName).Scan(&image.Id, &image.ImageName, &image.ImageSigned, &image.TrivySigned, &image.TrivyValid, &image.SbomSigned, &image.SbomValid, &image.LastScannedAt, &image.CreatedAt, &image.UpdatedAt)
 	if err != nil {
 		return image, err
 	}
@@ -154,10 +154,10 @@ func GetAllImages(db *sql.DB) ([]objects.Image, error) {
 // 	return products, nil
 // }
 
-func UpdateImage(db *sql.DB, updated_image objects.Image) error {
+func UpdateImage(db *sql.DB, updatedImage objects.Image) error {
 
-	const required_field string = "Missing field \"%s\" required when updating an image"
-	const sql_error string = "Error updating image: %w"
+	const requiredField string = "Missing field \"%s\" required when updating an image"
+	const sqlError string = "Error updating image: %w"
 
 	var (
 		imageid       sql.NullInt32
@@ -184,35 +184,35 @@ func UpdateImage(db *sql.DB, updated_image objects.Image) error {
 	}
 	defer stmt.Close()
 
-	if updated_image.Id == 0 {
-		err_msg := fmt.Sprintf(required_field, "Id")
-		return errors.New(err_msg)
+	if updatedImage.Id == 0 {
+		errMsg := fmt.Sprintf(requiredField, "Id")
+		return errors.New(errMsg)
 	} else {
-		imageid.Int32 = updated_image.Id
+		imageid.Int32 = updatedImage.Id
 		imageid.Valid = true
 	}
-	if updated_image.ImageSigned != nil {
-		imageSigned.Bool = *updated_image.ImageSigned
+	if updatedImage.ImageSigned != nil {
+		imageSigned.Bool = *updatedImage.ImageSigned
 		imageSigned.Valid = true
 	}
-	if updated_image.TrivySigned != nil {
-		trivySigned.Bool = *updated_image.TrivySigned
+	if updatedImage.TrivySigned != nil {
+		trivySigned.Bool = *updatedImage.TrivySigned
 		trivySigned.Valid = true
 	}
-	if updated_image.TrivyValid != nil {
-		trivyValid.Bool = *updated_image.TrivyValid
+	if updatedImage.TrivyValid != nil {
+		trivyValid.Bool = *updatedImage.TrivyValid
 		trivyValid.Valid = true
 	}
-	if updated_image.SbomSigned != nil {
-		sbomSigned.Bool = *updated_image.SbomSigned
+	if updatedImage.SbomSigned != nil {
+		sbomSigned.Bool = *updatedImage.SbomSigned
 		sbomSigned.Valid = true
 	}
-	if updated_image.SbomValid != nil {
-		sbomValid.Bool = *updated_image.SbomValid
+	if updatedImage.SbomValid != nil {
+		sbomValid.Bool = *updatedImage.SbomValid
 		sbomValid.Valid = true
 	}
-	if updated_image.LastScannedAt != nil {
-		lastScannedAt.Time = *updated_image.LastScannedAt
+	if updatedImage.LastScannedAt != nil {
+		lastScannedAt.Time = *updatedImage.LastScannedAt
 		lastScannedAt.Valid = true
 	}
 	_, err = stmt.Exec(
@@ -239,65 +239,65 @@ func DeleteImage(db *sql.DB, id int32) error {
 	return nil
 }
 
-func GetImageWithoutReleases(db *sql.DB, image_id int32) (objects.Image, error) {
-	var retrieved_image objects.Image
-	const sql_error string = "Error fetching image: %w"
-	err := db.QueryRow(`SELECT * FROM images WHERE id = ?`, image_id).Scan(&retrieved_image.Id, &retrieved_image.ImageName, &retrieved_image.ImageSigned, &retrieved_image.TrivySigned, &retrieved_image.TrivyValid, &retrieved_image.SbomSigned, &retrieved_image.SbomValid, &retrieved_image.LastScannedAt, &retrieved_image.CreatedAt, &retrieved_image.UpdatedAt)
+func GetImageWithoutReleases(db *sql.DB, imageId int32) (objects.Image, error) {
+	var retrievedImage objects.Image
+	const sqlError string = "Error fetching image: %w"
+	err := db.QueryRow(`SELECT * FROM images WHERE id = ?`, imageId).Scan(&retrievedImage.Id, &retrievedImage.ImageName, &retrievedImage.ImageSigned, &retrievedImage.TrivySigned, &retrievedImage.TrivyValid, &retrievedImage.SbomSigned, &retrievedImage.SbomValid, &retrievedImage.LastScannedAt, &retrievedImage.CreatedAt, &retrievedImage.UpdatedAt)
 	if err != nil {
-		return retrieved_image, fmt.Errorf(sql_error, err)
+		return retrievedImage, fmt.Errorf(sqlError, err)
 	}
-	return retrieved_image, nil
+	return retrievedImage, nil
 }
 
-func GetAllImagesforRelease(db *sql.DB, release_id int32) ([]objects.Image, error) {
-	var fetched_images []objects.Image
+func GetAllImagesforRelease(db *sql.DB, releaseId int32) ([]objects.Image, error) {
+	var fetchedImages []objects.Image
 
-	var release_img_mappings []objects.Release_Image_Mapping
-	release_img_mappings, err := GetImgMappings(db, release_id)
+	var releaseImageMappings []objects.ReleaseImageMapping
+	releaseImageMappings, err := GetImgMappings(db, releaseId)
 	if err != nil {
-		return fetched_images, err
+		return fetchedImages, err
 	}
 
-	for _, release_image_mapping := range release_img_mappings {
-		image, err := GetImageWithoutReleases(db, *release_image_mapping.ImageId)
+	for _, releaseImageMapping := range releaseImageMappings {
+		image, err := GetImageWithoutReleases(db, *releaseImageMapping.ImageId)
 		if err != nil {
-			return fetched_images, err
+			return fetchedImages, err
 		}
-		fetched_images = append(fetched_images, image)
+		fetchedImages = append(fetchedImages, image)
 	}
 
-	return fetched_images, nil
+	return fetchedImages, nil
 }
 
-// 	if updated_image.ImageSigned != nil {
+// 	if updatedImage.ImageSigned != nil {
 // 		stmt, err := db.Prepare("CALL update_image_signed(?, ?)")
 // 		if err != nil {
 // 			return err
 // 		}
 // 		defer stmt.Close()
-// 		_, err = stmt.Exec(updated_image.ImageName, updated_image.ImageSigned)
+// 		_, err = stmt.Exec(updatedImage.ImageName, updatedImage.ImageSigned)
 // 		if err != nil {
 // 			return err
 // 		}
 // 	}
-// 	if updated_image.TrivySigned != nil && updated_image.TrivyValid != nil {
+// 	if updatedImage.TrivySigned != nil && updatedImage.TrivyValid != nil {
 // 		stmt, err := db.Prepare("CALL update_trivy_flags(?, ?, ?)")
 // 		if err != nil {
 // 			return err
 // 		}
 // 		defer stmt.Close()
-// 		_, err = stmt.Exec(updated_image.ImageName, updated_image.TrivySigned, updated_image.TrivyValid)
+// 		_, err = stmt.Exec(updatedImage.ImageName, updatedImage.TrivySigned, updatedImage.TrivyValid)
 // 		if err != nil {
 // 			return err
 // 		}
 // 	}
-// 	if updated_image.SbomSigned != nil && updated_image.SbomValid != nil {
+// 	if updatedImage.SbomSigned != nil && updatedImage.SbomValid != nil {
 // 		stmt, err := db.Prepare("CALL update_sbom_flags(?, ?, ?)")
 // 		if err != nil {
 // 			return err
 // 		}
 // 		defer stmt.Close()
-// 		_, err = stmt.Exec(updated_image.ImageName, updated_image.SbomSigned, updated_image.SbomValid)
+// 		_, err = stmt.Exec(updatedImage.ImageName, updatedImage.SbomSigned, updatedImage.SbomValid)
 // 		if err != nil {
 // 			return err
 // 		}

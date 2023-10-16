@@ -7,58 +7,58 @@ import (
 	"fmt"
 )
 
-func AddRelease(db *sql.DB, new_release objects.Release) error {
-	const required_field string = "Missing field \"%s\" required when creating a new release"
-	const sql_error string = "Error creating new release: %w"
-	if new_release.ProductId == nil {
-		err_msg := fmt.Sprintf(required_field, "Product Id")
-		return errors.New(err_msg)
+func AddRelease(db *sql.DB, newRelease objects.Release) error {
+	const requiredField string = "Missing field \"%s\" required when creating a new release"
+	const sqlError string = "Error creating new release: %w"
+	if newRelease.ProductId == nil {
+		errMsg := fmt.Sprintf(requiredField, "Product Id")
+		return errors.New(errMsg)
 	}
-	if new_release.Name == nil {
-		err_msg := fmt.Sprintf(required_field, "Name")
-		return errors.New(err_msg)
+	if newRelease.Name == nil {
+		errMsg := fmt.Sprintf(requiredField, "Name")
+		return errors.New(errMsg)
 	}
-	if new_release.TarballLink == nil {
+	if newRelease.TarballLink == nil {
 		_, err := db.Exec(
 			"INSERT INTO releases (product_id, name) VALUES (?, ?)",
-			*new_release.ProductId, *new_release.Name)
+			*newRelease.ProductId, *newRelease.Name)
 		if err != nil {
-			return fmt.Errorf(sql_error, err)
+			return fmt.Errorf(sqlError, err)
 		}
 	} else {
 		_, err := db.Exec(
 			"INSERT INTO releases (product_id, name, tarball_link) VALUES (?, ?, ?)",
-			*new_release.ProductId, *new_release.Name, *new_release.TarballLink)
+			*newRelease.ProductId, *newRelease.Name, *newRelease.TarballLink)
 		if err != nil {
-			return fmt.Errorf(sql_error, err)
+			return fmt.Errorf(sqlError, err)
 		}
 	}
 	return nil
 }
 
 func GetRelease(db *sql.DB, release objects.Release) (objects.Release, error) {
-	const required_field string = "Missing field \"%s\" required when retrieving a release"
-	const sql_error string = "Error finding release: %w"
-	var retrieved_release objects.Release
+	const requiredField string = "Missing field \"%s\" required when retrieving a release"
+	const sqlError string = "Error finding release: %w"
+	var retrievedRelease objects.Release
 	if release.ProductId == nil {
-		err_msg := fmt.Sprintf(required_field, "Product Id")
-		return retrieved_release, errors.New(err_msg)
+		errMsg := fmt.Sprintf(requiredField, "Product Id")
+		return retrievedRelease, errors.New(errMsg)
 	}
 	if release.Name == nil {
-		err_msg := fmt.Sprintf(required_field, "Name")
-		return retrieved_release, errors.New(err_msg)
+		errMsg := fmt.Sprintf(requiredField, "Name")
+		return retrievedRelease, errors.New(errMsg)
 	}
 	err := db.QueryRow(
 		`SELECT * FROM releases WHERE name = ? AND product_id = ?`, *release.Name, *release.ProductId).Scan(
-		&retrieved_release.Id, &retrieved_release.ProductId, &retrieved_release.Name, &retrieved_release.TarballLink, &retrieved_release.CreatedAt, &retrieved_release.UpdatedAt)
+		&retrievedRelease.Id, &retrievedRelease.ProductId, &retrievedRelease.Name, &retrievedRelease.TarballLink, &retrievedRelease.CreatedAt, &retrievedRelease.UpdatedAt)
 	if err != nil {
-		return retrieved_release, fmt.Errorf(sql_error, err)
+		return retrievedRelease, fmt.Errorf(sqlError, err)
 	}
-	retrieved_release.Images, err = GetAllImagesforRelease(db, retrieved_release.Id)
+	retrievedRelease.Images, err = GetAllImagesforRelease(db, retrievedRelease.Id)
 	if err != nil {
-		return retrieved_release, err
+		return retrievedRelease, err
 	}
-	return retrieved_release, nil
+	return retrievedRelease, nil
 }
 
 func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]objects.Release, error) {
@@ -117,44 +117,44 @@ func GetAllReleases(db *sql.DB) ([]objects.Release, error) {
 	return releases, nil
 }
 
-func UpdateRelease(db *sql.DB, updated_release objects.Release) error {
-	const missing_field string = "Missing field %s (needed to locate release in DB)"
-	const sql_error string = "Error updating new release: %w"
-	if updated_release.ProductId == nil {
-		err_msg := fmt.Sprintf(missing_field, "Product Id")
-		return errors.New(err_msg)
+func UpdateRelease(db *sql.DB, updatedRelease objects.Release) error {
+	const missingField string = "Missing field %s (needed to locate release in DB)"
+	const sqlError string = "Error updating new release: %w"
+	if updatedRelease.ProductId == nil {
+		errMsg := fmt.Sprintf(missingField, "Product Id")
+		return errors.New(errMsg)
 	}
-	if updated_release.Name == nil {
-		err_msg := fmt.Sprintf(missing_field, "Name")
-		return errors.New(err_msg)
+	if updatedRelease.Name == nil {
+		errMsg := fmt.Sprintf(missingField, "Name")
+		return errors.New(errMsg)
 	}
-	if updated_release.TarballLink == nil {
+	if updatedRelease.TarballLink == nil {
 		return errors.New("No new data to update release with")
 	} else {
 		_, err := db.Exec(
 			`UPDATE releases SET tarball_link = ? WHERE name = ? AND product_id = ?`,
-			*updated_release.TarballLink, *updated_release.Name, *updated_release.ProductId)
+			*updatedRelease.TarballLink, *updatedRelease.Name, *updatedRelease.ProductId)
 		if err != nil {
-			return fmt.Errorf(sql_error, err)
+			return fmt.Errorf(sqlError, err)
 		}
 	}
 	return nil
 }
 
-func DeleteRelease(db *sql.DB, release_to_delete objects.Release) error {
-	const missing_field string = "Missing field %s (needed to locate release in DB)"
-	const sql_error string = "Error updating new release: %w"
-	if release_to_delete.ProductId == nil {
-		err_msg := fmt.Sprintf(missing_field, "Product Id")
-		return errors.New(err_msg)
+func DeleteRelease(db *sql.DB, releaseToDelete objects.Release) error {
+	const missingField string = "Missing field %s (needed to locate release in DB)"
+	const sqlError string = "Error updating new release: %w"
+	if releaseToDelete.ProductId == nil {
+		errMsg := fmt.Sprintf(missingField, "Product Id")
+		return errors.New(errMsg)
 	}
-	if release_to_delete.Name == nil {
-		err_msg := fmt.Sprintf(missing_field, "Name")
-		return errors.New(err_msg)
+	if releaseToDelete.Name == nil {
+		errMsg := fmt.Sprintf(missingField, "Name")
+		return errors.New(errMsg)
 	}
 	_, err := db.Exec(
 		`DELETE FROM releases WHERE name = ? AND product_id = ?`,
-		*release_to_delete.Name, *release_to_delete.ProductId)
+		*releaseToDelete.Name, *releaseToDelete.ProductId)
 	if err != nil {
 		return err
 	}
@@ -162,35 +162,35 @@ func DeleteRelease(db *sql.DB, release_to_delete objects.Release) error {
 }
 
 func GetReleaseWithoutImages(db *sql.DB, release_id int32) (objects.Release, error) {
-	var retrieved_release objects.Release
-	const sql_error string = "Error fetching release: %w"
+	var retrievedRelease objects.Release
+	const sqlError string = "Error fetching release: %w"
 	err := db.QueryRow(
 		`SELECT * FROM releases WHERE id = ?`, release_id).Scan(
-		&retrieved_release.Id, &retrieved_release.ProductId, &retrieved_release.Name, &retrieved_release.TarballLink, &retrieved_release.CreatedAt, &retrieved_release.UpdatedAt)
+		&retrievedRelease.Id, &retrievedRelease.ProductId, &retrievedRelease.Name, &retrievedRelease.TarballLink, &retrievedRelease.CreatedAt, &retrievedRelease.UpdatedAt)
 	if err != nil {
-		return retrieved_release, fmt.Errorf(sql_error, err)
+		return retrievedRelease, fmt.Errorf(sqlError, err)
 	}
-	return retrieved_release, nil
+	return retrievedRelease, nil
 
 }
 
-func GetAllReleasesforImage(db *sql.DB, image_id int32) ([]objects.Release, error) {
+func GetAllReleasesforImage(db *sql.DB, imageId int32) ([]objects.Release, error) {
 
-	var fetched_releases []objects.Release
+	var fetchedReleases []objects.Release
 
-	var release_img_mappings []objects.Release_Image_Mapping
-	release_img_mappings, err := GetReleaseMappings(db, image_id)
+	var releaseImageMappings []objects.ReleaseImageMapping
+	releaseImageMappings, err := GetReleaseMappings(db, imageId)
 	if err != nil {
-		return fetched_releases, err
+		return fetchedReleases, err
 	}
 
-	for _, release_image_mapping := range release_img_mappings {
-		release, err := GetReleaseWithoutImages(db, *release_image_mapping.ReleaseId)
+	for _, releaseImageMapping := range releaseImageMappings {
+		release, err := GetReleaseWithoutImages(db, *releaseImageMapping.ReleaseId)
 		if err != nil {
-			return fetched_releases, err
+			return fetchedReleases, err
 		}
-		fetched_releases = append(fetched_releases, release)
+		fetchedReleases = append(fetchedReleases, release)
 	}
 
-	return fetched_releases, nil
+	return fetchedReleases, nil
 }

@@ -7,28 +7,28 @@ import (
 	"fmt"
 )
 
-func AddProduct(db *sql.DB, new_product objects.Product) error {
-	const required_field string = "Missing field \"%s\" required when creating a new product"
-	const sql_error string = "Error creating new product: %w"
-	if new_product.Name == nil {
-		err_msg := fmt.Sprintf(required_field, "Name")
-		return errors.New(err_msg)
+func AddProduct(db *sql.DB, newProduct objects.Product) error {
+	const requiredField string = "Missing field \"%s\" required when creating a new product"
+	const sqlError string = "Error creating new product: %w"
+	if newProduct.Name == nil {
+		errMsg := fmt.Sprintf(requiredField, "Name")
+		return errors.New(errMsg)
 	} else {
-		_, err := db.Exec("INSERT INTO product (name) VALUES (?)", *new_product.Name)
+		_, err := db.Exec("INSERT INTO product (name) VALUES (?)", *newProduct.Name)
 		if err != nil {
-			return fmt.Errorf(sql_error, err)
+			return fmt.Errorf(sqlError, err)
 		}
 	}
 	return nil
 }
 
 func GetProduct(db *sql.DB, name string) (objects.Product, error) {
-	var retrieved_product objects.Product
-	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrieved_product.Id, &retrieved_product.Name, &retrieved_product.CreatedAt, &retrieved_product.UpdatedAt)
+	var retrievedProduct objects.Product
+	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrievedProduct.Id, &retrievedProduct.Name, &retrievedProduct.CreatedAt, &retrievedProduct.UpdatedAt)
 	if err != nil {
-		return retrieved_product, err
+		return retrievedProduct, err
 	}
-	return retrieved_product, nil
+	return retrievedProduct, nil
 }
 
 func GetAllProducts(db *sql.DB) ([]objects.Product, error) {
@@ -57,9 +57,9 @@ func GetAllProducts(db *sql.DB) ([]objects.Product, error) {
 	return products, nil
 }
 
-func UpdateProduct(db *sql.DB, new_name string, name string) error {
+func UpdateProduct(db *sql.DB, newName string, name string) error {
 	if _, err := db.Exec(
-		`UPDATE product SET name = ? WHERE name = ?`, new_name, name); err != nil {
+		`UPDATE product SET name = ? WHERE name = ?`, newName, name); err != nil {
 		return err
 	}
 	return nil

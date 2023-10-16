@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Release_Image_Mapping struct {
+type ReleaseImageMapping struct {
 	Id        int32
 	ReleaseId *int32
 	ImageId   *int32
