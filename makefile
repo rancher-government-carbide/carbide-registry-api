@@ -2,6 +2,7 @@
 
 BINARY_NAME=carbide-api
 CONTAINERTAG=rancher-government-carbide/$(BINARY_NAME)
+CONTAINERFILE=./Containerfile
 SRC=./cmd
 VERSION=0.1.0
 COMMIT_HASH=$(shell git rev-parse HEAD)
@@ -28,7 +29,7 @@ lint:
 
 # Build the container image
 container:
-	$(CLI) build -t $(CONTAINERTAG):$(VERSION) . && $(CLI) image tag $(CONTAINERTAG):$(VERSION) $(CONTAINERTAG):latest
+	$(CLI) build -t $(CONTAINERTAG):$(COMMIT_HASH) -f $(CONTAINERFILE) . && $(CLI) image tag $(CONTAINERTAG):$(COMMIT_HASH) $(CONTAINERTAG):latest
 	
 # Push the binary
 container-push: container
