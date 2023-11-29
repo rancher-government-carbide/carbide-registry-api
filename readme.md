@@ -1,16 +1,26 @@
-# Secure Pipeline Database API 
+# Carbide Images API
+
+The database of hardened images for rancher government carbide resides in our secured cloud. This stateless API should act as a simple interface to such.
 
 ## Build
-
 ```bash
 # compile the binary
 make
 # for more options try
 make help
 ```
+## Develop
+```bash
+# This will start the api and hot reload such whenever changes are saved to a .go file.
+./reload.sh
+```
+## Deploy
+Bare-metal, docker, and k8s deployments are all supported - though k8s is recommended.
+```bash
+helm install carbide-api ./chart --values <values-file>
+```
 ## Environment
-
-| Environment Variable  | Description               | Optional                  |
+| Variable              | Description               | Optional                  |
 | --------------------  | -----------               | --------                  |
 | DBUSER                | MySQL/MariaDB username    | false                     |
 | DBPASS                | MySQL/MariaDB password    | false                     |
@@ -19,17 +29,6 @@ make help
 | DBNAME                | MySQL/MariaDB name        | false                     |
 | PORT                  | port to serve api         | true (defaults to 5000)   |
 
-## Develop
-```bash
-# This will start the api and hot reload such whenever changes are saved to a .go file.
-./reload.sh
-```
-
-## Deploy
-Bare-metal, docker, and k8s deployments are all supported - though k8s is recommended.
-```bash
-helm install carbide-api ./chart --values <values-file>
-```
 
 ## REST Schema
 >prefix: https://\<backendurl\>/api/v0/
