@@ -38,7 +38,7 @@ securityContext: {}
 
 mysql:
   # name of database
-  name: ""
+  name: "carbide"
   # connection parameters
   host: ""
   port: 3306
