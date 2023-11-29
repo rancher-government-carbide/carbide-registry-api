@@ -17,7 +17,7 @@ make help
 ## Deploy
 Bare-metal, docker, and k8s deployments are all supported - though k8s is recommended.
 ```bash
-helm install carbide-api ./chart --values <values-file>
+helm install carbide-images-api ./chart --values <values-file>
 ```
 ## Testing
 For now an insomnia file can be found at `./example/exampleQueries.json`.

@@ -1,7 +1,7 @@
 package api
 
 import (
-	// "carbide-api/cmd/api/objects"
+	// "carbide-images-api/cmd/api/objects"
 	"encoding/json"
 	"errors"
 	"fmt"

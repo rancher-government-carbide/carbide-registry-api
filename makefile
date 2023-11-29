@@ -1,6 +1,4 @@
-.PHONY: dependencies test container container-push linux darwin windows run clean help 
-
-BINARY_NAME=carbide-api
+BINARY_NAME=carbide-images-api
 CONTAINERTAG=rancher-government-carbide/$(BINARY_NAME)
 CONTAINERFILE=./Containerfile
 SRC=./cmd
@@ -16,34 +14,42 @@ CLI=nerdctl
 $(BINARY_NAME):
 	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOENV) go build $(BUILD_FLAGS) -o $(BINARY_NAME) $(SRC)
 
+.PHONY: check
 check: test lint
 
 # Test the binary
+.PHONY: test
 test:
 	go test $(SRC)
 
 # Run linters
+.PHONY: lint
 lint:
 	go vet $(SRC)
 	staticcheck $(SRC)
 
 # Build the container image
+.PHONY: container
 container:
 	$(CLI) build -t $(CONTAINERTAG):$(COMMIT_HASH) -f $(CONTAINERFILE) . && $(CLI) image tag $(CONTAINERTAG):$(COMMIT_HASH) $(CONTAINERTAG):latest
 	
 # Push the binary
+.PHONY: container-push
 container-push: container
 	$(CLI) push $(CONTAINER_NAME):$(COMMIT_HASH) && $(CLI) push $(CONTAINER_NAME):latest
 
 # Ensure dependencies are available
+.PHONY: dependencies
 dependencies:
 	go mod tidy && go get -v -d ./...
 
 # Clean the binary
+.PHONY: clean
 clean:
 	rm -f $(BINARY_NAME)
 
 # Show help
+.PHONY: help
 help:
 	@printf "Available targets:\n"
 	@printf "  $(BINARY_NAME) 		Build the binary (default)\n"

@@ -1,4 +1,4 @@
-module carbide-api
+module carbide-images-api
 
 go 1.20
 

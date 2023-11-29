@@ -1,8 +1,8 @@
 package main
 
 import (
-	"carbide-api/pkg/api"
-	"carbide-api/pkg/database"
+	"carbide-images-api/pkg/api"
+	"carbide-images-api/pkg/database"
 	"net/http"
 	"os"
 

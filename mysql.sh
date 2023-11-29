@@ -1,6 +1,6 @@
 #!/bin/sh
 # dependencies: kubectl, helm
-NAMESPACE="${NAMESPACE:-carbide-api}"
+NAMESPACE="${NAMESPACE:-carbide-images-api}"
 kubectl create ns "$NAMESPACE"
 kubectl apply -f https://raw.githubusercontent.com/mysql/mysql-operator/trunk/deploy/deploy-crds.yaml && \
 kubectl apply -f https://raw.githubusercontent.com/mysql/mysql-operator/trunk/deploy/deploy-operator.yaml

@@ -1,8 +1,8 @@
 package api
 
 import (
-	DB "carbide-api/pkg/database"
-	"carbide-api/pkg/objects"
+	DB "carbide-images-api/pkg/database"
+	"carbide-images-api/pkg/objects"
 	"database/sql"
 	"encoding/json"
 	"net/http"
