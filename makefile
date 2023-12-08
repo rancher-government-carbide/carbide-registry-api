@@ -2,6 +2,7 @@ BINARY_NAME=carbide-images-api
 CONTAINERTAG=rancher-government-carbide/$(BINARY_NAME)
 CONTAINERFILE=./Containerfile
 SRC=./cmd
+PKG=./pkg/*
 VERSION=0.1.0
 COMMIT_HASH=$(shell git rev-parse HEAD)
 GOENV=CGO_ENABLED=0
@@ -20,13 +21,13 @@ check: test lint
 # Test the binary
 .PHONY: test
 test:
-	go test $(SRC)
+	go test -v $(SRC) $(PKG)
 
 # Run linters
 .PHONY: lint
 lint:
-	go vet $(SRC)
-	staticcheck $(SRC)
+	go vet $(SRC) $(PKG)
+	staticcheck $(SRC) $(PKG)
 
 # Build the container image
 .PHONY: container
