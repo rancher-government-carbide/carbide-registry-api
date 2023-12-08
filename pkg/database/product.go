@@ -8,8 +8,8 @@ import (
 )
 
 func AddProduct(db *sql.DB, newProduct objects.Product) error {
-	const requiredField string = "Missing field \"%s\" required when creating a new product"
-	const sqlError string = "Error creating new product: %w"
+	const requiredField string = "missing field \"%s\" required when creating a new product"
+	const sqlError string = "error creating new product: %w"
 	if newProduct.Name == nil {
 		errMsg := fmt.Sprintf(requiredField, "Name")
 		return errors.New(errMsg)

@@ -32,7 +32,6 @@ func releaseImageMappingGet(w http.ResponseWriter, r *http.Request, db *sql.DB) 
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Accepts a JSON payload of a new image and responds with the new JSON object after it's been successfully created in the database
@@ -75,7 +74,6 @@ func releaseImageMappingPost(w http.ResponseWriter, r *http.Request, db *sql.DB)
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Deletes the releaseImageMapping and responds with an empty payload
@@ -101,7 +99,6 @@ func releaseImageMappingDelete(w http.ResponseWriter, r *http.Request, db *sql.D
 		"imageId":               *receivedReleaseImageMapping.ImageId,
 	}).Info("Release_image_mapping has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
-	return
 }
 
 // Responds with the JSON representation of an releaseImageMapping

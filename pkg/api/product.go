@@ -31,7 +31,6 @@ func productGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Accepts a JSON payload of a new product and responds with the new JSON object after it's been successfully created in the database
@@ -70,7 +69,6 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Responds with the JSON representation of a product
@@ -93,7 +91,6 @@ func productGetByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Responds with the JSON representation of a product
@@ -130,7 +127,6 @@ func productPutByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Deletes the product and responds with an empty payload
@@ -147,5 +143,4 @@ func productDeleteByName(w http.ResponseWriter, r *http.Request, db *sql.DB, pro
 		"product": productName,
 	}).Info("Product has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
-	return
 }

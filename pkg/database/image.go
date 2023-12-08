@@ -21,8 +21,8 @@ func GetImagebyId(db *sql.DB, imageId int32) (objects.Image, error) {
 }
 
 func AddImage(db *sql.DB, newImage objects.Image) error {
-	const requiredField string = "Missing field \"%s\" required when creating a new image"
-	const sqlError string = "Error creating new image: %w"
+	const requiredField string = "missing field \"%s\" required when creating a new image"
+	// const sqlError string = "error creating new image: %w"
 
 	var (
 		imageName     sql.NullString
@@ -156,8 +156,8 @@ func GetAllImages(db *sql.DB) ([]objects.Image, error) {
 
 func UpdateImage(db *sql.DB, updatedImage objects.Image) error {
 
-	const requiredField string = "Missing field \"%s\" required when updating an image"
-	const sqlError string = "Error updating image: %w"
+	const requiredField string = "missing field \"%s\" required when updating an image"
+	// const sqlError string = "error updating image: %w"
 
 	var (
 		imageid       sql.NullInt32
@@ -241,7 +241,7 @@ func DeleteImage(db *sql.DB, id int32) error {
 
 func GetImageWithoutReleases(db *sql.DB, imageId int32) (objects.Image, error) {
 	var retrievedImage objects.Image
-	const sqlError string = "Error fetching image: %w"
+	const sqlError string = "error fetching image: %w"
 	err := db.QueryRow(`SELECT * FROM images WHERE id = ?`, imageId).Scan(&retrievedImage.Id, &retrievedImage.ImageName, &retrievedImage.ImageSigned, &retrievedImage.TrivySigned, &retrievedImage.TrivyValid, &retrievedImage.SbomSigned, &retrievedImage.SbomValid, &retrievedImage.LastScannedAt, &retrievedImage.CreatedAt, &retrievedImage.UpdatedAt)
 	if err != nil {
 		return retrievedImage, fmt.Errorf(sqlError, err)

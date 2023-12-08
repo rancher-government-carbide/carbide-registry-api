@@ -4,7 +4,6 @@ import (
 	// "carbide-images-api/cmd/api/objects"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -23,7 +22,7 @@ func loginMiddleware(w http.ResponseWriter, r *http.Request) {
 	_, err := verifyJWT(r)
 	if err == nil {
 		log.Info("User is already logged in\n")
-		w.Write([]byte(fmt.Sprintf("User is already logged in")))
+		w.Write([]byte("User is already logged in"))
 		return
 	}
 }
@@ -82,7 +81,7 @@ func verifyJWT(r *http.Request) (int64, error) {
 	// parse and check token validity
 	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return "", errors.New("Invalid JWT Token")
+			return "", errors.New("invalid JWT")
 		}
 		return []byte(secret), nil
 	})
@@ -93,17 +92,20 @@ func verifyJWT(r *http.Request) (int64, error) {
 	// parse claims from token
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, errors.New("Failed to parse JWT claims")
+		return 0, errors.New("failed to parse JWT claims")
 	}
 
 	// check if token is expired
 	exp := claims["exp"].(float64)
 	if int64(exp) < time.Now().Local().Unix() {
-		return 0, errors.New("Token Expired")
+		return 0, errors.New("token expired")
 	}
 
 	s_userid := claims["userid"].(string)
 	userid, err := strconv.ParseInt(s_userid, 10, 64)
+	if err != nil {
+		return 0, errors.New("failed to parse userid")
+	}
 
 	return userid, nil
 }

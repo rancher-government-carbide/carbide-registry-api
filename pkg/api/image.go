@@ -32,7 +32,6 @@ func imageGet(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Accepts a JSON payload of a new image and responds with the new JSON object after it's been successfully created in the database
@@ -44,7 +43,6 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
-		return
 	}
 	if newImage.ImageName == nil {
 		httpJSONError(w, "missing image name", http.StatusBadRequest)
@@ -78,7 +76,6 @@ func imagePost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Responds with the JSON representation of an image (includes associated releases)
@@ -104,7 +101,6 @@ func imageGet1(w http.ResponseWriter, r *http.Request, db *sql.DB, imageId int32
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Accepts a JSON payload of the updated image and responds with the new JSON object after it's been successfully updated in the database
@@ -146,7 +142,6 @@ func imagePut1(w http.ResponseWriter, r *http.Request, db *sql.DB, imageId int32
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Deletes the image and responds with an empty payload
@@ -163,5 +158,4 @@ func imageDelete1(w http.ResponseWriter, r *http.Request, db *sql.DB, imageId in
 		"image": imageId,
 	}).Info("Image has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
-	return
 }

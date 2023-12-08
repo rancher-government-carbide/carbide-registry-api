@@ -13,5 +13,5 @@ type Image struct {
 	LastScannedAt *time.Time
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	Releases []Release
+	Releases      []Release
 }

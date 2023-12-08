@@ -8,8 +8,8 @@ import (
 )
 
 func AddRelease(db *sql.DB, newRelease objects.Release) error {
-	const requiredField string = "Missing field \"%s\" required when creating a new release"
-	const sqlError string = "Error creating new release: %w"
+	const requiredField string = "missing field \"%s\" required when creating a new release"
+	const sqlError string = "error creating new release: %w"
 	if newRelease.ProductId == nil {
 		errMsg := fmt.Sprintf(requiredField, "Product Id")
 		return errors.New(errMsg)
@@ -37,8 +37,8 @@ func AddRelease(db *sql.DB, newRelease objects.Release) error {
 }
 
 func GetRelease(db *sql.DB, release objects.Release) (objects.Release, error) {
-	const requiredField string = "Missing field \"%s\" required when retrieving a release"
-	const sqlError string = "Error finding release: %w"
+	const requiredField string = "missing field \"%s\" required when retrieving a release"
+	const sqlError string = "error finding release: %w"
 	var retrievedRelease objects.Release
 	if release.ProductId == nil {
 		errMsg := fmt.Sprintf(requiredField, "Product Id")
@@ -63,10 +63,14 @@ func GetRelease(db *sql.DB, release objects.Release) (objects.Release, error) {
 
 func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]objects.Release, error) {
 
+	var releases []objects.Release
 	product, err := GetProduct(db, product_name)
+	if err != nil {
+		releases = nil
+		return releases, err
+	}
 	product_id := product.Id
 
-	var releases []objects.Release
 	rows, err := db.Query(`SELECT * FROM releases WHERE product_id = ?`, product_id)
 	if err != nil {
 		releases = nil
@@ -118,8 +122,8 @@ func GetAllReleases(db *sql.DB) ([]objects.Release, error) {
 }
 
 func UpdateRelease(db *sql.DB, updatedRelease objects.Release) error {
-	const missingField string = "Missing field %s (needed to locate release in DB)"
-	const sqlError string = "Error updating new release: %w"
+	const missingField string = "missing field %s (needed to locate release in DB)"
+	const sqlError string = "error updating new release: %w"
 	if updatedRelease.ProductId == nil {
 		errMsg := fmt.Sprintf(missingField, "Product Id")
 		return errors.New(errMsg)
@@ -129,7 +133,7 @@ func UpdateRelease(db *sql.DB, updatedRelease objects.Release) error {
 		return errors.New(errMsg)
 	}
 	if updatedRelease.TarballLink == nil {
-		return errors.New("No new data to update release with")
+		return errors.New("no new data to update release with")
 	} else {
 		_, err := db.Exec(
 			`UPDATE releases SET tarball_link = ? WHERE name = ? AND product_id = ?`,
@@ -142,8 +146,8 @@ func UpdateRelease(db *sql.DB, updatedRelease objects.Release) error {
 }
 
 func DeleteRelease(db *sql.DB, releaseToDelete objects.Release) error {
-	const missingField string = "Missing field %s (needed to locate release in DB)"
-	const sqlError string = "Error updating new release: %w"
+	const missingField string = "missing field %s (needed to locate release in DB)"
+	// const sqlError string = "error updating new release: %w"
 	if releaseToDelete.ProductId == nil {
 		errMsg := fmt.Sprintf(missingField, "Product Id")
 		return errors.New(errMsg)
@@ -163,7 +167,7 @@ func DeleteRelease(db *sql.DB, releaseToDelete objects.Release) error {
 
 func GetReleaseWithoutImages(db *sql.DB, release_id int32) (objects.Release, error) {
 	var retrievedRelease objects.Release
-	const sqlError string = "Error fetching release: %w"
+	const sqlError string = "error fetching release: %w"
 	err := db.QueryRow(
 		`SELECT * FROM releases WHERE id = ?`, release_id).Scan(
 		&retrievedRelease.Id, &retrievedRelease.ProductId, &retrievedRelease.Name, &retrievedRelease.TarballLink, &retrievedRelease.CreatedAt, &retrievedRelease.UpdatedAt)

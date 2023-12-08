@@ -24,7 +24,7 @@ func GetReleaseImageMappingbyId(db *sql.DB, releaseImageMappingId int32) (object
 
 func GetReleaseImageMapping(db *sql.DB, releaseImageMapping objects.ReleaseImageMapping) (objects.ReleaseImageMapping, error) {
 	const requiredField string = "Missing field \"%s\" required when retrieving a releaseImageMapping"
-	const sqlError string = "Error retrieving releaseImageMapping: %w"
+	// const sqlError string = "Error retrieving releaseImageMapping: %w"
 	var retrievedReleaseImageMapping objects.ReleaseImageMapping
 	if releaseImageMapping.ReleaseId == nil {
 		errMsg := fmt.Sprintf(requiredField, "ReleaseId")
@@ -49,7 +49,7 @@ func GetReleaseImageMapping(db *sql.DB, releaseImageMapping objects.ReleaseImage
 
 func AddReleaseImgMapping(db *sql.DB, newReleaseImgMapping objects.ReleaseImageMapping) error {
 	const requiredField string = "Missing field \"%s\" required when creating a releaseImageMapping"
-	const sqlError string = "Error creating releaseImageMapping: %w"
+	// const sqlError string = "Error creating releaseImageMapping: %w"
 	if newReleaseImgMapping.ReleaseId == nil {
 		errMsg := fmt.Sprintf(requiredField, "ReleaseId")
 		return errors.New(errMsg)
@@ -154,7 +154,7 @@ func DeleteReleaseImgMappingbyId(db *sql.DB, releaseImgMappingId int32) error {
 
 func DeleteReleaseImgMapping(db *sql.DB, releaseImageMappingToDelete objects.ReleaseImageMapping) error {
 	const requiredField string = "Missing field \"%s\" required when deleting a releaseImageMapping"
-	const sqlError string = "Error deleting releaseImageMapping: %w"
+	// const sqlError string = "Error deleting releaseImageMapping: %w"
 	if releaseImageMappingToDelete.ReleaseId == nil {
 		errMsg := fmt.Sprintf(requiredField, "ReleaseId")
 		return errors.New(errMsg)

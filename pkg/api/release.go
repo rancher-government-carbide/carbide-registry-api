@@ -32,7 +32,6 @@ func releaseGet(w http.ResponseWriter, r *http.Request, db *sql.DB, productName 
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Accepts a JSON payload of a new release and responds with the new JSON object after it's been successfully created in the database
@@ -80,7 +79,6 @@ func releasePost(w http.ResponseWriter, r *http.Request, db *sql.DB, productName
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Responds with the JSON representation of a release
@@ -114,7 +112,6 @@ func releaseGetByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Accepts a JSON payload of the updated release and responds with the new JSON object after it's been successfully updated in the database
@@ -163,7 +160,6 @@ func releasePutByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	if err != nil {
 		log.Error(err)
 	}
-	return
 }
 
 // Deletes the release and responds with an empty payload
@@ -189,5 +185,4 @@ func releaseDeleteByName(w http.ResponseWriter, r *http.Request, db *sql.DB, pro
 		"release": releaseName,
 	}).Info("Release has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
-	return
 }
