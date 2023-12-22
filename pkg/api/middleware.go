@@ -1,9 +1,10 @@
 package api
 
 import (
-	// "carbide-images-api/cmd/api/objects"
+	"carbide-images-api/pkg/objects"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -37,27 +38,27 @@ func enableCors(w http.ResponseWriter, r *http.Request) {
 }
 
 // generate JWT from given user - returns err and token
-// func generateJWT(user objects.User) (string, error) {
-//
-// 	// pull secret from environment
-// 	secret := os.Getenv("JWTSECRET")
-//
-// 	// generate new jwt
-// 	token := jwt.New(jwt.SigningMethodHS256)
-// 	claims := token.Claims.(jwt.MapClaims)
-//
-// 	// add claims payload
-// 	claims["exp"] = time.Now().Add(time.Minute * 60).Unix()
-// 	claims["userid"] = fmt.Sprint(user.Id)
-//
-// 	// stringify token
-// 	tokenString, err := token.SignedString([]byte(secret))
-// 	if err != nil {
-// 		return "", err
-// 	}
-//
-// 	return tokenString, nil
-// }
+func generateJWT(user objects.User) (string, error) {
+
+	// pull secret from environment
+	secret := os.Getenv("JWTSECRET")
+
+	// generate new jwt
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+
+	// add claims payload
+	claims["exp"] = time.Now().Add(time.Minute * 60).Unix()
+	claims["userid"] = fmt.Sprint(user.Id)
+
+	// stringify token
+	tokenString, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
 
 // checks if http request is authorized/logged in - returns error and username string; empty if err
 func verifyJWT(r *http.Request) (int64, error) {
