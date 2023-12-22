@@ -8,6 +8,5 @@ RUN make
 
 FROM scratch
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /build/carbide-api /
-CMD ["/carbide-api"]
-
+COPY --from=builder /build/carbide-images-api /
+ENTRYPOINT ["/carbide-images-api"]

@@ -4,7 +4,10 @@
 *.dll
 *.so
 *.dylib
-carbide-api*
+carbide-images-api*
+
+# Backup files
+*.bak
 
 # Test binary, built with `go test -c`
 *.test

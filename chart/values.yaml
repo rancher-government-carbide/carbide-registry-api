@@ -1,11 +1,11 @@
-# Default values for carbide-api.
+# Default values for carbide-images-api.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 2
 
 image:
-  repository: clanktron/carbide-api
+  repository: clanktron/carbide-images-api
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -38,7 +38,7 @@ securityContext: {}
 
 mysql:
   # name of database
-  name: ""
+  name: "carbide"
   # connection parameters
   host: ""
   port: 3306

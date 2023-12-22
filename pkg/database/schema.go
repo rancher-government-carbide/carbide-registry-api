@@ -1,4 +1,4 @@
-package api
+package database
 
 import (
 	"database/sql"
@@ -7,9 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func DatabaseInit(db_user string, db_pass string, db_host string, db_port string, db_name string) (*sql.DB, error) {
-
-	// Initialize database connection
+func Init(db_user string, db_pass string, db_host string, db_port string, db_name string) (*sql.DB, error) {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", db_user, db_pass, db_host, db_port, db_name)
 	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
@@ -17,6 +15,10 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 	} else if err = db.Ping(); err != nil {
 		return db, err
 	}
+	return db, err
+}
+
+func SchemaInit(db *sql.DB) error {
 
 	// Ensure existence of product table.
 	if _, err := db.Exec(`
@@ -26,7 +28,7 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 		  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 		)`); err != nil {
-		return db, err
+		return err
 	}
 
 	// Ensure existence of releases table.
@@ -40,7 +42,7 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 		  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 		)`); err != nil {
-		return db, err
+		return err
 	}
 
 	// Ensure existence of images table.
@@ -57,14 +59,14 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 		  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 		)`); err != nil {
-		return db, err
+		return err
 	}
 
 	// TODO: make indepmotent
 	//// Ensure constraint on images table
 	// _, err = db.Exec(`ALTER TABLE images ADD CONSTRAINT unique_image_name UNIQUE (image_name)`)
 	// if err != nil {
-	// 	return db, err
+	// 	return err
 	// }
 
 	// Ensure existence of release_image_mapping table
@@ -78,7 +80,7 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 		  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 		)`); err != nil {
-		return db, err
+		return err
 	}
 
 	// TODO: make procedure creation indepmotent
@@ -144,7 +146,7 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 	// 	    END IF;
 	// 	END
 	// 	`); err != nil {
-	// 	return db, err
+	// 	return err
 	// }
 
 	// if _, err := db.Exec(`
@@ -172,7 +174,7 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 	// 	    END IF;
 	// 	END
 	// 	`); err != nil {
-	// 	return db, err
+	// 	return err
 	// }
 
 	// if _, err := db.Exec(`
@@ -203,7 +205,7 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 	// 	    END IF;
 	// 	END
 	// 	`); err != nil {
-	// 	return db, err
+	// 	return err
 	// }
 
 	// if _, err := db.Exec(`
@@ -234,8 +236,8 @@ func DatabaseInit(db_user string, db_pass string, db_host string, db_port string
 	//
 	// 	END //
 	// 	`); err != nil {
-	// 	return db, err
+	// 	return err
 	// }
 
-	return db, err
+	return nil
 }

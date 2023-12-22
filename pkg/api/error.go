@@ -9,7 +9,7 @@ type ErrorResponse struct {
 	ErrorMessage string `json:"error_message"`
 }
 
-func http_json_error(w http.ResponseWriter, error string, http_status_code int) error {
+func httpJSONError(w http.ResponseWriter, error string, http_status_code int) error {
 
 	response := ErrorResponse{
 		ErrorMessage: error,
