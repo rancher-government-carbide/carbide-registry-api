@@ -19,27 +19,23 @@ func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Error(err)
 		return
 	}
-	// add user to database
 	if err := DB.AddUser(db, newUser); err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	// reassign stored values in user object
-	newUser, err = DB.GetUser(db, newUser.Username)
+	newUser, err = DB.GetUser(db, *newUser.Username)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	log.Printf("User %s has been successfully created", newUser.Username)
-	// respond with jwt
+	log.WithFields(log.Fields{
+		"user": *newUser.Username,
+	}).Info("User has been successfully created")
 	token, err := generateJWT(newUser)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	fmt.Print(token, "\n")
-
-	// provide token as cookie to frontend
 	ck := http.Cookie{
 		Name:     "token",
 		Value:    token,
@@ -54,10 +50,9 @@ func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func userDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	// parse username from jwt token
 	userid, err := verifyJWT(r)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		http.Error(w, "Missing or expired cookie", 401)
 		return
 	}
@@ -68,49 +63,45 @@ func userDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Error(err)
 		return
 	}
-	// check credentials
 	if err := DB.VerifyUser(db, userToDelete); err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	// remove row with corresponding userid
 	if err := DB.DeleteUser(db, userid); err != nil {
-		log.Print(err)
-		log.Printf("Failed to delete user with id %d", userid)
+		log.Error(err)
+		log.Errorf("Failed to delete user with id %d", userid)
 		w.Write([]byte(fmt.Sprintf("Failed to delete user with id %d", userid)))
 		return
 	}
+	log.WithFields(log.Fields{
+		"user": *userToDelete.Username,
+	}).Info("User has been successfully deleted or didn't exist in the first place")
 	respondSuccess(w)
 	return
 }
 
 func loginPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var login objects.User
-	// payload should contain username and password of user (other fields are ignored)
 	err := json.NewDecoder(r.Body).Decode(&login)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
-	// checks user+pass against stored database values
 	if err := DB.VerifyUser(db, login); err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	// fill user object with necessary information (userid)
-	login, err = DB.GetUser(db, login.Username)
+	login, err = DB.GetUser(db, *login.Username)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	// creates jwt for user
 	token, err := generateJWT(login)
 	if err != nil {
-		log.Print(err)
+		log.Error(err)
 		return
 	}
-	// provide token as cookie to frontend
 	ck := http.Cookie{
 		Name:     "token",
 		Value:    token,
@@ -119,44 +110,9 @@ func loginPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 	}
-	// responds with message to store cookie in browser for future requests
 	http.SetCookie(w, &ck)
-	log.Printf("%s logged in successfully", login.Username)
+	log.WithFields(log.Fields{
+		"user": *login.Username,
+	}).Info("User logged in successfully")
 	respondSuccess(w)
 }
-
-// accepts POST requests with new user payloads - responds with jwt or error
-// func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-// 	switch r.Method {
-// 	case http.MethodPost:
-// 		userPost()
-// 	case http.MethodDelete:
-// 		userDelete()
-// 	case http.MethodOptions:
-// 		return
-// 	default:
-// 		http.Error(w, fmt.Sprintf("Expected method POST, OPTIONS or DELETE, got %v", r.Method), http.StatusMethodNotAllowed)
-// 		fmt.Printf("Expected method POST, OPTIONS or DELETE, got %v", r.Method)
-// 		return
-// 	}
-//
-// }
-//
-// // accepts POST requests with user credentials - responds with a jwt or error
-// func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-// 	_, err := verifyJWT(r)
-// 	if err == nil {
-// 		log.Print("User is already logged in\n")
-// 		w.Write([]byte(fmt.Sprintf("User is already logged in")))
-// 		return
-// 	}
-// 	switch r.Method {
-// 	case http.MethodPost:
-// 		return
-// 	case http.MethodOptions:
-// 		return
-// 	default:
-// 		http.Error(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
-// 		return
-// 	}
-// }
