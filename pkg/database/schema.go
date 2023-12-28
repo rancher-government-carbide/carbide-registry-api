@@ -19,8 +19,64 @@ func Init(db_user string, db_pass string, db_host string, db_port string, db_nam
 }
 
 func SchemaInit(db *sql.DB) error {
+	err := ensureProductTable(db)
+	if err != nil {
+		return err
+	}
+	err = ensureReleasesTable(db)
+	if err != nil {
+		return err
+	}
+	err = ensureImagesTable(db)
+	if err != nil {
+		return err
+	}
+	err = ensureImagesTableConstraint(db)
+	if err != nil {
+		return err
+	}
+	err = ensureUsersTable(db)
+	if err != nil {
+		return err
+	}
+	err = ensureUsersTableConstraint(db)
+	if err != nil {
+		return err
+	}
+	err = ensureReleaseImageMappingTable(db)
+	if err != nil {
+		return err
+	}
+	err = ensureCreateUpdateImageProcedure(db)
+	if err != nil {
+		return nil
+	}
+	err = ensureUpdateTrivyFlagsProcedure(db)
+	if err != nil {
+		return nil
+	}
+	err = ensureUpdateSbomFlagsProcedure(db)
+	if err != nil {
+		return nil
+	}
+	return nil
+}
 
-	// Ensure existence of product table.
+func ensureUsersTable(db *sql.DB) error {
+	if _, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+		  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+		  username VARCHAR(255) NOT NULL UNIQUE,
+		  password VARCHAR(255) NOT NULL UNIQUE,
+		  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+		)`); err != nil {
+		return err
+	}
+	return nil
+}
+
+func ensureProductTable(db *sql.DB) error {
 	if _, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS product (
 		  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -30,8 +86,10 @@ func SchemaInit(db *sql.DB) error {
 		)`); err != nil {
 		return err
 	}
+	return nil
+}
 
-	// Ensure existence of releases table.
+func ensureReleasesTable(db *sql.DB) error {
 	if _, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS releases (
 		  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -44,8 +102,10 @@ func SchemaInit(db *sql.DB) error {
 		)`); err != nil {
 		return err
 	}
+	return nil
+}
 
-	// Ensure existence of images table.
+func ensureImagesTable(db *sql.DB) error {
 	if _, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS images (
 		  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -61,29 +121,46 @@ func SchemaInit(db *sql.DB) error {
 		)`); err != nil {
 		return err
 	}
+	return nil
+}
 
+func ensureReleaseImageMappingTable(db *sql.DB) error {
+	if _, err := db.Exec(`
+   	CREATE TABLE IF NOT EXISTS release_image_mapping (
+   	  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   	  release_id INT NOT NULL,
+   	  image_id INT NOT NULL,
+   	  CONSTRAINT fk_releases_map FOREIGN KEY (release_id) REFERENCES releases(id) ON DELETE CASCADE,
+   	  CONSTRAINT fk_images_map FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
+   	  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   	  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+   	)`); err != nil {
+		return err
+	}
+	return nil
+}
+
+func ensureImagesTableConstraint(db *sql.DB) error {
 	// TODO: make indepmotent
 	//// Ensure constraint on images table
-	// _, err = db.Exec(`ALTER TABLE images ADD CONSTRAINT unique_image_name UNIQUE (image_name)`)
+	// _, err := db.Exec(`ALTER TABLE images ADD CONSTRAINT unique_image_name UNIQUE (image_name)`)
 	// if err != nil {
 	// 	return err
 	// }
+	return nil
+}
 
-	// Ensure existence of release_image_mapping table
-	if _, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS release_image_mapping (
-		  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-		  release_id INT NOT NULL,
-		  image_id INT NOT NULL,
-		  CONSTRAINT fk_releases_map FOREIGN KEY (release_id) REFERENCES releases(id) ON DELETE CASCADE,
-		  CONSTRAINT fk_images_map FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
-		  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-		)`); err != nil {
+func ensureUsersTableConstraint(db *sql.DB) error {
+	// TODO: make indepmotent
+	//// Ensure constraint on images table
+	_, err := db.Exec(`ALTER TABLE users ADD CONSTRAINT unique_username UNIQUE (username)`)
+	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	// TODO: make procedure creation indepmotent
+func ensureCreateUpdateImageProcedure(db *sql.DB) error {
 	// // Ensure existence of create_update_image procedure
 	// if _, err := db.Exec(`
 	// 	CREATE PROCEDURE create_update_image(
@@ -148,7 +225,10 @@ func SchemaInit(db *sql.DB) error {
 	// 	`); err != nil {
 	// 	return err
 	// }
+	return nil
+}
 
+func ensureUpdateImageSignedProcedure(db *sql.DB) error {
 	// if _, err := db.Exec(`
 	// 	CREATE PROCEDURE update_image_signed(
 	// 	    IN p_image_name VARCHAR(255),
@@ -176,7 +256,10 @@ func SchemaInit(db *sql.DB) error {
 	// 	`); err != nil {
 	// 	return err
 	// }
+	return nil
+}
 
+func ensureUpdateTrivyFlagsProcedure(db *sql.DB) error {
 	// if _, err := db.Exec(`
 	// 	CREATE PROCEDURE update_trivy_flags(
 	// 	    IN p_image_name VARCHAR(255),
@@ -207,7 +290,10 @@ func SchemaInit(db *sql.DB) error {
 	// 	`); err != nil {
 	// 	return err
 	// }
+	return nil
+}
 
+func ensureUpdateSbomFlagsProcedure(db *sql.DB) error {
 	// if _, err := db.Exec(`
 	// 	CREATE PROCEDURE update_sbom_flags(
 	// 	    IN p_image_name VARCHAR(255),
@@ -238,6 +324,5 @@ func SchemaInit(db *sql.DB) error {
 	// 	`); err != nil {
 	// 	return err
 	// }
-
 	return nil
 }
