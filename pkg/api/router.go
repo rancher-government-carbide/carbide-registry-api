@@ -241,7 +241,7 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if !userIsAuthenticated(w, r) {
 		log.Info("user is unauthorized\n")
-		w.Write([]byte("user is unauthorized"))
+		respondWithJSON(w, "user is unauthorized")
 		return
 	}
 	switch r.Method {
