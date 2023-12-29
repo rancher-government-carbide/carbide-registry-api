@@ -75,8 +75,8 @@ func serveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if userIsAuthenticated(w, r) {
-		log.Info("User is already logged in\n")
-		w.Write([]byte("User is already logged in"))
+		log.Info("user is already logged in\n")
+		w.Write([]byte("user is already logged in"))
 		return
 	}
 	switch r.Method {
@@ -93,8 +93,8 @@ func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if !userIsAuthenticated(w, r) {
-		log.Info("User is unauthorized\n")
-		w.Write([]byte("User is unauthorized"))
+		log.Info("user is unauthorized\n")
+		w.Write([]byte("user is unauthorized"))
 		return
 	}
 	var productName string
@@ -146,8 +146,8 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productName string) {
 	if !userIsAuthenticated(w, r) {
-		log.Info("User is unauthorized\n")
-		w.Write([]byte("User is unauthorized"))
+		log.Info("user is unauthorized\n")
+		w.Write([]byte("user is unauthorized"))
 		return
 	}
 	var release_name string
@@ -197,8 +197,8 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productNam
 
 func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if !userIsAuthenticated(w, r) {
-		log.Info("User is unauthorized\n")
-		w.Write([]byte("User is unauthorized"))
+		log.Info("user is unauthorized\n")
+		w.Write([]byte("user is unauthorized"))
 		return
 	}
 	var image_id_string string
@@ -245,8 +245,8 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if !userIsAuthenticated(w, r) {
-		log.Info("User is unauthorized\n")
-		w.Write([]byte("User is unauthorized"))
+		log.Info("user is unauthorized\n")
+		w.Write([]byte("user is unauthorized"))
 		return
 	}
 	switch r.Method {

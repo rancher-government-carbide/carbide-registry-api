@@ -57,7 +57,7 @@ func productPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	log.WithFields(log.Fields{
 		"product": *createdProduct.Name,
-	}).Info("Product has been successfully created")
+	}).Info("product has been successfully created")
 	createdProductJSON, err := json.Marshal(createdProduct)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
@@ -115,7 +115,7 @@ func productPutByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	}
 	log.WithFields(log.Fields{
 		"product": *updatedProduct.Name,
-	}).Info("Product has been successfully updated")
+	}).Info("product has been successfully updated")
 	updatedProductJSON, err := json.Marshal(updatedProduct)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
@@ -141,6 +141,6 @@ func productDeleteByName(w http.ResponseWriter, r *http.Request, db *sql.DB, pro
 	}
 	log.WithFields(log.Fields{
 		"product": productName,
-	}).Info("Product has been successfully deleted")
+	}).Info("product has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
 }
