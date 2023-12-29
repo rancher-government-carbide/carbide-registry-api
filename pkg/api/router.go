@@ -145,11 +145,6 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productName string) {
-	if !userIsAuthenticated(w, r) {
-		log.Info("user is unauthorized\n")
-		w.Write([]byte("user is unauthorized"))
-		return
-	}
 	var release_name string
 	release_name, r.URL.Path = shiftPath(r.URL.Path)
 	if r.URL.Path != "/" {
