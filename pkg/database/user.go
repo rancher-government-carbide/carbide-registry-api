@@ -9,24 +9,30 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func AddUser(db *sql.DB, newUser objects.User) error {
+func ensureFields(user objects.User) error {
 	const requiredField string = "missing field \"%s\" required when creating a new user"
 	const sqlError string = "error creating new user: %w"
-	if newUser.Username == nil {
+	if user.Username == nil {
 		errMsg := fmt.Sprintf(requiredField, "username")
 		return errors.New(errMsg)
 	}
-	if newUser.Password == nil {
+	if user.Password == nil {
 		errMsg := fmt.Sprintf(requiredField, "password")
 		return errors.New(errMsg)
 	}
-	// hash user password
+	return nil
+}
+
+func AddUser(db *sql.DB, newUser objects.User) error {
+	err := ensureFields(newUser)
+	if err != nil {
+		return err
+	}
 	if bytes, err := bcrypt.GenerateFromPassword([]byte(*newUser.Password), 4); err != nil {
 		return err
 	} else {
 		*newUser.Password = string(bytes)
 	}
-	// insert new user object in database
 	if _, err := db.Exec(
 		"INSERT INTO users (username, password) VALUES (?, ?)",
 		newUser.Username, newUser.Password); err != nil {
@@ -71,11 +77,14 @@ func GetUsers(db *sql.DB) ([]objects.User, error) {
 
 // checks if user credentials are valid - returns nil on success; err otherwise
 func VerifyUser(db *sql.DB, user objects.User) error {
+	err := ensureFields(user)
+	if err != nil {
+		return err
+	}
 	verified, err := GetUser(db, *user.Username)
 	if err != nil {
 		return err
 	}
-	// compare the user's stored password with the one provided
 	if err := bcrypt.CompareHashAndPassword([]byte(*verified.Password), []byte(*user.Password)); err != nil {
 		return err
 	}
@@ -83,7 +92,7 @@ func VerifyUser(db *sql.DB, user objects.User) error {
 }
 
 // delete corresponding row in users table
-func DeleteUser(db *sql.DB, userid int64) error {
+func DeleteUserById(db *sql.DB, userid int64) error {
 	if _, err := db.Exec(
 		`DELETE FROM users WHERE id = ?;`, userid); err != nil {
 		return err

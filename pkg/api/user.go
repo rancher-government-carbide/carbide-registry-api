@@ -21,6 +21,7 @@ func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	if err := DB.AddUser(db, newUser); err != nil {
 		log.Error(err)
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	newUser, err = DB.GetUser(db, *newUser.Username)
@@ -67,7 +68,7 @@ func userDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Error(err)
 		return
 	}
-	if err := DB.DeleteUser(db, userid); err != nil {
+	if err := DB.DeleteUserById(db, userid); err != nil {
 		log.Error(err)
 		log.Errorf("Failed to delete user with id %d", userid)
 		w.Write([]byte(fmt.Sprintf("Failed to delete user with id %d", userid)))

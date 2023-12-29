@@ -153,10 +153,10 @@ func ensureImagesTableConstraint(db *sql.DB) error {
 func ensureUsersTableConstraint(db *sql.DB) error {
 	// TODO: make indepmotent
 	//// Ensure constraint on images table
-	_, err := db.Exec(`ALTER TABLE users ADD CONSTRAINT unique_username UNIQUE (username)`)
-	if err != nil {
-		return err
-	}
+	// _, err := db.Exec(`ALTER TABLE users ADD CONSTRAINT unique_username UNIQUE (username)`)
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
