@@ -31,20 +31,10 @@ func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	log.WithFields(log.Fields{
 		"user": *newUser.Username,
 	}).Info("user has been successfully created")
-	token, err := generateJWT(newUser)
+	err = setAuthCookie(w, newUser)
 	if err != nil {
 		log.Error(err)
-		return
 	}
-	ck := http.Cookie{
-		Name:     "token",
-		Value:    token,
-		MaxAge:   3600,
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-	}
-	http.SetCookie(w, &ck)
 	respondWithJSON(w, "user has been created")
 	return
 }
@@ -96,20 +86,10 @@ func loginPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Error(err)
 		return
 	}
-	token, err := generateJWT(login)
+	err = setAuthCookie(w, login)
 	if err != nil {
 		log.Error(err)
-		return
 	}
-	ck := http.Cookie{
-		Name:     "token",
-		Value:    token,
-		MaxAge:   3600,
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-	}
-	http.SetCookie(w, &ck)
 	log.WithFields(log.Fields{
 		"user": *login.Username,
 	}).Info("user logged in successfully")

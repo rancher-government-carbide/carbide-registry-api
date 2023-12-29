@@ -34,6 +34,23 @@ func enableCors(w http.ResponseWriter, r *http.Request) {
 	(w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 }
 
+func setAuthCookie(w http.ResponseWriter, user objects.User) error {
+	token, err := generateJWT(user)
+	if err != nil {
+		return err
+	}
+	ck := http.Cookie{
+		Name:     "token",
+		Value:    token,
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	}
+	http.SetCookie(w, &ck)
+	return nil
+}
+
 // generate JWT from given user - returns err and token
 func generateJWT(user objects.User) (string, error) {
 	secret := os.Getenv("JWTSECRET")
