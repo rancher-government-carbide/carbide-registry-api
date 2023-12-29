@@ -92,6 +92,15 @@ func VerifyUser(db *sql.DB, user objects.User) error {
 }
 
 // delete corresponding row in users table
+func DeleteUserByUsername(db *sql.DB, username string) error {
+	if _, err := db.Exec(
+		`DELETE FROM users WHERE username = ?;`, username); err != nil {
+		return err
+	}
+	return nil
+}
+
+// delete corresponding row in users table
 func DeleteUserById(db *sql.DB, userid int64) error {
 	if _, err := db.Exec(
 		`DELETE FROM users WHERE id = ?;`, userid); err != nil {

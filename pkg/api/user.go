@@ -5,7 +5,6 @@ import (
 	"carbide-images-api/pkg/objects"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -31,7 +30,7 @@ func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	log.WithFields(log.Fields{
 		"user": *newUser.Username,
-	}).Info("User has been successfully created")
+	}).Info("user has been successfully created")
 	token, err := generateJWT(newUser)
 	if err != nil {
 		log.Error(err)
@@ -51,14 +50,8 @@ func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func userDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	userid, err := verifyJWT(r)
-	if err != nil {
-		log.Error(err)
-		http.Error(w, "Missing or expired cookie", 401)
-		return
-	}
 	var userToDelete objects.User
-	err = json.NewDecoder(r.Body).Decode(&userToDelete)
+	err := json.NewDecoder(r.Body).Decode(&userToDelete)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
@@ -68,15 +61,16 @@ func userDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		log.Error(err)
 		return
 	}
-	if err := DB.DeleteUserById(db, userid); err != nil {
+	if err := DB.DeleteUserByUsername(db, *userToDelete.Username); err != nil {
 		log.Error(err)
-		log.Errorf("Failed to delete user with id %d", userid)
-		w.Write([]byte(fmt.Sprintf("Failed to delete user with id %d", userid)))
+		log.WithFields(log.Fields{
+			"username": *userToDelete.Username,
+		}).Error("failed to delete user")
 		return
 	}
 	log.WithFields(log.Fields{
 		"user": *userToDelete.Username,
-	}).Info("User has been successfully deleted or didn't exist in the first place")
+	}).Info("user has been successfully deleted or didn't exist in the first place")
 	respondSuccess(w)
 	return
 }
@@ -114,6 +108,6 @@ func loginPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	http.SetCookie(w, &ck)
 	log.WithFields(log.Fields{
 		"user": *login.Username,
-	}).Info("User logged in successfully")
+	}).Info("user logged in successfully")
 	respondSuccess(w)
 }
