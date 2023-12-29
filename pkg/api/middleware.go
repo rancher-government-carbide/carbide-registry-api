@@ -81,8 +81,8 @@ func verifyJWT(r *http.Request) (int64, error) {
 	if int64(exp) < time.Now().Local().Unix() {
 		return 0, errors.New("token expired")
 	}
-	UserIdString := claims["userid"].(string)
-	userid, err := strconv.ParseInt(UserIdString, 10, 64)
+	userIdString := claims["userid"].(string)
+	userid, err := strconv.ParseInt(userIdString, 10, 64)
 	if err != nil {
 		return 0, errors.New("failed to parse userid")
 	}
