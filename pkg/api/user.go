@@ -45,7 +45,7 @@ func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		SameSite: http.SameSiteNoneMode,
 	}
 	http.SetCookie(w, &ck)
-	respondSuccess(w)
+	respondWithJSON(w, "user has been created")
 	return
 }
 
@@ -58,20 +58,24 @@ func userDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	if err := DB.VerifyUser(db, userToDelete); err != nil {
-		log.Error(err)
+		log.WithFields(log.Fields{
+			"username": *userToDelete.Username,
+			"error":    err,
+		}).Error("invalid username or password")
+		httpJSONError(w, "invalid username or password", http.StatusBadRequest)
 		return
 	}
 	if err := DB.DeleteUserByUsername(db, *userToDelete.Username); err != nil {
-		log.Error(err)
 		log.WithFields(log.Fields{
 			"username": *userToDelete.Username,
+			"error":    err,
 		}).Error("failed to delete user")
 		return
 	}
 	log.WithFields(log.Fields{
 		"user": *userToDelete.Username,
-	}).Info("user has been successfully deleted or didn't exist in the first place")
-	respondSuccess(w)
+	}).Info("user has been successfully deleted")
+	respondWithJSON(w, "user has been deleted")
 	return
 }
 
@@ -109,5 +113,5 @@ func loginPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	log.WithFields(log.Fields{
 		"user": *login.Username,
 	}).Info("user logged in successfully")
-	respondSuccess(w)
+	respondWithJSON(w, "login successfull")
 }

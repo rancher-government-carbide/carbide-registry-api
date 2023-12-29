@@ -97,22 +97,10 @@ type Response struct {
 	Message string
 }
 
-func respondFailure(w http.ResponseWriter) error {
-	var success Response
-	success.Message = "FAILURE"
-	json, err := json.Marshal(success)
-	if err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
-	return nil
-}
-
-func respondSuccess(w http.ResponseWriter) error {
-	var success Response
-	success.Message = "SUCCESS"
-	json, err := json.Marshal(success)
+func respondWithJSON(w http.ResponseWriter, message string) error {
+	var jsonResponse Response
+	jsonResponse.Message = message
+	json, err := json.Marshal(jsonResponse)
 	if err != nil {
 		return err
 	}

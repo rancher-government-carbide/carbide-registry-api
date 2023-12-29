@@ -76,7 +76,7 @@ func serveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if userIsAuthenticated(w, r) {
 		log.Info("user is already logged in\n")
-		w.Write([]byte("user is already logged in"))
+		respondWithJSON(w, "user is already logged in")
 		return
 	}
 	switch r.Method {
@@ -94,7 +94,7 @@ func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if !userIsAuthenticated(w, r) {
 		log.Info("user is unauthorized\n")
-		w.Write([]byte("user is unauthorized"))
+		respondWithJSON(w, "user is unauthorized")
 		return
 	}
 	var productName string
