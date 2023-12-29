@@ -33,8 +33,7 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-
-	Middleware(w, r)
+	GlobalMiddleware(w, r)
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 	switch head {
@@ -75,7 +74,7 @@ func serveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if userIsAuthenticated(w,r) {
+	if userIsAuthenticated(w, r) {
 		log.Info("User is already logged in\n")
 		w.Write([]byte("User is already logged in"))
 		return
@@ -93,7 +92,7 @@ func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if !userIsAuthenticated(w,r) {
+	if !userIsAuthenticated(w, r) {
 		log.Info("User is unauthorized\n")
 		w.Write([]byte("User is unauthorized"))
 		return
@@ -146,7 +145,7 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productName string) {
-	if !userIsAuthenticated(w,r) {
+	if !userIsAuthenticated(w, r) {
 		log.Info("User is unauthorized\n")
 		w.Write([]byte("User is unauthorized"))
 		return
@@ -197,7 +196,7 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productNam
 }
 
 func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if !userIsAuthenticated(w,r) {
+	if !userIsAuthenticated(w, r) {
 		log.Info("User is unauthorized\n")
 		w.Write([]byte("User is unauthorized"))
 		return
@@ -219,14 +218,12 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			return
 		}
 	} else {
-
 		image_id_64, err := strconv.ParseInt(image_id_string, 10, 32)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 		image_id := int32(image_id_64)
-
 		switch r.Method {
 		case http.MethodGet:
 			imageGet1(w, r, db, image_id)
@@ -247,7 +244,7 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if !userIsAuthenticated(w,r) {
+	if !userIsAuthenticated(w, r) {
 		log.Info("User is unauthorized\n")
 		w.Write([]byte("User is unauthorized"))
 		return

@@ -13,7 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func Middleware(w http.ResponseWriter, r *http.Request) {
+func GlobalMiddleware(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r)
 }
 
