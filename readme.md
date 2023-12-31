@@ -41,6 +41,16 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
 >prefix: https://\<backendurl\>/api/v0/
 
 #### Functional Endpoints:
+- /user
+    - POST: accepts username and password
+        - creates user account
+        - only returns cookie first time user is created
+    - DELETE: accepts username and password
+        - deletes user account
+- /login
+    - POST: should accept username and password
+        - returns authentication cookie/token (stored in browser by frontend)  
+>The following require the user to have provide their auth token via cookie:
 - /product
     - GET: get all products
     - POST: create new product
@@ -68,12 +78,6 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
     - DELETE: delete releaseimgmapping
 
 #### Possible Additions:
-- /user
-    - POST: should accept username and password
-        - only returns cookie first time user is created
-- /login
-    - POST: should accept username and password
-        - returns authentication cookie/token (stored in browser by frontend)
 - /product/{product_name}/release/{release_name}/image
     - GET: get all images for product release
     - POST: create new image for product release
