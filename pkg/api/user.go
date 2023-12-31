@@ -10,12 +10,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var newUser objects.User
-	err := json.NewDecoder(r.Body).Decode(&newUser)
+func decodeUser(w http.ResponseWriter, r *http.Request) (objects.User, error) {
+	var user objects.User
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
+		return user, err
+	}
+	return user, nil
+}
+
+func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	newUser, err := decodeUser(w, r)
+	if err != nil {
 		return
 	}
 	if err := DB.AddUser(db, newUser); err != nil {
@@ -40,11 +48,8 @@ func userPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func userDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var userToDelete objects.User
-	err := json.NewDecoder(r.Body).Decode(&userToDelete)
+	userToDelete, err := decodeUser(w, r)
 	if err != nil {
-		httpJSONError(w, err.Error(), http.StatusBadRequest)
-		log.Error(err)
 		return
 	}
 	if err := DB.VerifyUser(db, userToDelete); err != nil {
@@ -70,11 +75,8 @@ func userDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func loginPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var login objects.User
-	err := json.NewDecoder(r.Body).Decode(&login)
+	login, err := decodeUser(w, r)
 	if err != nil {
-		httpJSONError(w, err.Error(), http.StatusBadRequest)
-		log.Error(err)
 		return
 	}
 	if err := DB.VerifyUser(db, login); err != nil {
