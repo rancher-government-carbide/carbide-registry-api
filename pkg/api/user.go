@@ -81,6 +81,7 @@ func loginPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	if err := DB.VerifyUser(db, login); err != nil {
 		log.Error(err)
+		httpJSONError(w, "invalid username or password", http.StatusUnauthorized)
 		return
 	}
 	login, err = DB.GetUser(db, *login.Username)
