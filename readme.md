@@ -95,3 +95,4 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
 
 ## Misc notes
 - move entire DB schema to this api (for portability)
+- product names should be unique
