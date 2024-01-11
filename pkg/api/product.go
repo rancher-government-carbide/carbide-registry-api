@@ -78,6 +78,7 @@ func productGetByName(w http.ResponseWriter, r *http.Request, db *sql.DB, produc
 	var retrievedProduct objects.Product
 	retrievedProduct, err := DB.GetProduct(db, productName)
 	if err != nil {
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		log.Error(err)
 		return
 	}
