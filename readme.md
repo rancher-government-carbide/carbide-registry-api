@@ -36,6 +36,7 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
 | DBPORT                | MySQL/MariaDB port        | false                     |
 | DBNAME                | MySQL/MariaDB name        | false                     |
 | PORT                  | port to serve api         | true (defaults to 5000)   |
+| JWTSECRET             | JWT privatekey            | false                     |
 
 ## REST Schema
 >prefix: https://\<backendurl\>/api/v0/
