@@ -1,64 +1,83 @@
 BINARY_NAME=carbide-images-api
-CONTAINERTAG=rancher-government-carbide/$(BINARY_NAME)
+ORG=rancher-government-carbide
+CONTAINER_TAG=$(ORG)/$(BINARY_NAME)
 CONTAINERFILE=./Containerfile
+COMPILATION_SRC=./cmd
 SRC=./cmd
-PKG=./pkg/*
-VERSION=0.1.0
+VERSION=0.1.2
 COMMIT_HASH=$(shell git rev-parse HEAD)
 GOENV=CGO_ENABLED=0
 BUILD_FLAGS=-ldflags="-X 'main.Version=$(VERSION)'"
 TEST_FLAGS=-v -cover -count 1
-# change to docker if not using rancher desktop
+ARTIFACT_DIR=dist
 CLI=nerdctl
 
-# Build the binary
 $(BINARY_NAME):
-	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOENV) go build $(BUILD_FLAGS) -o $(BINARY_NAME) $(SRC)
+	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOENV) go build $(BUILD_FLAGS) -o $(BINARY_NAME) $(SRC) ## Build binary (default)
 
 .PHONY: check
-check: test lint
+check: test lint ## Test and lint
 
-# Test the binary
 .PHONY: test
-test:
-	go test -v $(SRC) $(PKG)
+test: ## Run go tests
+	go test $(TEST_FLAGS) ./...
 
-# Run linters
 .PHONY: lint
-lint:
-	go vet $(SRC) $(PKG)
-	staticcheck $(SRC) $(PKG)
+lint: ## Run go vet and staticcheck against codebase
+	go vet ./...
+	staticcheck ./...
 
-# Build the container image
 .PHONY: container
-container:
-	$(CLI) build -t $(CONTAINERTAG):$(COMMIT_HASH) -f $(CONTAINERFILE) . && $(CLI) image tag $(CONTAINERTAG):$(COMMIT_HASH) $(CONTAINERTAG):latest
+container: clean ## Build the container
+	$(CLI) build -t $(CONTAINER_TAG):$(COMMIT_HASH) .
 	
-# Push the binary
 .PHONY: container-push
-container-push: container
-	$(CLI) push $(CONTAINER_NAME):$(COMMIT_HASH) && $(CLI) push $(CONTAINER_NAME):latest
+container-push: ## Push the container
+	$(CLI) push $(CONTAINER_TAG):$(COMMIT_HASH)
 
-# Ensure dependencies are available
+.PHONY: container-push
+container-build-and-push: container container-push ## Build and push the container
+
 .PHONY: dependencies
-dependencies:
+dependencies: ## Run go mod and go get to ensure dependencies
 	go mod tidy && go get -v -d ./...
 
-# Clean the binary
-.PHONY: clean
-clean:
-	rm -f $(BINARY_NAME)
+.PHONY: release
+release: build-linux build-darwin build-windows package-chart checksums ## Build helm chart and binaries for all platforms
 
-# Show help
+.PHONY: release-windows
+build-windows: ## Build all arches for windows
+	make GOOS=windows  GOARCH=amd64 BINARY_NAME=$(ARTIFACT_DIR)/$(BINARY_NAME)-windows-amd64-$(VERSION)
+	make GOOS=windows GOARCH=arm64 BINARY_NAME=$(ARTIFACT_DIR)/$(BINARY_NAME)-windows-arm64-$(VERSION)
+
+.PHONY: release-darwin
+build-darwin: ## Build all arches for darwin
+	make GOOS=darwin GOARCH=amd64 BINARY_NAME=$(ARTIFACT_DIR)/$(BINARY_NAME)-darwin-amd64-$(VERSION)
+	make GOOS=darwin GOARCH=arm64 BINARY_NAME=$(ARTIFACT_DIR)/$(BINARY_NAME)-darwin-arm64-$(VERSION)
+
+.PHONY: release-linux
+build-linux: ## Build all arches for linux
+	make GOOS=linux GOARCH=amd64 BINARY_NAME=$(ARTIFACT_DIR)/$(BINARY_NAME)-linux-amd64-$(VERSION)
+	make GOOS=linux  GOARCH=arm64 BINARY_NAME=$(ARTIFACT_DIR)/$(BINARY_NAME)-linux-arm64-$(VERSION)
+	make GOOS=linux  GOARCH=riscv64 BINARY_NAME=$(ARTIFACT_DIR)/$(BINARY_NAME)-linux-riscv64-$(VERSION)
+
+.PHONY: release-chart
+package-chart: ## Package helm chart
+	helm package -u ./chart -d $(ARTIFACT_DIR)
+
+.PHONY: checksums
+checksums: ## Generate release asset checksums
+	shasum -a 256 $(ARTIFACT_DIR)/* | tee $(ARTIFACT_DIR)/checksums.txt
+
+.PHONY: clean
+clean: ## Clean workspace
+	rm -rf $(BINARY_NAME) $(ARTIFACT_DIR)/*
+
 .PHONY: help
 help:
-	@printf "Available targets:\n"
-	@printf "  $(BINARY_NAME) 		Build the binary (default)\n"
-	@printf "  test 			Build and test the binary\n"
-	@printf "  lint 			Run go vet and staticcheck\n"
-	@printf "  check 		Test and lint the binary\n"
-	@printf "  container 		Build the container\n"
-	@printf "  container-push 	Build and push the container\n"
-	@printf "  dependencies 		Ensure dependencies are available\n"
-	@printf "  clean 		Clean build results\n"
-	@printf "  help 			Show help\n"
+	@echo "Available targets:"
+	@if [ -t 1 ]; then \
+		awk -F ':|##' '/^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$NF }' $(MAKEFILE_LIST) | grep -v '^help:'; \
+	else \
+		awk -F ':|##' '/^[a-zA-Z0-9_-]+:.*?##/ { printf "  %-20s %s\n", $$1, $$NF }' $(MAKEFILE_LIST) | grep -v '^help:'; \
+	fi
