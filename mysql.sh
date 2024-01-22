@@ -65,7 +65,7 @@ while [ $# -gt 0 ]; do
             connectFlag=true
             ;;
          --help)
-            showUsage
+            usage
             exit 0
             ;;
         *)
