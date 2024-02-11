@@ -114,14 +114,32 @@ type Response struct {
 	Message string
 }
 
-func respondWithJSON(w http.ResponseWriter, message string) error {
-	var jsonResponse Response
-	jsonResponse.Message = message
-	json, err := json.Marshal(jsonResponse)
+func sendAsJSON(w http.ResponseWriter, object interface{}) error {
+	json, err := json.Marshal(object)
 	if err != nil {
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
 		return err
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(json)
+	return nil
+}
+
+func respondWithJSON(w http.ResponseWriter, message string) error {
+	var jsonResponse Response
+	jsonResponse.Message = message
+	err := sendAsJSON(w, jsonResponse)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func decodeJSONObject(w http.ResponseWriter, r *http.Request, object interface{}) error {
+	err := json.NewDecoder(r.Body).Decode(object)
+	if err != nil {
+		httpJSONError(w, err.Error(), http.StatusBadRequest)
+		return err
+	}
 	return nil
 }

@@ -1,15 +1,50 @@
 package api
 
 import (
+	"carbide-images-api/pkg/api/middleware"
 	"database/sql"
 	"fmt"
 	"net/http"
 	"path"
-	"strconv"
 	"strings"
+
+	// "github.com/justinas/alice"
 
 	log "github.com/sirupsen/logrus"
 )
+
+func InitRouter(db *sql.DB) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /user", middleware.Global(createUserHandler(db)) )
+	mux.HandleFunc("DELETE /user", deleteUserHandler(db))
+	mux.HandleFunc("POST /login", loginHandler(db))
+	mux.HandleFunc("GET /product", getAllProductsHandler(db))
+	mux.HandleFunc("POST /product", createProductHandler(db))
+	mux.HandleFunc("GET /product/{name}", getProductHandler(db))
+	mux.HandleFunc("PUT /product/{name}", updateProductHandler(db))
+	mux.HandleFunc("DELETE /product/{name}", deleteProductHandler(db))
+	mux.HandleFunc("GET /release", getAllReleasesHandler(db))
+	mux.HandleFunc("POST /release", createReleaseHandler(db))
+	mux.HandleFunc("GET /release/{name}", getReleaseHandler(db))
+	mux.HandleFunc("DELETE /release/{name}", deleteReleaseHandler(db))
+	mux.HandleFunc("GET /image", getAllImagesHandler(db))
+	mux.HandleFunc("POST /image", createImageHandler(db))
+	mux.HandleFunc("GET /image/{id}", getImageHandler(db))
+	mux.HandleFunc("PUT /image/{id}", updateImageHandler(db))
+	mux.HandleFunc("DELETE /image/{id}", deleteImageHandler(db))
+	mux.HandleFunc("GET /releaseImageMapping", getAllReleaseImageMappingsHandler(db))
+	mux.HandleFunc("POST /releaseImageMapping", createReleaseImageMappingHandler(db))
+	mux.HandleFunc("DELETE /releaseImageMapping", deleteReleaseImageMappingHandler(db))
+
+	return mux
+}
+
+func sampleHandler(db *sql.DB) http.HandlerFunc {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+	}
+
+	return http.HandlerFunc(fn)
+}
 
 // shiftPath splits off the first component of p, which will be cleaned of
 // relative components before processing. head will never contain a slash and
@@ -37,21 +72,6 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 	switch head {
-	case "product":
-		serveProduct(w, r, h.DB)
-		return
-	case "image":
-		serveImage(w, r, h.DB)
-		return
-	case "releaseImageMapping":
-		serveReleaseImageMapping(w, r, h.DB)
-		return
-	case "user":
-		serveUser(w, r, h.DB)
-		return
-	case "login":
-		serveLogin(w, r, h.DB)
-		return
 	default:
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
@@ -59,12 +79,6 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func serveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	switch r.Method {
-	case http.MethodPost:
-		userPost(w, r, db)
-		return
-	case http.MethodDelete:
-		userDelete(w, r, db)
-		return
 	case http.MethodOptions:
 		return
 	default:
@@ -75,9 +89,6 @@ func serveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	switch r.Method {
-	case http.MethodPost:
-		loginPost(w, r, db)
-		return
 	case http.MethodOptions:
 		return
 	default:
@@ -98,8 +109,6 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var head string
 		head, r.URL.Path = shiftPath(r.URL.Path)
 		switch head {
-		case "release":
-			serveRelease(w, r, db, productName)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -107,12 +116,6 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	if productName == "" {
 		switch r.Method {
-		case http.MethodGet:
-			productGet(w, r, db)
-			return
-		case http.MethodPost:
-			productPost(w, r, db)
-			return
 		case http.MethodOptions:
 			return
 		default:
@@ -121,15 +124,6 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		}
 	} else {
 		switch r.Method {
-		case http.MethodGet:
-			productGetByName(w, r, db, productName)
-			return
-		case http.MethodPut:
-			productPutByName(w, r, db, productName)
-			return
-		case http.MethodDelete:
-			productDeleteByName(w, r, db, productName)
-			return
 		case http.MethodOptions:
 			return
 		default:
@@ -153,12 +147,6 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productNam
 	}
 	if release_name == "" {
 		switch r.Method {
-		case http.MethodGet:
-			releaseGet(w, r, db, productName)
-			return
-		case http.MethodPost:
-			releasePost(w, r, db, productName)
-			return
 		case http.MethodOptions:
 			return
 		default:
@@ -167,15 +155,6 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productNam
 		}
 	} else {
 		switch r.Method {
-		case http.MethodGet:
-			releaseGetByName(w, r, db, productName, release_name)
-			return
-		case http.MethodPut:
-			releasePutByName(w, r, db, productName, release_name)
-			return
-		case http.MethodDelete:
-			releaseDeleteByName(w, r, db, productName, release_name)
-			return
 		case http.MethodOptions:
 			return
 		default:
@@ -195,12 +174,6 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	image_id_string, r.URL.Path = shiftPath(r.URL.Path)
 	if image_id_string == "" {
 		switch r.Method {
-		case http.MethodGet:
-			imageGet(w, r, db)
-			return
-		case http.MethodPost:
-			imagePost(w, r, db)
-			return
 		case http.MethodOptions:
 			return
 		default:
@@ -208,22 +181,7 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			return
 		}
 	} else {
-		image_id_64, err := strconv.ParseInt(image_id_string, 10, 32)
-		if err != nil {
-			log.Error(err)
-			return
-		}
-		image_id := int32(image_id_64)
 		switch r.Method {
-		case http.MethodGet:
-			imageGet1(w, r, db, image_id)
-			return
-		case http.MethodPut:
-			imagePut1(w, r, db, image_id)
-			return
-		case http.MethodDelete:
-			imageDelete1(w, r, db, image_id)
-			return
 		case http.MethodOptions:
 			return
 		default:
@@ -240,15 +198,6 @@ func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB
 		return
 	}
 	switch r.Method {
-	case http.MethodGet:
-		releaseImageMappingGet(w, r, db)
-		return
-	case http.MethodPost:
-		releaseImageMappingPost(w, r, db)
-		return
-	case http.MethodDelete:
-		releaseImageMappingDelete(w, r, db)
-		return
 	case http.MethodOptions:
 		return
 	default:
