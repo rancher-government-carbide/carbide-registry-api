@@ -21,7 +21,7 @@ helm install carbide-images-api ./chart --values <values-file>
 ```
 ## Testing
 For now an insomnia file can be found at `./example/exampleQueries.json`.
-If you prefer to use the OSS version try [insomnium](https://github.com/ArchGPT/insomnium)
+If you prefer to use the OSS version try [insomnium](https://github.com/ArchGPT/insomnium).
 If you prefer to use cURL or a programming language to test the endpoints the queries can be exported to those as well.
 
 If you don't have access to a mysql database available for testing, you can deploy one to your local cluster with the [mysql operator](https://github.com/mysql/mysql-operator)
