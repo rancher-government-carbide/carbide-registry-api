@@ -1,40 +1,38 @@
 package api
 
 import (
-	"carbide-images-api/pkg/api/middleware"
+	"carbide-images-api/pkg/api/utils"
 	"database/sql"
 	"fmt"
 	"net/http"
 	"path"
 	"strings"
 
-	// "github.com/justinas/alice"
-
 	log "github.com/sirupsen/logrus"
 )
 
 func InitRouter(db *sql.DB) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /user", middleware.Global(createUserHandler(db)) )
-	mux.HandleFunc("DELETE /user", deleteUserHandler(db))
-	mux.HandleFunc("POST /login", loginHandler(db))
-	mux.HandleFunc("GET /product", getAllProductsHandler(db))
-	mux.HandleFunc("POST /product", createProductHandler(db))
-	mux.HandleFunc("GET /product/{name}", getProductHandler(db))
-	mux.HandleFunc("PUT /product/{name}", updateProductHandler(db))
-	mux.HandleFunc("DELETE /product/{name}", deleteProductHandler(db))
-	mux.HandleFunc("GET /release", getAllReleasesHandler(db))
-	mux.HandleFunc("POST /release", createReleaseHandler(db))
-	mux.HandleFunc("GET /release/{name}", getReleaseHandler(db))
-	mux.HandleFunc("DELETE /release/{name}", deleteReleaseHandler(db))
-	mux.HandleFunc("GET /image", getAllImagesHandler(db))
-	mux.HandleFunc("POST /image", createImageHandler(db))
-	mux.HandleFunc("GET /image/{id}", getImageHandler(db))
-	mux.HandleFunc("PUT /image/{id}", updateImageHandler(db))
-	mux.HandleFunc("DELETE /image/{id}", deleteImageHandler(db))
-	mux.HandleFunc("GET /releaseImageMapping", getAllReleaseImageMappingsHandler(db))
-	mux.HandleFunc("POST /releaseImageMapping", createReleaseImageMappingHandler(db))
-	mux.HandleFunc("DELETE /releaseImageMapping", deleteReleaseImageMappingHandler(db))
+	mux.Handle("POST /user", createUserHandler(db))
+	mux.Handle("DELETE /user", deleteUserHandler(db))
+	mux.Handle("POST /login", loginHandler(db))
+	mux.Handle("GET /product", getAllProductsHandler(db))
+	mux.Handle("POST /product", createProductHandler(db))
+	mux.Handle("GET /product/{name}", getProductHandler(db))
+	mux.Handle("PUT /product/{name}", updateProductHandler(db))
+	mux.Handle("DELETE /product/{name}", deleteProductHandler(db))
+	mux.Handle("GET /release", getAllReleasesHandler(db))
+	mux.Handle("POST /release", createReleaseHandler(db))
+	mux.Handle("GET /release/{name}", getReleaseHandler(db))
+	mux.Handle("DELETE /release/{name}", deleteReleaseHandler(db))
+	mux.Handle("GET /image", getAllImagesHandler(db))
+	mux.Handle("POST /image", createImageHandler(db))
+	mux.Handle("GET /image/{id}", getImageHandler(db))
+	mux.Handle("PUT /image/{id}", updateImageHandler(db))
+	mux.Handle("DELETE /image/{id}", deleteImageHandler(db))
+	mux.Handle("GET /releaseImageMapping", getAllReleaseImageMappingsHandler(db))
+	mux.Handle("POST /releaseImageMapping", createReleaseImageMappingHandler(db))
+	mux.Handle("DELETE /releaseImageMapping", deleteReleaseImageMappingHandler(db))
 
 	return mux
 }
@@ -82,7 +80,7 @@ func serveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	case http.MethodOptions:
 		return
 	default:
-		httpJSONError(w, fmt.Sprintf("Expected method POST, DELETE, or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+		utils.HttpJSONError(w, fmt.Sprintf("Expected method POST, DELETE, or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
 		return
 	}
 }
@@ -92,7 +90,7 @@ func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	case http.MethodOptions:
 		return
 	default:
-		httpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+		utils.HttpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
 		return
 	}
 }
@@ -100,7 +98,7 @@ func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if !userIsAuthenticated(w, r) {
 		log.Info("user is unauthorized\n")
-		respondWithJSON(w, "user is unauthorized")
+		utils.RespondWithJSON(w, "user is unauthorized")
 		return
 	}
 	var productName string
@@ -177,7 +175,7 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		case http.MethodOptions:
 			return
 		default:
-			httpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+			utils.HttpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
 			return
 		}
 	} else {
@@ -185,7 +183,7 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		case http.MethodOptions:
 			return
 		default:
-			httpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+			utils.HttpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
 			return
 		}
 	}
@@ -194,14 +192,14 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if !userIsAuthenticated(w, r) {
 		log.Info("user is unauthorized\n")
-		respondWithJSON(w, "user is unauthorized")
+		utils.RespondWithJSON(w, "user is unauthorized")
 		return
 	}
 	switch r.Method {
 	case http.MethodOptions:
 		return
 	default:
-		httpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+		utils.HttpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
 		return
 	}
 }

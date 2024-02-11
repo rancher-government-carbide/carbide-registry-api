@@ -1,6 +1,7 @@
 package api
 
 import (
+	"carbide-images-api/pkg/api/utils"
 	DB "carbide-images-api/pkg/database"
 	"carbide-images-api/pkg/objects"
 	"database/sql"
@@ -17,16 +18,16 @@ func productNameFromPath(r *http.Request) string {
 // Responds with a JSON array of all products in the database
 //
 // Success Code: 200 OK
-func getAllProductsHandler(db *sql.DB) http.HandlerFunc {
+func getAllProductsHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		products, err := DB.GetAllProducts(db)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		err = sendAsJSON(w, products)
+		err = utils.SendAsJSON(w, products)
 		if err != nil {
 			log.Error(err)
 		}
@@ -38,23 +39,23 @@ func getAllProductsHandler(db *sql.DB) http.HandlerFunc {
 // Accepts a JSON payload of a new product and responds with the new JSON object after it's been successfully created in the database
 //
 // Success Code: 201 OK
-func createProductHandler(db *sql.DB) http.HandlerFunc {
+func createProductHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var createdProduct objects.Product
-		err := decodeJSONObject(w, r, &createdProduct)
+		err := utils.DecodeJSONObject(w, r, &createdProduct)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 		err = DB.AddProduct(db, createdProduct)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		createdProduct, err = DB.GetProduct(db, *createdProduct.Name)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -62,7 +63,7 @@ func createProductHandler(db *sql.DB) http.HandlerFunc {
 			"product": *createdProduct.Name,
 		}).Info("product has been successfully created")
 		w.WriteHeader(http.StatusCreated)
-		err = sendAsJSON(w, createdProduct)
+		err = utils.SendAsJSON(w, createdProduct)
 		if err != nil {
 			log.Error(err)
 		}
@@ -74,18 +75,18 @@ func createProductHandler(db *sql.DB) http.HandlerFunc {
 // Responds with the JSON representation of a product
 //
 // Success Code: 200 OK
-func getProductHandler(db *sql.DB) http.HandlerFunc {
+func getProductHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var retrievedProduct objects.Product
 		productName := productNameFromPath(r)
 		retrievedProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusBadRequest)
+			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
 			log.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		err = sendAsJSON(w, retrievedProduct)
+		err = utils.SendAsJSON(w, retrievedProduct)
 		if err != nil {
 			log.Error(err)
 		}
@@ -97,11 +98,11 @@ func getProductHandler(db *sql.DB) http.HandlerFunc {
 // Responds with the JSON representation of a product
 //
 // Success Code: 200 OK
-func updateProductHandler(db *sql.DB) http.HandlerFunc {
+func updateProductHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var updatedProduct objects.Product
 		productName := productNameFromPath(r)
-		err := decodeJSONObject(w, r, &updatedProduct)
+		err := utils.DecodeJSONObject(w, r, &updatedProduct)
 		if err != nil {
 			log.Error(err)
 			return
@@ -120,7 +121,7 @@ func updateProductHandler(db *sql.DB) http.HandlerFunc {
 			"product": *updatedProduct.Name,
 		}).Info("product has been successfully updated")
 		w.WriteHeader(http.StatusOK)
-		err = sendAsJSON(w, updatedProduct)
+		err = utils.SendAsJSON(w, updatedProduct)
 		if err != nil {
 			log.Error(err)
 		}
@@ -132,12 +133,12 @@ func updateProductHandler(db *sql.DB) http.HandlerFunc {
 // Deletes the product and responds with an empty payload
 //
 // Success Code: 204 No Content
-func deleteProductHandler(db *sql.DB) http.HandlerFunc {
+func deleteProductHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		productName := productNameFromPath(r)
 		err := DB.DeleteProduct(db, productName)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"carbide-images-api/pkg/api/utils"
 	DB "carbide-images-api/pkg/database"
 	"carbide-images-api/pkg/objects"
 	"database/sql"
@@ -9,17 +10,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func createUserHandler(db *sql.DB) http.HandlerFunc {
+func createUserHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var newUser objects.User
-		err := decodeJSONObject(w, r, &newUser)
+		err := utils.DecodeJSONObject(w, r, &newUser)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 		if err := DB.AddUser(db, newUser); err != nil {
 			log.Error(err)
-			httpJSONError(w, err.Error(), http.StatusBadRequest)
+			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		newUser, err = DB.GetUser(db, *newUser.Username)
@@ -34,7 +35,7 @@ func createUserHandler(db *sql.DB) http.HandlerFunc {
 		if err != nil {
 			log.Error(err)
 		}
-		respondWithJSON(w, "user has been created")
+		utils.RespondWithJSON(w, "user has been created")
 		return
 	}
 	return http.HandlerFunc(fn)
@@ -43,7 +44,7 @@ func createUserHandler(db *sql.DB) http.HandlerFunc {
 func deleteUserHandler(db *sql.DB) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var userToDelete objects.User
-		err := decodeJSONObject(w, r, &userToDelete)
+		err := utils.DecodeJSONObject(w, r, &userToDelete)
 		if err != nil {
 			log.Error(err)
 			return
@@ -53,7 +54,7 @@ func deleteUserHandler(db *sql.DB) http.HandlerFunc {
 				"username": *userToDelete.Username,
 				"error":    err,
 			}).Error("invalid username or password")
-			httpJSONError(w, "invalid username or password", http.StatusBadRequest)
+			utils.HttpJSONError(w, "invalid username or password", http.StatusBadRequest)
 			return
 		}
 		if err := DB.DeleteUserByUsername(db, *userToDelete.Username); err != nil {
@@ -66,7 +67,7 @@ func deleteUserHandler(db *sql.DB) http.HandlerFunc {
 		log.WithFields(log.Fields{
 			"user": *userToDelete.Username,
 		}).Info("user has been successfully deleted")
-		respondWithJSON(w, "user has been deleted")
+		utils.RespondWithJSON(w, "user has been deleted")
 		return
 	}
 	return http.HandlerFunc(fn)
@@ -75,14 +76,14 @@ func deleteUserHandler(db *sql.DB) http.HandlerFunc {
 func loginHandler(db *sql.DB) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var userLoggingIn objects.User
-		err := decodeJSONObject(w, r, &userLoggingIn)
+		err := utils.DecodeJSONObject(w, r, &userLoggingIn)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 		if err := DB.VerifyUser(db, userLoggingIn); err != nil {
 			log.Error(err)
-			httpJSONError(w, "invalid username or password", http.StatusUnauthorized)
+			utils.HttpJSONError(w, "invalid username or password", http.StatusUnauthorized)
 			return
 		}
 		userLoggingIn, err = DB.GetUser(db, *userLoggingIn.Username)
@@ -97,7 +98,7 @@ func loginHandler(db *sql.DB) http.HandlerFunc {
 		log.WithFields(log.Fields{
 			"user": *userLoggingIn.Username,
 		}).Info("user logged in successfully")
-		respondWithJSON(w, "login successfull")
+		utils.RespondWithJSON(w, "login successfull")
 	}
 	return http.HandlerFunc(fn)
 }

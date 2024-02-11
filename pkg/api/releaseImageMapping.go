@@ -1,6 +1,7 @@
 package api
 
 import (
+	"carbide-images-api/pkg/api/utils"
 	DB "carbide-images-api/pkg/database"
 	"carbide-images-api/pkg/objects"
 	"database/sql"
@@ -12,16 +13,16 @@ import (
 // Responds with a JSON array of all images in the database
 //
 // Success Code: 200 OK
-func getAllReleaseImageMappingsHandler(db *sql.DB) http.HandlerFunc {
+func getAllReleaseImageMappingsHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		allReleaseImageMappings, err := DB.GetAllReleaseImgMappings(db)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		err = sendAsJSON(w, allReleaseImageMappings)
+		err = utils.SendAsJSON(w, allReleaseImageMappings)
 		if err != nil {
 			log.Error(err)
 		}
@@ -33,23 +34,23 @@ func getAllReleaseImageMappingsHandler(db *sql.DB) http.HandlerFunc {
 // Accepts a JSON payload of a new image and responds with the new JSON object after it's been successfully created in the database
 //
 // Success Code: 201 Created
-func createReleaseImageMappingHandler(db *sql.DB) http.HandlerFunc {
+func createReleaseImageMappingHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var receivedReleaseImageMapping objects.ReleaseImageMapping
-		err := decodeJSONObject(w, r, &receivedReleaseImageMapping)
+		err := utils.DecodeJSONObject(w, r, &receivedReleaseImageMapping)
 		if err != nil || receivedReleaseImageMapping.ReleaseId == nil || receivedReleaseImageMapping.ImageId == nil {
 			log.Error(err)
 			return
 		}
 		err = DB.AddReleaseImgMapping(db, receivedReleaseImageMapping)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		newReleaseImageMapping, err := DB.GetReleaseImageMapping(db, receivedReleaseImageMapping)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -59,7 +60,7 @@ func createReleaseImageMappingHandler(db *sql.DB) http.HandlerFunc {
 			"imageId":               *newReleaseImageMapping.ImageId,
 		}).Info("release_image_mapping has been successfully created")
 		w.WriteHeader(http.StatusCreated)
-		err = sendAsJSON(w, newReleaseImageMapping)
+		err = utils.SendAsJSON(w, newReleaseImageMapping)
 		if err != nil {
 			log.Error(err)
 		}
@@ -71,18 +72,18 @@ func createReleaseImageMappingHandler(db *sql.DB) http.HandlerFunc {
 // Deletes the releaseImageMapping and responds with an empty payload
 //
 // Success Code: 204 No Content
-func deleteReleaseImageMappingHandler(db *sql.DB) http.HandlerFunc {
+func deleteReleaseImageMappingHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var receivedReleaseImageMapping objects.ReleaseImageMapping
-		err := decodeJSONObject(w, r, &receivedReleaseImageMapping)
+		err := utils.DecodeJSONObject(w, r, &receivedReleaseImageMapping)
 		if err != nil || receivedReleaseImageMapping.ReleaseId == nil || receivedReleaseImageMapping.ImageId == nil {
-			httpJSONError(w, err.Error(), http.StatusBadRequest)
+			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
 			log.Error(err)
 			return
 		}
 		err = DB.DeleteReleaseImgMapping(db, receivedReleaseImageMapping)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}

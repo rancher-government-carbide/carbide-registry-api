@@ -1,6 +1,7 @@
 package api
 
 import (
+	"carbide-images-api/pkg/api/utils"
 	DB "carbide-images-api/pkg/database"
 	"carbide-images-api/pkg/objects"
 	"database/sql"
@@ -17,18 +18,18 @@ func releaseNameFromPath(r *http.Request) string {
 // Responds with a JSON array of all releases in the database
 //
 // Success Code: 200 OK
-func getAllReleasesHandler(db *sql.DB) http.HandlerFunc {
+func getAllReleasesHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var allReleases []objects.Release
 		productName := productNameFromPath(r)
 		allReleases, err := DB.GetAllReleasesforProduct(db, productName)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		err = sendAsJSON(w, allReleases)
+		err = utils.SendAsJSON(w, allReleases)
 		if err != nil {
 			log.Error(err)
 		}
@@ -40,31 +41,31 @@ func getAllReleasesHandler(db *sql.DB) http.HandlerFunc {
 // Accepts a JSON payload of a new release and responds with the new JSON object after it's been successfully created in the database
 //
 // Success Code: 201 Created
-func createReleaseHandler(db *sql.DB) http.HandlerFunc {
+func createReleaseHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var newRelease objects.Release
 		productName := productNameFromPath(r)
-		err := decodeJSONObject(w, r, &newRelease)
+		err := utils.DecodeJSONObject(w, r, &newRelease)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 		parentProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		newRelease.ProductId = &parentProduct.Id
 		err = DB.AddRelease(db, newRelease)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		createdRelease, err := DB.GetRelease(db, newRelease)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -72,7 +73,7 @@ func createReleaseHandler(db *sql.DB) http.HandlerFunc {
 			"release": *createdRelease.Name,
 		}).Info("new release has been successfully created")
 		w.WriteHeader(http.StatusCreated)
-		err = sendAsJSON(w, createdRelease)
+		err = utils.SendAsJSON(w, createdRelease)
 		if err != nil {
 			log.Error(err)
 		}
@@ -84,7 +85,7 @@ func createReleaseHandler(db *sql.DB) http.HandlerFunc {
 // Responds with the JSON representation of a release
 //
 // Success Code: 200 OK
-func getReleaseHandler(db *sql.DB) http.HandlerFunc {
+func getReleaseHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var retrievedRelease objects.Release
 		productName := productNameFromPath(r)
@@ -92,19 +93,19 @@ func getReleaseHandler(db *sql.DB) http.HandlerFunc {
 		retrievedRelease.Name = &releaseName
 		parentProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		retrievedRelease.ProductId = &parentProduct.Id
 		retrievedRelease, err = DB.GetRelease(db, retrievedRelease)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		err = sendAsJSON(w, retrievedRelease)
+		err = utils.SendAsJSON(w, retrievedRelease)
 		if err != nil {
 			log.Error(err)
 		}
@@ -116,12 +117,12 @@ func getReleaseHandler(db *sql.DB) http.HandlerFunc {
 // Accepts a JSON payload of the updated release and responds with the new JSON object after it's been successfully updated in the database
 //
 // Success Code: 200 OK
-func updateReleaseHandler(db *sql.DB) http.HandlerFunc {
+func updateReleaseHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var receivedRelease objects.Release
 		productName := productNameFromPath(r)
 		releaseName := releaseNameFromPath(r)
-		err := decodeJSONObject(w, r, &receivedRelease)
+		err := utils.DecodeJSONObject(w, r, &receivedRelease)
 		if err != nil {
 			log.Error(err)
 			return
@@ -129,20 +130,20 @@ func updateReleaseHandler(db *sql.DB) http.HandlerFunc {
 		receivedRelease.Name = &releaseName
 		parentProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		receivedRelease.ProductId = &parentProduct.Id
 		err = DB.UpdateRelease(db, receivedRelease)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		updatedRelease, err := DB.GetRelease(db, receivedRelease)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -150,7 +151,7 @@ func updateReleaseHandler(db *sql.DB) http.HandlerFunc {
 			"release": *updatedRelease.Name,
 		}).Info("release has been successfully updated")
 		w.WriteHeader(http.StatusOK)
-		err = sendAsJSON(w, updatedRelease)
+		err = utils.SendAsJSON(w, updatedRelease)
 		if err != nil {
 			log.Error(err)
 		}
@@ -162,7 +163,7 @@ func updateReleaseHandler(db *sql.DB) http.HandlerFunc {
 // Deletes the release and responds with an empty payload
 //
 // Success Code: 204 No Content
-func deleteReleaseHandler(db *sql.DB) http.HandlerFunc {
+func deleteReleaseHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var releaseToDelete objects.Release
 		productName := productNameFromPath(r)
@@ -170,14 +171,14 @@ func deleteReleaseHandler(db *sql.DB) http.HandlerFunc {
 		releaseToDelete.Name = &releaseName
 		parentProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		releaseToDelete.ProductId = &parentProduct.Id
 		err = DB.DeleteRelease(db, releaseToDelete)
 		if err != nil {
-			httpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
