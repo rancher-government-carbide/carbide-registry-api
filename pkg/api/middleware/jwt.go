@@ -5,7 +5,6 @@ import (
 	"carbide-images-api/pkg/objects"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,14 +15,19 @@ import (
 )
 
 func checkAuth(w http.ResponseWriter, r *http.Request) {
-	if !authenticated(w, r) {
-		log.Info("user is unauthorized\n")
+	if !authorized(w, r) {
+		// log.Info("user is unauthorized\n")
 		utils.RespondWithJSON(w, "user is unauthorized")
 		return
 	}
 }
 
-func authenticated(w http.ResponseWriter, r *http.Request) bool {
+func Authenticate(w http.ResponseWriter, user objects.User) error {
+	err := setAuthCookie(w, user)
+	return err
+}
+
+func authorized(w http.ResponseWriter, r *http.Request) bool {
 	_, err := verifyJWT(r)
 	if err == nil {
 		return true

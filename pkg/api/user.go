@@ -1,6 +1,7 @@
 package api
 
 import (
+	"carbide-images-api/pkg/api/middleware"
 	"carbide-images-api/pkg/api/utils"
 	DB "carbide-images-api/pkg/database"
 	"carbide-images-api/pkg/objects"
@@ -31,7 +32,7 @@ func createUserHandler(db *sql.DB) http.Handler {
 		log.WithFields(log.Fields{
 			"user": *newUser.Username,
 		}).Info("user has been successfully created")
-		err = setAuthCookie(w, newUser)
+		err = middleware.Authenticate(w, newUser)
 		if err != nil {
 			log.Error(err)
 		}
@@ -91,7 +92,7 @@ func loginHandler(db *sql.DB) http.HandlerFunc {
 			log.Error(err)
 			return
 		}
-		err = setAuthCookie(w, userLoggingIn)
+		err = middleware.Authenticate(w, userLoggingIn)
 		if err != nil {
 			log.Error(err)
 		}
