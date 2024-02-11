@@ -33,8 +33,7 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-
-	Middleware(w, r)
+	GlobalMiddleware(w, r)
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 	switch head {
@@ -47,32 +46,66 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "releaseImageMapping":
 		serveReleaseImageMapping(w, r, h.DB)
 		return
-		// 	case "user":
-		// 		serveUser(w, r, h.DB)
-		// 		return
-		// 	case "login":
-		// 		serveLogin(w, r, h.DB)
-		// 		return
+	case "user":
+		serveUser(w, r, h.DB)
+		return
+	case "login":
+		serveLogin(w, r, h.DB)
+		return
 	default:
 		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 }
 
+func serveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	switch r.Method {
+	case http.MethodPost:
+		userPost(w, r, db)
+		return
+	case http.MethodDelete:
+		userDelete(w, r, db)
+		return
+	case http.MethodOptions:
+		return
+	default:
+		httpJSONError(w, fmt.Sprintf("Expected method POST, DELETE, or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	switch r.Method {
+	case http.MethodPost:
+		loginPost(w, r, db)
+		return
+	case http.MethodOptions:
+		return
+	default:
+		httpJSONError(w, fmt.Sprintf("Expected method POST or OPTIONS, got %v", r.Method), http.StatusMethodNotAllowed)
+		return
+	}
+}
+
 func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var product_name string
-	product_name, r.URL.Path = shiftPath(r.URL.Path)
+	if !userIsAuthenticated(w, r) {
+		log.Info("user is unauthorized\n")
+		respondWithJSON(w, "user is unauthorized")
+		return
+	}
+	var productName string
+	productName, r.URL.Path = shiftPath(r.URL.Path)
 	if r.URL.Path != "/" {
 		var head string
 		head, r.URL.Path = shiftPath(r.URL.Path)
 		switch head {
 		case "release":
-			serveRelease(w, r, db, product_name)
+			serveRelease(w, r, db, productName)
 		default:
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
 		return
 	}
-	if product_name == "" {
+	if productName == "" {
 		switch r.Method {
 		case http.MethodGet:
 			productGet(w, r, db)
@@ -89,13 +122,13 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	} else {
 		switch r.Method {
 		case http.MethodGet:
-			productGetByName(w, r, db, product_name)
+			productGetByName(w, r, db, productName)
 			return
 		case http.MethodPut:
-			productPutByName(w, r, db, product_name)
+			productPutByName(w, r, db, productName)
 			return
 		case http.MethodDelete:
-			productDeleteByName(w, r, db, product_name)
+			productDeleteByName(w, r, db, productName)
 			return
 		case http.MethodOptions:
 			return
@@ -106,7 +139,7 @@ func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 }
 
-func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, product_name string) {
+func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productName string) {
 	var release_name string
 	release_name, r.URL.Path = shiftPath(r.URL.Path)
 	if r.URL.Path != "/" {
@@ -121,10 +154,10 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, product_na
 	if release_name == "" {
 		switch r.Method {
 		case http.MethodGet:
-			releaseGet(w, r, db, product_name)
+			releaseGet(w, r, db, productName)
 			return
 		case http.MethodPost:
-			releasePost(w, r, db, product_name)
+			releasePost(w, r, db, productName)
 			return
 		case http.MethodOptions:
 			return
@@ -135,13 +168,13 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, product_na
 	} else {
 		switch r.Method {
 		case http.MethodGet:
-			releaseGetByName(w, r, db, product_name, release_name)
+			releaseGetByName(w, r, db, productName, release_name)
 			return
 		case http.MethodPut:
-			releasePutByName(w, r, db, product_name, release_name)
+			releasePutByName(w, r, db, productName, release_name)
 			return
 		case http.MethodDelete:
-			releaseDeleteByName(w, r, db, product_name, release_name)
+			releaseDeleteByName(w, r, db, productName, release_name)
 			return
 		case http.MethodOptions:
 			return
@@ -153,6 +186,11 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, product_na
 }
 
 func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	if !userIsAuthenticated(w, r) {
+		log.Info("user is unauthorized\n")
+		w.Write([]byte("user is unauthorized"))
+		return
+	}
 	var image_id_string string
 	image_id_string, r.URL.Path = shiftPath(r.URL.Path)
 	if image_id_string == "" {
@@ -170,14 +208,12 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			return
 		}
 	} else {
-
 		image_id_64, err := strconv.ParseInt(image_id_string, 10, 32)
 		if err != nil {
 			log.Error(err)
 			return
 		}
 		image_id := int32(image_id_64)
-
 		switch r.Method {
 		case http.MethodGet:
 			imageGet1(w, r, db, image_id)
@@ -198,6 +234,11 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	if !userIsAuthenticated(w, r) {
+		log.Info("user is unauthorized\n")
+		respondWithJSON(w, "user is unauthorized")
+		return
+	}
 	switch r.Method {
 	case http.MethodGet:
 		releaseImageMappingGet(w, r, db)

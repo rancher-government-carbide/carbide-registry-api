@@ -36,15 +36,13 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-mysql:
-  # name of database
-  name: "carbide"
-  # connection parameters
-  host: ""
-  port: 3306
-  username: ""
-  password: ""
-
+env:
+ DBNAME: "carbide"
+ DBUSER: ""
+ DBPASS: ""
+ DBHOST: ""
+ DBPORT: "3306"
+ JWTSECRET: ""
 
 service:
   type: ClusterIP

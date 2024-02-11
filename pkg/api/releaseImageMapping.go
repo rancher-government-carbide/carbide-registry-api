@@ -61,7 +61,7 @@ func releaseImageMappingPost(w http.ResponseWriter, r *http.Request, db *sql.DB)
 		"releaseImageMappingId": newReleaseImageMapping.Id,
 		"releaseId":             *newReleaseImageMapping.ReleaseId,
 		"imageId":               *newReleaseImageMapping.ImageId,
-	}).Info("Release_image_mapping has been successfully created")
+	}).Info("release_image_mapping has been successfully created")
 	newReleaseImageMappingJSON, err := json.Marshal(newReleaseImageMapping)
 	if err != nil {
 		httpJSONError(w, err.Error(), http.StatusInternalServerError)
@@ -97,7 +97,7 @@ func releaseImageMappingDelete(w http.ResponseWriter, r *http.Request, db *sql.D
 		"releaseImageMappingId": receivedReleaseImageMapping.Id,
 		"releaseId":             *receivedReleaseImageMapping.ReleaseId,
 		"imageId":               *receivedReleaseImageMapping.ImageId,
-	}).Info("Release_image_mapping has been successfully deleted")
+	}).Info("release_image_mapping has been successfully deleted")
 	w.WriteHeader(http.StatusNoContent)
 }
 

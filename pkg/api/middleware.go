@@ -1,30 +1,28 @@
 package api
 
 import (
-	// "carbide-images-api/cmd/api/objects"
+	"carbide-images-api/pkg/objects"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func Middleware(w http.ResponseWriter, r *http.Request) {
+func GlobalMiddleware(w http.ResponseWriter, r *http.Request) {
 	enableCors(w, r)
 }
 
-func loginMiddleware(w http.ResponseWriter, r *http.Request) {
+func userIsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 	_, err := verifyJWT(r)
 	if err == nil {
-		log.Info("User is already logged in\n")
-		w.Write([]byte("User is already logged in"))
-		return
+		return true
 	}
+	return false
 }
 
 func enableCors(w http.ResponseWriter, r *http.Request) {
@@ -36,34 +34,40 @@ func enableCors(w http.ResponseWriter, r *http.Request) {
 	(w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 }
 
+func setAuthCookie(w http.ResponseWriter, user objects.User) error {
+	token, err := generateJWT(user)
+	if err != nil {
+		return err
+	}
+	ck := http.Cookie{
+		Name:     "token",
+		Value:    token,
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	}
+	http.SetCookie(w, &ck)
+	return nil
+}
+
 // generate JWT from given user - returns err and token
-// func generateJWT(user objects.User) (string, error) {
-//
-// 	// pull secret from environment
-// 	secret := os.Getenv("JWTSECRET")
-//
-// 	// generate new jwt
-// 	token := jwt.New(jwt.SigningMethodHS256)
-// 	claims := token.Claims.(jwt.MapClaims)
-//
-// 	// add claims payload
-// 	claims["exp"] = time.Now().Add(time.Minute * 60).Unix()
-// 	claims["userid"] = fmt.Sprint(user.Id)
-//
-// 	// stringify token
-// 	tokenString, err := token.SignedString([]byte(secret))
-// 	if err != nil {
-// 		return "", err
-// 	}
-//
-// 	return tokenString, nil
-// }
+func generateJWT(user objects.User) (string, error) {
+	secret := os.Getenv("JWTSECRET")
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(time.Minute * 60).Unix()
+	claims["userid"] = fmt.Sprint(user.Id)
+	tokenString, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
+}
 
 // checks if http request is authorized/logged in - returns error and username string; empty if err
 func verifyJWT(r *http.Request) (int64, error) {
-
 	secret := os.Getenv("JWTSECRET")
-
 	// get token from cookie
 	c, err := r.Cookie("token")
 	if err != nil {
@@ -74,12 +78,10 @@ func verifyJWT(r *http.Request) (int64, error) {
 		// For any other type of error, return a bad request status
 		return 0, err
 	}
-
 	// Get the JWT string from the cookie
-	tokenstring := c.Value
-
+	tokenString := c.Value
 	// parse and check token validity
-	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return "", errors.New("invalid JWT")
 		}
@@ -88,25 +90,19 @@ func verifyJWT(r *http.Request) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-
-	// parse claims from token
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return 0, errors.New("failed to parse JWT claims")
 	}
-
-	// check if token is expired
 	exp := claims["exp"].(float64)
 	if int64(exp) < time.Now().Local().Unix() {
 		return 0, errors.New("token expired")
 	}
-
-	s_userid := claims["userid"].(string)
-	userid, err := strconv.ParseInt(s_userid, 10, 64)
+	userIdString := claims["userid"].(string)
+	userid, err := strconv.ParseInt(userIdString, 10, 64)
 	if err != nil {
 		return 0, errors.New("failed to parse userid")
 	}
-
 	return userid, nil
 }
 
@@ -118,22 +114,10 @@ type Response struct {
 	Message string
 }
 
-func respondFailure(w http.ResponseWriter) error {
-	var success Response
-	success.Message = "FAILURE"
-	json, err := json.Marshal(success)
-	if err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
-	return nil
-}
-
-func respondSuccess(w http.ResponseWriter) error {
-	var success Response
-	success.Message = "SUCCESS"
-	json, err := json.Marshal(success)
+func respondWithJSON(w http.ResponseWriter, message string) error {
+	var jsonResponse Response
+	jsonResponse.Message = message
+	json, err := json.Marshal(jsonResponse)
 	if err != nil {
 		return err
 	}
