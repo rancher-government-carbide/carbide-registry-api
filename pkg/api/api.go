@@ -1,6 +1,7 @@
 package api
 
 import (
+	"carbide-images-api/pkg/api/middleware"
 	"carbide-images-api/pkg/api/utils"
 	"database/sql"
 	"fmt"
@@ -8,40 +9,35 @@ import (
 	"path"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/justinas/alice"
 )
 
 func InitRouter(db *sql.DB) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle("POST /user", createUserHandler(db))
-	mux.Handle("DELETE /user", deleteUserHandler(db))
-	mux.Handle("POST /login", loginHandler(db))
-	mux.Handle("GET /product", getAllProductsHandler(db))
-	mux.Handle("POST /product", createProductHandler(db))
-	mux.Handle("GET /product/{name}", getProductHandler(db))
-	mux.Handle("PUT /product/{name}", updateProductHandler(db))
-	mux.Handle("DELETE /product/{name}", deleteProductHandler(db))
-	mux.Handle("GET /release", getAllReleasesHandler(db))
-	mux.Handle("POST /release", createReleaseHandler(db))
-	mux.Handle("GET /release/{name}", getReleaseHandler(db))
-	mux.Handle("DELETE /release/{name}", deleteReleaseHandler(db))
-	mux.Handle("GET /image", getAllImagesHandler(db))
-	mux.Handle("POST /image", createImageHandler(db))
-	mux.Handle("GET /image/{id}", getImageHandler(db))
-	mux.Handle("PUT /image/{id}", updateImageHandler(db))
-	mux.Handle("DELETE /image/{id}", deleteImageHandler(db))
-	mux.Handle("GET /releaseImageMapping", getAllReleaseImageMappingsHandler(db))
-	mux.Handle("POST /releaseImageMapping", createReleaseImageMappingHandler(db))
-	mux.Handle("DELETE /releaseImageMapping", deleteReleaseImageMappingHandler(db))
+	globalMiddleware := alice.New(middleware.CORS)
+	authMiddleware := alice.New(middleware.CORS, middleware.JWTAuth)
+	mux.Handle("POST /user", globalMiddleware.Then(createUserHandler(db)))
+	mux.Handle("DELETE /user", globalMiddleware.Then(deleteUserHandler(db)))
+	mux.Handle("POST /login", authMiddleware.Then(loginHandler(db)))
+	mux.Handle("GET /product", authMiddleware.Then(getAllProductsHandler(db)))
+	mux.Handle("POST /product", authMiddleware.Then(createProductHandler(db)))
+	mux.Handle("GET /product/{name}", authMiddleware.Then(getProductHandler(db)))
+	mux.Handle("PUT /product/{name}", authMiddleware.Then(updateProductHandler(db)))
+	mux.Handle("DELETE /product/{name}", authMiddleware.Then(deleteProductHandler(db)))
+	mux.Handle("GET /release", authMiddleware.Then(getAllReleasesHandler(db)))
+	mux.Handle("POST /release", authMiddleware.Then(createReleaseHandler(db)))
+	mux.Handle("GET /release/{name}", authMiddleware.Then(getReleaseHandler(db)))
+	mux.Handle("DELETE /release/{name}", authMiddleware.Then(deleteReleaseHandler(db)))
+	mux.Handle("GET /image", authMiddleware.Then(getAllImagesHandler(db)))
+	mux.Handle("POST /image", authMiddleware.Then(createImageHandler(db)))
+	mux.Handle("GET /image/{id}", authMiddleware.Then(getImageHandler(db)))
+	mux.Handle("PUT /image/{id}", authMiddleware.Then(updateImageHandler(db)))
+	mux.Handle("DELETE /image/{id}", authMiddleware.Then(deleteImageHandler(db)))
+	mux.Handle("GET /releaseImageMapping", authMiddleware.Then(getAllReleaseImageMappingsHandler(db)))
+	mux.Handle("POST /releaseImageMapping", authMiddleware.Then(createReleaseImageMappingHandler(db)))
+	mux.Handle("DELETE /releaseImageMapping", authMiddleware.Then(deleteReleaseImageMappingHandler(db)))
 
 	return mux
-}
-
-func sampleHandler(db *sql.DB) http.HandlerFunc {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-	}
-
-	return http.HandlerFunc(fn)
 }
 
 // shiftPath splits off the first component of p, which will be cleaned of
@@ -66,7 +62,6 @@ func (h Serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	GlobalMiddleware(w, r)
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 	switch head {
@@ -96,11 +91,6 @@ func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveProduct(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if !userIsAuthenticated(w, r) {
-		log.Info("user is unauthorized\n")
-		utils.RespondWithJSON(w, "user is unauthorized")
-		return
-	}
 	var productName string
 	productName, r.URL.Path = shiftPath(r.URL.Path)
 	if r.URL.Path != "/" {
@@ -163,11 +153,6 @@ func serveRelease(w http.ResponseWriter, r *http.Request, db *sql.DB, productNam
 }
 
 func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if !userIsAuthenticated(w, r) {
-		log.Info("user is unauthorized\n")
-		w.Write([]byte("user is unauthorized"))
-		return
-	}
 	var image_id_string string
 	image_id_string, r.URL.Path = shiftPath(r.URL.Path)
 	if image_id_string == "" {
@@ -190,11 +175,6 @@ func serveImage(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveReleaseImageMapping(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if !userIsAuthenticated(w, r) {
-		log.Info("user is unauthorized\n")
-		utils.RespondWithJSON(w, "user is unauthorized")
-		return
-	}
 	switch r.Method {
 	case http.MethodOptions:
 		return

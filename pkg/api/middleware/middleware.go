@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-func Global(next http.Handler) http.Handler {
+func CORS(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w, r)
 		next.ServeHTTP(w, r)
