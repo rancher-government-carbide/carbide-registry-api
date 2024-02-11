@@ -13,7 +13,7 @@ import (
 
 // returns imageID if a valid int32, or -1 if not
 func imageIDFromPath(w http.ResponseWriter, r *http.Request) int32 {
-	imageID64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+	imageID64, err := strconv.ParseInt(r.PathValue("imageID"), 10, 32)
 	if err != nil {
 		utils.HttpJSONError(w, "invalid image ID", http.StatusBadRequest)
 		log.Error(err)

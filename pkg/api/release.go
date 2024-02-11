@@ -11,7 +11,7 @@ import (
 )
 
 func releaseNameFromPath(r *http.Request) string {
-	releaseName := r.PathValue("name")
+	releaseName := r.PathValue("releaseName")
 	return releaseName
 }
 

@@ -11,7 +11,7 @@ import (
 )
 
 func productNameFromPath(r *http.Request) string {
-	productName := r.PathValue("name")
+	productName := r.PathValue("productName")
 	return productName
 }
 
