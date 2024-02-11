@@ -74,11 +74,6 @@ func serveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 func serveLogin(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if userIsAuthenticated(w, r) {
-		log.Info("user is already logged in\n")
-		respondWithJSON(w, "user is already logged in")
-		return
-	}
 	switch r.Method {
 	case http.MethodPost:
 		loginPost(w, r, db)
