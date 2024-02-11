@@ -4,18 +4,18 @@ import (
 	"net/http"
 )
 
-func Global(next http.HandlerFunc) http.HandlerFunc {
+func Global(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w, r)
-		next(w, r)
+		next.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(fn)
 }
 
-func JWTAuth(next http.HandlerFunc) http.HandlerFunc {
+func JWTAuth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		checkAuth(w, r)
-		next(w, r)
+		next.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(fn)
 }
