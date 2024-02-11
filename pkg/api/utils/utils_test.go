@@ -1,4 +1,4 @@
-package api
+package utils
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 
 func TestHTTPJSONError(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := httpJSONError(w, "Test Error Message", http.StatusBadRequest)
+		err := HttpJSONError(w, "Test Error Message", http.StatusBadRequest)
 		if err != nil {
 			t.Fatalf("httpJSONError failed: %v", err)
 		}

@@ -1,37 +1,34 @@
-package api
+package middleware
 
 import (
+	"carbide-images-api/pkg/api/utils"
 	"carbide-images-api/pkg/objects"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	// "github.com/rs/zerolog/log"
 )
 
-func GlobalMiddleware(w http.ResponseWriter, r *http.Request) {
-	enableCors(w, r)
+func checkAuth(w http.ResponseWriter, r *http.Request) {
+	if !authenticated(w, r) {
+		log.Info("user is unauthorized\n")
+		utils.RespondWithJSON(w, "user is unauthorized")
+		return
+	}
 }
 
-func userIsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
+func authenticated(w http.ResponseWriter, r *http.Request) bool {
 	_, err := verifyJWT(r)
 	if err == nil {
 		return true
 	}
 	return false
-}
-
-func enableCors(w http.ResponseWriter, r *http.Request) {
-	origin := r.Header.Get("Origin")
-	(w).Header().Set("Access-Control-Allow-Origin", origin)
-	(w).Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Charset, Accept-Language, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, Content-Length, Content-Type, Cookie, Date, Forwarded, Origin, User-Agent")
-	(w).Header().Set("Access-Control-Allow-Credentials", "true")
-	// TODO: Separate allowed methods (and maybe headers) by endpoint
-	(w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 }
 
 func setAuthCookie(w http.ResponseWriter, user objects.User) error {
@@ -108,38 +105,4 @@ func verifyJWT(r *http.Request) (int64, error) {
 
 func terminateJWT() {
 	// replace jwt with another that expires immediately
-}
-
-type Response struct {
-	Message string
-}
-
-func sendAsJSON(w http.ResponseWriter, object interface{}) error {
-	json, err := json.Marshal(object)
-	if err != nil {
-		httpJSONError(w, err.Error(), http.StatusBadRequest)
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
-	return nil
-}
-
-func respondWithJSON(w http.ResponseWriter, message string) error {
-	var jsonResponse Response
-	jsonResponse.Message = message
-	err := sendAsJSON(w, jsonResponse)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func decodeJSONObject(w http.ResponseWriter, r *http.Request, object interface{}) error {
-	err := json.NewDecoder(r.Body).Decode(object)
-	if err != nil {
-		httpJSONError(w, err.Error(), http.StatusBadRequest)
-		return err
-	}
-	return nil
 }
