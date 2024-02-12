@@ -46,7 +46,7 @@ func setAuthCookie(w http.ResponseWriter, user objects.User) error {
 	return nil
 }
 
-// generate JWT from given user - returns err and token
+// generate JWT for given user
 func generateJWT(user objects.User) (string, error) {
 	secret := os.Getenv("JWTSECRET")
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -60,28 +60,23 @@ func generateJWT(user objects.User) (string, error) {
 	return tokenString, nil
 }
 
-// checks if http request is authorized/logged in - returns error and username string; empty if err
 func verifyJWT(r *http.Request) (int64, error) {
 	secret := os.Getenv("JWTSECRET")
-	// get token from cookie
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			// If the cookie is not set, return an unauthorized status
 			return 0, err
 		}
-		// For any other type of error, return a bad request status
 		return 0, err
 	}
-	// Get the JWT string from the cookie
 	tokenString := c.Value
-	// parse and check token validity
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return "", errors.New("invalid JWT")
 		}
 		return []byte(secret), nil
-	})
+	}
+	token, err := jwt.Parse(tokenString, keyFunc)
 	if err != nil {
 		return 0, err
 	}
@@ -94,11 +89,11 @@ func verifyJWT(r *http.Request) (int64, error) {
 		return 0, errors.New("token expired")
 	}
 	userIdString := claims["userid"].(string)
-	userid, err := strconv.ParseInt(userIdString, 10, 64)
+	userID, err := strconv.ParseInt(userIdString, 10, 64)
 	if err != nil {
 		return 0, errors.New("failed to parse userid")
 	}
-	return userid, nil
+	return userID, nil
 }
 
 func terminateJWT() {
