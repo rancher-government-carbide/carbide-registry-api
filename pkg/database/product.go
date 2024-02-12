@@ -31,15 +31,14 @@ func GetProduct(db *sql.DB, name string) (objects.Product, error) {
 	return retrievedProduct, nil
 }
 
-func GetAllProducts(db *sql.DB) ([]objects.Product, error) {
+func GetAllProducts(db *sql.DB, page int, pageSize int) ([]objects.Product, error) {
 	var products []objects.Product
-	rows, err := db.Query(`SELECT * FROM product`)
+	rows, err := db.Query(`SELECT * FROM product LIMIT ? OFFSET ?`, pageSize, page)
 	if err != nil {
 		products = nil
 		return products, err
 	}
 	defer rows.Close()
-
 	for rows.Next() {
 		var product objects.Product
 		err = rows.Scan(&product.Id, &product.Name, &product.CreatedAt, &product.UpdatedAt)
@@ -53,7 +52,6 @@ func GetAllProducts(db *sql.DB) ([]objects.Product, error) {
 		products = nil
 		return products, err
 	}
-
 	return products, nil
 }
 

@@ -20,7 +20,9 @@ func productNameFromPath(r *http.Request) string {
 // Success Code: 200 OK
 func getAllProductsHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		products, err := DB.GetAllProducts(db)
+		page := utils.ParsePage(w, r)
+		pageSize := utils.ParsePageSize(w, r)
+		products, err := DB.GetAllProducts(db, page, pageSize)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
