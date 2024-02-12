@@ -61,14 +61,14 @@ func GetRelease(db *sql.DB, release objects.Release) (objects.Release, error) {
 	return retrievedRelease, nil
 }
 
-func GetAllReleasesforProduct(db *sql.DB, productName string, page int, pageSize int) ([]objects.Release, error) {
+func GetAllReleasesforProduct(db *sql.DB, productName string, limit int, offset int) ([]objects.Release, error) {
 	var releases []objects.Release
 	product, err := GetProduct(db, productName)
 	if err != nil {
 		releases = nil
 		return releases, err
 	}
-	rows, err := db.Query(`SELECT * FROM releases WHERE product_id = ? LIMIT ? OFFSET ?`, product.Id, pageSize, page)
+	rows, err := db.Query(`SELECT * FROM releases WHERE product_id = ? LIMIT ? OFFSET ?`, product.Id, limit, offset)
 	if err != nil {
 		releases = nil
 		return releases, err
@@ -90,9 +90,9 @@ func GetAllReleasesforProduct(db *sql.DB, productName string, page int, pageSize
 	return releases, nil
 }
 
-func GetAllReleases(db *sql.DB, page int, pageSize int) ([]objects.Release, error) {
+func GetAllReleases(db *sql.DB, limit int, offset int) ([]objects.Release, error) {
 	var releases []objects.Release
-	rows, err := db.Query(`SELECT * FROM releases LIMIT ? OFFSET ?`, pageSize, page)
+	rows, err := db.Query(`SELECT * FROM releases LIMIT ? OFFSET ?`, limit, offset)
 	if err != nil {
 		releases = nil
 		return releases, err
