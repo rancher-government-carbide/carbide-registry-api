@@ -23,6 +23,7 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	mux.Handle("GET /product/{productName}/release", authMiddleware.Then(getAllReleasesHandler(db)))
 	mux.Handle("POST /product/{productName}/release", authMiddleware.Then(createReleaseHandler(db)))
 	mux.Handle("GET /product/{productName}/release/{releaseName}", authMiddleware.Then(getReleaseHandler(db)))
+	mux.Handle("PUT /product/{productName}/release/{releaseName}", authMiddleware.Then(updateReleaseHandler(db)))
 	mux.Handle("DELETE /product/{proudctName}/release/{releaseName}", authMiddleware.Then(deleteReleaseHandler(db)))
 	mux.Handle("GET /image", authMiddleware.Then(getAllImagesHandler(db)))
 	mux.Handle("POST /image", authMiddleware.Then(createImageHandler(db)))
