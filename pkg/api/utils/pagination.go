@@ -8,28 +8,33 @@ import (
 )
 
 const MAX_PAGE_SIZE = 50
+const DEFAULT_PAGE = 1
+const DEFAULT_PAGE_SIZE = 10
 
-func ParsePage(w http.ResponseWriter, r *http.Request) (int, error) {
+func ParsePage(w http.ResponseWriter, r *http.Request) int {
 	pageString := r.URL.Query().Get("page")
 	page, err := strconv.Atoi(pageString)
 	if err != nil {
-		HttpJSONError(w, "invalid page", http.StatusBadRequest)
-		log.Error(err)
-		return -1, err
+		log.Debug(err)
+		page = DEFAULT_PAGE
+		return page
 	}
-	return page, nil
+	if page < 1 {
+		page = DEFAULT_PAGE
+	}
+	return page
 }
 
-func ParsePageSize(w http.ResponseWriter, r *http.Request) (int, error) {
+func ParsePageSize(w http.ResponseWriter, r *http.Request) int {
 	pageSizeString := r.URL.Query().Get("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeString)
 	if err != nil {
-		HttpJSONError(w, "invalid page size", http.StatusBadRequest)
-		log.Error(err)
-		return -1, err
+		log.Debug(err)
+		pageSize = DEFAULT_PAGE_SIZE
+		return pageSize
 	}
 	if pageSize > MAX_PAGE_SIZE {
-		pageSize = MAX_PAGE_SIZE
+		pageSize = DEFAULT_PAGE_SIZE
 	}
-	return pageSize, nil
+	return pageSize
 }
