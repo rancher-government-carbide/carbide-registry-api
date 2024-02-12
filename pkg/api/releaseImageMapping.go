@@ -15,7 +15,8 @@ import (
 // Success Code: 200 OK
 func getAllReleaseImageMappingsHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		allReleaseImageMappings, err := DB.GetAllReleaseImgMappings(db)
+		limit, offset := utils.GetLimitAndOffset(r)
+		allReleaseImageMappings, err := DB.GetAllReleaseImgMappings(db, limit, offset)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)

@@ -66,15 +66,14 @@ func AddReleaseImgMapping(db *sql.DB, newReleaseImgMapping objects.ReleaseImageM
 	return nil
 }
 
-func GetImgMappings(db *sql.DB, releaseId int32) ([]objects.ReleaseImageMapping, error) {
+func GetImgMappings(db *sql.DB, releaseId int32, limit int, offset int) ([]objects.ReleaseImageMapping, error) {
 	var releaseImgMappings []objects.ReleaseImageMapping
-	rows, err := db.Query(`SELECT * FROM release_image_mapping  WHERE release_id = ?`, releaseId)
+	rows, err := db.Query(`SELECT * FROM release_image_mapping WHERE release_id = ? LIMIT ? OFFSET ?`, releaseId, limit, offset)
 	if err != nil {
 		releaseImgMappings = nil
 		return releaseImgMappings, err
 	}
 	defer rows.Close()
-
 	for rows.Next() {
 		var releaseImgMapping objects.ReleaseImageMapping
 		err = rows.Scan(&releaseImgMapping.Id, &releaseImgMapping.ReleaseId, &releaseImgMapping.ImageId, &releaseImgMapping.CreatedAt, &releaseImgMapping.UpdatedAt)
@@ -88,19 +87,17 @@ func GetImgMappings(db *sql.DB, releaseId int32) ([]objects.ReleaseImageMapping,
 		releaseImgMappings = nil
 		return releaseImgMappings, err
 	}
-
 	return releaseImgMappings, nil
 }
 
-func GetReleaseMappings(db *sql.DB, imageId int32) ([]objects.ReleaseImageMapping, error) {
+func GetReleaseMappings(db *sql.DB, imageId int32, limit int, offset int) ([]objects.ReleaseImageMapping, error) {
 	var releaseImgMappings []objects.ReleaseImageMapping
-	rows, err := db.Query(`SELECT * FROM release_image_mapping WHERE image_id = ?`, imageId)
+	rows, err := db.Query(`SELECT * FROM release_image_mapping WHERE image_id = ? LIMIT ? OFFSET ?`, imageId, limit, offset)
 	if err != nil {
 		releaseImgMappings = nil
 		return releaseImgMappings, err
 	}
 	defer rows.Close()
-
 	for rows.Next() {
 		var releaseImgMapping objects.ReleaseImageMapping
 		err = rows.Scan(&releaseImgMapping.Id, &releaseImgMapping.ReleaseId, &releaseImgMapping.ImageId, &releaseImgMapping.CreatedAt, &releaseImgMapping.UpdatedAt)
@@ -114,13 +111,12 @@ func GetReleaseMappings(db *sql.DB, imageId int32) ([]objects.ReleaseImageMappin
 		releaseImgMappings = nil
 		return releaseImgMappings, err
 	}
-
 	return releaseImgMappings, nil
 }
 
-func GetAllReleaseImgMappings(db *sql.DB) ([]objects.ReleaseImageMapping, error) {
+func GetAllReleaseImgMappings(db *sql.DB, limit int, offset int) ([]objects.ReleaseImageMapping, error) {
 	var releaseImgMappings []objects.ReleaseImageMapping
-	rows, err := db.Query(`SELECT * FROM release_image_mapping`)
+	rows, err := db.Query(`SELECT * FROM release_image_mapping LIMIT ? OFFSET ?`, limit, offset)
 	if err != nil {
 		releaseImgMappings = nil
 		return releaseImgMappings, err

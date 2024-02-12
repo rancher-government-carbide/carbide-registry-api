@@ -31,9 +31,9 @@ func GetProduct(db *sql.DB, name string) (objects.Product, error) {
 	return retrievedProduct, nil
 }
 
-func GetAllProducts(db *sql.DB, page int, pageSize int) ([]objects.Product, error) {
+func GetAllProducts(db *sql.DB, limit int, offset int) ([]objects.Product, error) {
 	var products []objects.Product
-	rows, err := db.Query(`SELECT * FROM product LIMIT ? OFFSET ?`, pageSize, page)
+	rows, err := db.Query(`SELECT * FROM product LIMIT ? OFFSET ?`, limit, offset)
 	if err != nil {
 		products = nil
 		return products, err

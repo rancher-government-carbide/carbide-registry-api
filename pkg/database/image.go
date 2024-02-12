@@ -101,10 +101,9 @@ func GetImagebyName(db *sql.DB, imageName string) (objects.Image, error) {
 	return image, nil
 }
 
-func GetAllImages(db *sql.DB, page int, pageSize int) ([]objects.Image, error) {
+func GetAllImages(db *sql.DB, limit int, offset int) ([]objects.Image, error) {
 	var images []objects.Image
-	offset := (page - 1) * pageSize
-	rows, err := db.Query(`SELECT * FROM images LIMIT ? OFFSET ?`, pageSize, offset)
+	rows, err := db.Query(`SELECT * FROM images LIMIT ? OFFSET ?`, limit, offset)
 	if err != nil {
 		images = nil
 		return images, err
@@ -217,10 +216,10 @@ func GetImageWithoutReleases(db *sql.DB, imageId int32) (objects.Image, error) {
 	return retrievedImage, nil
 }
 
-func GetAllImagesforRelease(db *sql.DB, releaseId int32) ([]objects.Image, error) {
+func GetAllImagesforRelease(db *sql.DB, releaseId int32, limit int, offset int) ([]objects.Image, error) {
 	var fetchedImages []objects.Image
 	var releaseImageMappings []objects.ReleaseImageMapping
-	releaseImageMappings, err := GetImgMappings(db, releaseId)
+	releaseImageMappings, err := GetImgMappings(db, releaseId, limit, offset)
 	if err != nil {
 		return fetchedImages, err
 	}

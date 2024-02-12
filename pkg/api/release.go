@@ -22,7 +22,8 @@ func getAllReleasesHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var allReleases []objects.Release
 		productName := productNameFromPath(r)
-		allReleases, err := DB.GetAllReleasesforProduct(db, productName)
+		limit, offset := utils.GetLimitAndOffset(r)
+		allReleases, err := DB.GetAllReleasesforProduct(db, productName, limit, offset)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)

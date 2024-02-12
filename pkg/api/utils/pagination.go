@@ -11,7 +11,15 @@ const MAX_PAGE_SIZE = 50
 const DEFAULT_PAGE = 1
 const DEFAULT_PAGE_SIZE = 10
 
-func ParsePage(w http.ResponseWriter, r *http.Request) int {
+func GetLimitAndOffset(r *http.Request) (int, int) {
+	page := parsePage(r)
+	pageSize := parsePageSize(r)
+	offset := (page - 1) * pageSize
+	limit := pageSize
+	return limit, offset
+}
+
+func parsePage(r *http.Request) int {
 	pageString := r.URL.Query().Get("page")
 	page, err := strconv.Atoi(pageString)
 	if err != nil {
@@ -25,7 +33,7 @@ func ParsePage(w http.ResponseWriter, r *http.Request) int {
 	return page
 }
 
-func ParsePageSize(w http.ResponseWriter, r *http.Request) int {
+func parsePageSize(r *http.Request) int {
 	pageSizeString := r.URL.Query().Get("pageSize")
 	pageSize, err := strconv.Atoi(pageSizeString)
 	if err != nil {
