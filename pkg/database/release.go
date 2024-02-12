@@ -54,7 +54,7 @@ func GetRelease(db *sql.DB, release objects.Release) (objects.Release, error) {
 	if err != nil {
 		return retrievedRelease, fmt.Errorf(sqlError, err)
 	}
-	retrievedRelease.Images, err = GetAllImagesforRelease(db, retrievedRelease.Id)
+	retrievedRelease.Images, err = GetAllImagesforRelease(db, retrievedRelease.Id, 9999999, 0)
 	if err != nil {
 		return retrievedRelease, err
 	}
@@ -170,10 +170,10 @@ func GetReleaseWithoutImages(db *sql.DB, release_id int32) (objects.Release, err
 	return retrievedRelease, nil
 }
 
-func GetAllReleasesforImage(db *sql.DB, imageId int32) ([]objects.Release, error) {
+func GetAllReleasesforImage(db *sql.DB, imageId int32, limit int, offset int) ([]objects.Release, error) {
 	var fetchedReleases []objects.Release
 	var releaseImageMappings []objects.ReleaseImageMapping
-	releaseImageMappings, err := GetReleaseMappings(db, imageId)
+	releaseImageMappings, err := GetReleaseMappings(db, imageId, limit, offset)
 	if err != nil {
 		return fetchedReleases, err
 	}

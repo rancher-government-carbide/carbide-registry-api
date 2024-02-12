@@ -13,7 +13,7 @@ func GetImagebyId(db *sql.DB, imageId int32) (objects.Image, error) {
 	if err != nil {
 		return image, err
 	}
-	image.Releases, err = GetAllReleasesforImage(db, imageId)
+	image.Releases, err = GetAllReleasesforImage(db, imageId, 9999999, 0)
 	if err != nil {
 		return image, err
 	}
@@ -94,7 +94,7 @@ func GetImagebyName(db *sql.DB, imageName string) (objects.Image, error) {
 	if err != nil {
 		return image, err
 	}
-	image.Releases, err = GetAllReleasesforImage(db, image.Id)
+	image.Releases, err = GetAllReleasesforImage(db, image.Id, 9999999, 0)
 	if err != nil {
 		return image, err
 	}
