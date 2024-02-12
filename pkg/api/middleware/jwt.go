@@ -14,25 +14,19 @@ import (
 	// "github.com/rs/zerolog/log"
 )
 
-func checkAuth(w http.ResponseWriter, r *http.Request) {
-	if !authorized(w, r) {
-		// log.Info("user is unauthorized\n")
-		utils.RespondWithJSON(w, "user is unauthorized")
-		return
-	}
-}
-
 func Authenticate(w http.ResponseWriter, user objects.User) error {
 	err := setAuthCookie(w, user)
 	return err
 }
 
-func authorized(w http.ResponseWriter, r *http.Request) bool {
+func Authorized(w http.ResponseWriter, r *http.Request) bool {
 	_, err := verifyJWT(r)
-	if err == nil {
-		return true
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		utils.RespondWithJSON(w, "user is unauthorized")
+		return false
 	}
-	return false
+	return true
 }
 
 func setAuthCookie(w http.ResponseWriter, user objects.User) error {
