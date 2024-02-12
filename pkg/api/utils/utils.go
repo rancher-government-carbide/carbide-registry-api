@@ -43,10 +43,11 @@ type ErrorResponse struct {
 	ErrorMessage string `json:"error_message"`
 }
 
-func HttpJSONError(w http.ResponseWriter, error string, http_status_code int) error {
+func HttpJSONError(w http.ResponseWriter, error string, httpStatusCode int) error {
 	response := ErrorResponse{
 		ErrorMessage: error,
 	}
+	w.WriteHeader(httpStatusCode)
 	err := SendAsJSON(w, response)
 	if err != nil {
 		return err
