@@ -139,6 +139,7 @@ func updateImageHandler(db *sql.DB) http.Handler {
 		}
 		updatedImage, err = DB.GetImagebyId(db, updatedImage.Id)
 		if err != nil {
+			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
