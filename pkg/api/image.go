@@ -33,7 +33,15 @@ func imageIDFromPath(w http.ResponseWriter, r *http.Request) int32 {
 // Success Code: 200 OK
 func getAllImagesHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		images, err := DB.GetAllImages(db)
+		page, err := utils.ParsePage(w, r)
+		if err != nil {
+			return
+		}
+		pageSize, err := utils.ParsePageSize(w, r)
+		if err != nil {
+			return
+		}
+		images, err := DB.GetAllImages(db, page, pageSize)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)

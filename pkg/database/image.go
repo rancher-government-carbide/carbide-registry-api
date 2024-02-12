@@ -102,9 +102,10 @@ func GetImagebyName(db *sql.DB, imageName string) (objects.Image, error) {
 	return image, nil
 }
 
-func GetAllImages(db *sql.DB) ([]objects.Image, error) {
+func GetAllImages(db *sql.DB, page int, pageSize int) ([]objects.Image, error) {
 	var images []objects.Image
-	rows, err := db.Query(`SELECT * FROM images`)
+	offset := (page - 1) * pageSize
+	rows, err := db.Query(`SELECT * FROM images LIMIT ? OFFSET ?`, pageSize, offset)
 	if err != nil {
 		images = nil
 		return images, err
