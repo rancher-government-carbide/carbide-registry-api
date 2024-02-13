@@ -6,13 +6,12 @@ import (
 	"net/http"
 )
 
-func NewRouter(db *sql.DB) *http.ServeMux {
+func NewRouter(db *sql.DB) http.Handler {
 	mux := http.NewServeMux()
-	global := middleware.CORS
-	withAuth := middleware.ChainHandlers(global, middleware.JWTAuth)
-	mux.Handle("POST /user", global(createUserHandler(db)))
-	mux.Handle("DELETE /user", global(deleteUserHandler(db)))
-	mux.Handle("POST /login", global(loginHandler(db)))
+	withAuth := middleware.JWTAuth
+	mux.Handle("POST /user", createUserHandler(db))
+	mux.Handle("DELETE /user", deleteUserHandler(db))
+	mux.Handle("POST /login", loginHandler(db))
 	mux.Handle("GET /product", withAuth(getAllProductsHandler(db)))
 	mux.Handle("POST /product", withAuth(createProductHandler(db)))
 	mux.Handle("GET /product/{productName}", withAuth(getProductHandler(db)))
@@ -31,5 +30,7 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	mux.Handle("GET /releaseImageMapping", withAuth(getAllReleaseImageMappingsHandler(db)))
 	mux.Handle("POST /releaseImageMapping", withAuth(createReleaseImageMappingHandler(db)))
 	mux.Handle("DELETE /releaseImageMapping", withAuth(deleteReleaseImageMappingHandler(db)))
-	return mux
+	withCors := middleware.CORS
+	newMux := withCors(mux)
+	return newMux
 }
