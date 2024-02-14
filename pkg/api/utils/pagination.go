@@ -41,7 +41,7 @@ func parsePageSize(r *http.Request) int {
 		pageSize = DEFAULT_PAGE_SIZE
 		return pageSize
 	}
-	if pageSize > MAX_PAGE_SIZE {
+	if pageSize > MAX_PAGE_SIZE || pageSize < 1 {
 		pageSize = DEFAULT_PAGE_SIZE
 	}
 	return pageSize
