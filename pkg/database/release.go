@@ -54,30 +54,26 @@ func GetRelease(db *sql.DB, release objects.Release) (objects.Release, error) {
 	if err != nil {
 		return retrievedRelease, fmt.Errorf(sqlError, err)
 	}
-	retrievedRelease.Images, err = GetAllImagesforRelease(db, retrievedRelease.Id)
+	retrievedRelease.Images, err = GetAllImagesforRelease(db, retrievedRelease.Id, 9999999, 0)
 	if err != nil {
 		return retrievedRelease, err
 	}
 	return retrievedRelease, nil
 }
 
-func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]objects.Release, error) {
-
+func GetAllReleasesforProduct(db *sql.DB, productName string, limit int, offset int) ([]objects.Release, error) {
 	var releases []objects.Release
-	product, err := GetProduct(db, product_name)
+	product, err := GetProduct(db, productName)
 	if err != nil {
 		releases = nil
 		return releases, err
 	}
-	product_id := product.Id
-
-	rows, err := db.Query(`SELECT * FROM releases WHERE product_id = ?`, product_id)
+	rows, err := db.Query(`SELECT * FROM releases WHERE product_id = ? LIMIT ? OFFSET ?`, product.Id, limit, offset)
 	if err != nil {
 		releases = nil
 		return releases, err
 	}
 	defer rows.Close()
-
 	for rows.Next() {
 		var release objects.Release
 		err = rows.Scan(&release.Id, &release.ProductId, &release.Name, &release.TarballLink, &release.CreatedAt, &release.UpdatedAt)
@@ -91,19 +87,17 @@ func GetAllReleasesforProduct(db *sql.DB, product_name string) ([]objects.Releas
 		releases = nil
 		return releases, err
 	}
-
 	return releases, nil
 }
 
-func GetAllReleases(db *sql.DB) ([]objects.Release, error) {
+func GetAllReleases(db *sql.DB, limit int, offset int) ([]objects.Release, error) {
 	var releases []objects.Release
-	rows, err := db.Query(`SELECT * FROM releases`)
+	rows, err := db.Query(`SELECT * FROM releases LIMIT ? OFFSET ?`, limit, offset)
 	if err != nil {
 		releases = nil
 		return releases, err
 	}
 	defer rows.Close()
-
 	for rows.Next() {
 		var release objects.Release
 		err = rows.Scan(&release.Id, &release.ProductId, &release.Name, &release.TarballLink, &release.CreatedAt, &release.UpdatedAt)
@@ -117,7 +111,6 @@ func GetAllReleases(db *sql.DB) ([]objects.Release, error) {
 		releases = nil
 		return releases, err
 	}
-
 	return releases, nil
 }
 
@@ -175,19 +168,15 @@ func GetReleaseWithoutImages(db *sql.DB, release_id int32) (objects.Release, err
 		return retrievedRelease, fmt.Errorf(sqlError, err)
 	}
 	return retrievedRelease, nil
-
 }
 
-func GetAllReleasesforImage(db *sql.DB, imageId int32) ([]objects.Release, error) {
-
+func GetAllReleasesforImage(db *sql.DB, imageId int32, limit int, offset int) ([]objects.Release, error) {
 	var fetchedReleases []objects.Release
-
 	var releaseImageMappings []objects.ReleaseImageMapping
-	releaseImageMappings, err := GetReleaseMappings(db, imageId)
+	releaseImageMappings, err := GetReleaseMappings(db, imageId, limit, offset)
 	if err != nil {
 		return fetchedReleases, err
 	}
-
 	for _, releaseImageMapping := range releaseImageMappings {
 		release, err := GetReleaseWithoutImages(db, *releaseImageMapping.ReleaseId)
 		if err != nil {
@@ -195,6 +184,5 @@ func GetAllReleasesforImage(db *sql.DB, imageId int32) ([]objects.Release, error
 		}
 		fetchedReleases = append(fetchedReleases, release)
 	}
-
 	return fetchedReleases, nil
 }

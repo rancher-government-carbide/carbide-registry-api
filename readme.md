@@ -39,9 +39,6 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
 | JWTSECRET             | JWT privatekey            | false                     |
 
 ## REST Schema
->prefix: https://\<backendurl\>/api/v0/
-
-#### Functional Endpoints:
 - /user
     - POST: accepts username and password
         - creates user account
@@ -77,8 +74,19 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
     - GET: get all releaseimgmappings
     - POST: create new releaseimgmapping
     - DELETE: delete releaseimgmapping
+#### Query Parameters
+The following query parameters are supported:
+| Parameter           | Description            | Default  | Max  |
+| ------------------- | -----------            | -------- | ---  |
+| page                | page of data to return | 1        | N/A  |
+| pageSize            | size of data page      | 10       | 50   |
+> Pagination is supported on all endpoints that return multiple objects. These are: `/product`, `/product/{product_name}/release`, `/image`, `/releaseImageMapping`
 
-#### Possible Additions:
+## Misc TODO notes
+- move entire DB schema to this api (for portability)
+- product names should be unique
+
+#### Possible Endpoint Additions:
 - /product/{product_name}/release/{release_name}/image
     - GET: get all images for product release
     - POST: create new image for product release
@@ -94,6 +102,3 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
     - PUT: update release
     - DELETE: delete release
 
-## Misc notes
-- move entire DB schema to this api (for portability)
-- product names should be unique
