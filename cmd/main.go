@@ -49,5 +49,5 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Info("Starting server on port " + port + "...")
-	log.Fatal(http.ListenAndServe(":"+port, &api.Serve{DB: db}))
+	log.Fatal(http.ListenAndServe(":"+port, api.NewRouter(db)))
 }

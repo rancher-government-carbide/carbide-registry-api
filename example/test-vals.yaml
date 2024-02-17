@@ -2,13 +2,13 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 3
+replicaCount: 2
 
 image:
   repository: clanktron/carbide-images-api
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "52bea16d66aa04fe6d02c539dcc0c65805e62909"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -16,25 +16,24 @@ fullnameOverride: ""
 
 podAnnotations: {}
 
-podSecurityContext:
-  runAsUser: 1001
-  runAsGroup: 2000
-  fsGroup: 2000
+podSecurityContext: {}
+  # fsGroup: 2000
 
-securityContext:
-  capabilities:
-    drop:
-    - ALL
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
 
 env:
  DBNAME: "carbide"
- DBUSER: ""
- DBPASS: ""
- DBHOST: ""
+ DBUSER: "root"
+ DBPASS: "carbidecarbidecarbide"
+ DBHOST: "carbide.carbide-images-api.svc.cluster.local"
  DBPORT: "3306"
- JWTSECRET: ""
+ JWTSECRET: "oogabooga"
 
 service:
   type: ClusterIP

@@ -6,6 +6,9 @@
 *.dylib
 carbide-images-api*
 
+# Release assets
+dist/*
+
 # Backup files
 *.bak
 
