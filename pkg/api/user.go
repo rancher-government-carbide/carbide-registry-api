@@ -11,6 +11,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func authCheckHandler() http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		middleware.Authorized(w, r)
+		return
+	}
+	return http.HandlerFunc(fn)
+}
+
 func createUserHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var newUser objects.User
