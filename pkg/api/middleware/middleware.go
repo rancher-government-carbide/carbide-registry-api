@@ -13,6 +13,13 @@ func ChainHandlers(handlers ...func(http.Handler) http.Handler) func(http.Handle
     }
 }
 
+func Healthcheck() http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		return
+	}
+	return http.HandlerFunc(fn)
+}
+
 func CORS(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w, r)
