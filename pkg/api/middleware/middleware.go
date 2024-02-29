@@ -16,7 +16,11 @@ func ChainHandlers(handlers ...func(http.Handler) http.Handler) func(http.Handle
 func CORS(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w, r)
-		next.ServeHTTP(w, r)
+		if r.Method == "OPTIONS" {
+			return
+		} else {
+			next.ServeHTTP(w, r)
+		}
 	}
 	return http.HandlerFunc(fn)
 }
