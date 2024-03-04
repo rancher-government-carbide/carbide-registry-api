@@ -9,6 +9,7 @@ import (
 func NewRouter(db *sql.DB) http.Handler {
 	mux := http.NewServeMux()
 	withAuth := middleware.JWTAuth
+	mux.Handle("GET /healthcheck", middleware.Healthcheck())
 	mux.Handle("POST /user", createUserHandler(db))
 	mux.Handle("DELETE /user", deleteUserHandler(db))
 	mux.Handle("GET /auth", authCheckHandler())
