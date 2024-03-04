@@ -11,7 +11,8 @@ func NewRouter(db *sql.DB) http.Handler {
 	withAuth := middleware.JWTAuth
 	mux.Handle("POST /user", createUserHandler(db))
 	mux.Handle("DELETE /user", deleteUserHandler(db))
-	mux.Handle("POST /login", loginHandler(db))
+	mux.Handle("GET /auth", authCheckHandler())
+	mux.Handle("POST /auth", loginHandler(db))
 	mux.Handle("GET /product", withAuth(getAllProductsHandler(db)))
 	mux.Handle("POST /product", withAuth(createProductHandler(db)))
 	mux.Handle("GET /product/{productName}", withAuth(getProductHandler(db)))
