@@ -15,11 +15,8 @@ var PRIVATEKEY *rsa.PrivateKey
 
 func init() {
 	var GOLICENSE_KEY = os.Getenv("GOLICENSE_KEY")
-	keyData, err := os.ReadFile(GOLICENSE_KEY)
-	if err != nil {
-		panic(err)
-	}
-	PRIVATEKEY, err = certificate.PEMToPrivateKey(keyData)
+	var err error
+	PRIVATEKEY, err = certificate.PEMToPrivateKey([]byte(GOLICENSE_KEY))
 	if err != nil {
 		panic(err)
 	}
