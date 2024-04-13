@@ -26,7 +26,7 @@ func createCarbideAccountHandler(clientFactory *armcontainerregistry.ClientFacto
 			return
 		}
 		expiry := time.Now().Add(time.Hour * 24 * time.Duration(*newLicense.DaysTillExpiry))
-		*newLicense.License = license.CreateCarbideLicense(*newLicense.NodeCount, license.GOLICENSE_KEY, *newLicense.CustomerID, expiry)
+		*newLicense.License, err = license.CreateCarbideLicense(*newLicense.NodeCount, *newLicense.CustomerID, expiry)
 		*newLicense.Token, *newLicense.Password, err = azureToken.CreateCarbideAccount(clientFactory, *newLicense.CustomerID, expiry)
 		if err != nil {
 			log.Error(err)

@@ -1,15 +1,45 @@
 package license
 
 import (
+	"crypto/rsa"
 	"os"
 	"time"
+
+	"github.com/ebauman/golicense/pkg/certificate"
+	golicense "github.com/ebauman/golicense/pkg/license"
+	"github.com/ebauman/golicense/pkg/types"
+	"github.com/google/uuid"
 )
 
-var GOLICENSE_KEY = os.Getenv("GOLICENSE_KEY")
+var PRIVATEKEY *rsa.PrivateKey
 
-func CreateCarbideLicense(nodeCount int, golicenseKey string, customerID string, expirationDate time.Time) string {
-	license := "xyz.xyz.xyz=="
-	// TODO: use from rancherfederal/golicense as dep
-	// golicense create license --grant "compliance.cattle.io/stigatron=$NODE_COUNT" --key "$GOLICENSE_KEY" --licensee "$CUSTOMER_ID" --not-after "$EXPIRATION_DATE"
-	return license
+func init() {
+	var GOLICENSE_KEY = os.Getenv("GOLICENSE_KEY")
+	keyData, err := os.ReadFile(GOLICENSE_KEY)
+	if err != nil {
+		panic(err)
+	}
+	PRIVATEKEY, err = certificate.PEMToPrivateKey(keyData)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func CreateCarbideLicense(nodeCount int, customerID string, expirationDate time.Time) (string, error) {
+	grants := map[string]int{
+		"compliance.cattle.io/stigatron": nodeCount,
+	}
+	var notBeforeTime time.Time
+	license := types.License{
+		Id:        uuid.NewString(),
+		Grants:    grants,
+		NotAfter:  expirationDate,
+		NotBefore: notBeforeTime,
+		Licensee:  customerID,
+	}
+	keystring, err := golicense.GenerateLicenseKey(PRIVATEKEY, license)
+	if err != nil {
+		return "", err
+	}
+	return keystring, nil
 }

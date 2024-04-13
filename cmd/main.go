@@ -2,6 +2,7 @@ package main
 
 import (
 	"carbide-images-api/pkg/api"
+	"carbide-images-api/pkg/azureToken"
 	"carbide-images-api/pkg/database"
 	"net/http"
 	"os"
@@ -49,7 +50,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	clientFactory, err := api.NewAzureClients()
+	clientFactory, err := azureToken.NewAzureClients()
 	log.Info("Starting server on port " + port + "...")
 	log.Fatal(http.ListenAndServe(":"+port, api.NewRouter(db, clientFactory)))
 }
