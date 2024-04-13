@@ -4,12 +4,15 @@ import (
 	"carbide-images-api/pkg/api/middleware"
 	"database/sql"
 	"net/http"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
-func NewRouter(db *sql.DB) http.Handler {
+func NewRouter(db *sql.DB, clientFactory *armcontainerregistry.ClientFactory) http.Handler {
 	mux := http.NewServeMux()
 	withAuth := middleware.JWTAuth
 	mux.Handle("GET /healthcheck", middleware.Healthcheck())
+	mux.Handle("POST /carbide/license", createCarbideAccountHandler(clientFactory))
 	mux.Handle("POST /user", createUserHandler(db))
 	mux.Handle("DELETE /user", deleteUserHandler(db))
 	mux.Handle("GET /auth", authCheckHandler())

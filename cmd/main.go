@@ -48,6 +48,8 @@ func main() {
 		log.Error("Database schema init failed, exiting...")
 		log.Fatal(err)
 	}
+
+	clientFactory, err := api.NewAzureClients()
 	log.Info("Starting server on port " + port + "...")
-	log.Fatal(http.ListenAndServe(":"+port, api.NewRouter(db)))
+	log.Fatal(http.ListenAndServe(":"+port, api.NewRouter(db, clientFactory)))
 }
