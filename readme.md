@@ -28,15 +28,20 @@ If you don't have access to a mysql database available for testing, you can depl
 You can either follow their instructions or run `./bin/mysql.sh` which should deploy their operator and create a test cluster.
 
 ## Environment
-| Variable              | Description               | Optional                  |
-| --------------------  | -----------               | --------                  |
-| DBUSER                | MySQL/MariaDB username    | false                     |
-| DBPASS                | MySQL/MariaDB password    | false                     |
-| DBHOST                | MySQL/MariaDB host        | false                     |
-| DBPORT                | MySQL/MariaDB port        | false                     |
-| DBNAME                | MySQL/MariaDB name        | false                     |
-| PORT                  | port to serve api         | true (defaults to 5000)   |
-| JWTSECRET             | JWT privatekey            | false                     |
+| Variable              | Description                       | Optional                  |
+| --------------------  | -----------                       | --------                  |
+| DBUSER                | MySQL/MariaDB username            | false                     |
+| DBPASS                | MySQL/MariaDB password            | false                     |
+| DBHOST                | MySQL/MariaDB host                | false                     |
+| DBPORT                | MySQL/MariaDB port                | false                     |
+| DBNAME                | MySQL/MariaDB name                | false                     |
+| PORT                  | port to serve api                 | true (defaults to 5000)   |
+| JWTSECRET             | JWT privatekey                    | false                     |
+| GOLICENSE_KEY         | License privatekey                | false                     |
+| AZURE_SUBSCRIPTION_ID | Azure subscription id             | false                     |
+| AZURE_TENANT_ID       | Azure tenant id                   | false                     |
+| AZURE_CLIENT_ID       | Azure client id/app id            | false                     |
+| AZURE_CLIENT_SECRET   | Azure client secret/password      | false                     |
 
 ## REST Schema
 - /user
