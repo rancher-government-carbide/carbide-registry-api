@@ -2,7 +2,7 @@ package api
 
 import (
 	"carbide-images-api/pkg/api/utils"
-	"carbide-images-api/pkg/azureToken"
+	"carbide-images-api/pkg/azure"
 	"carbide-images-api/pkg/license"
 	"carbide-images-api/pkg/objects"
 	"net/http"
@@ -27,7 +27,7 @@ func createCarbideAccountHandler(clientFactory *armcontainerregistry.ClientFacto
 		}
 		expiry := time.Now().Add(time.Hour * 24 * time.Duration(*newLicense.DaysTillExpiry))
 		*newLicense.License, err = license.CreateCarbideLicense(*newLicense.NodeCount, *newLicense.CustomerID, expiry)
-		*newLicense.Token, *newLicense.Password, err = azureToken.CreateCarbideAccount(clientFactory, *newLicense.CustomerID, expiry)
+		*newLicense.Token, newLicense.Password, err = azure.CreateCarbideAccount(clientFactory, *newLicense.CustomerID, expiry)
 		if err != nil {
 			log.Error(err)
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
