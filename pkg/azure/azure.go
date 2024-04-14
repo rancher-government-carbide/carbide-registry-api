@@ -12,26 +12,33 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var AZURE_SUBSCRIPTION_ID = os.Getenv("AZURE_SUBSCRIPTION_ID")
-
 const REGISTRY_NAME = "rgcrprod"
 const SCOPE_MAP = "_repositories_pull"
-const SCOPE_MAP_ID = "/subscriptions/b82373d0-f87a-45fd-b466-f1f97e68fcd1/resourceGroups/rg-rgcr-prod-usgovvirginia/providers/Microsoft.ContainerRegistry/registries/rgcrprod/scopeMaps/" + SCOPE_MAP
 const RESOURCE_GROUP = "rg-rgcr-prod-usgovvirginia"
 
+var AZURE_SUBSCRIPTION_ID = os.Getenv("AZURE_SUBSCRIPTION_ID")
+var SCOPE_MAP_ID = "/subscriptions/" + AZURE_SUBSCRIPTION_ID + "/resourceGroups/" + RESOURCE_GROUP + "/providers/Microsoft.ContainerRegistry/registries/rgcrprod/scopeMaps/" + SCOPE_MAP
+
 func NewAzureClients() (*armcontainerregistry.ClientFactory, error) {
-	options := azidentity.DefaultAzureCredentialOptions{
+	credentialOptions := azidentity.DefaultAzureCredentialOptions{
 		ClientOptions: azcore.ClientOptions{
 			Cloud: cloud.AzureGovernment,
 		},
 	}
-	cred, err := azidentity.NewDefaultAzureCredential(&options)
+	clientOptions := policy.ClientOptions{
+		ClientOptions: azcore.ClientOptions{
+			Cloud: cloud.AzureGovernment,
+		},
+	}
+	cred, err := azidentity.NewDefaultAzureCredential(&credentialOptions)
 	if err != nil {
 		log.Fatalf("failed to obtain a credential: %v", err)
+		return &armcontainerregistry.ClientFactory{}, err
 	}
-	clientFactory, err := armcontainerregistry.NewClientFactory(AZURE_SUBSCRIPTION_ID, cred, nil)
+	clientFactory, err := armcontainerregistry.NewClientFactory(AZURE_SUBSCRIPTION_ID, cred, &clientOptions)
 	if err != nil {
 		log.Fatalf("failed to create clientFactory: %v", err)
+		return &armcontainerregistry.ClientFactory{}, err
 	}
 	return clientFactory, err
 }
