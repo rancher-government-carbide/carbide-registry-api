@@ -26,3 +26,4 @@ go.work
 
 # Sql files
 *.sql
+.env
