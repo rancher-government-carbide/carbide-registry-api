@@ -22,21 +22,23 @@ func init() {
 	}
 }
 
-func CreateCarbideLicense(nodeCount int, customerID string, expirationDate time.Time) (string, error) {
+func CreateCarbideLicense(nodeCount int, customerID string, expirationDate time.Time) (*string, error) {
 	grants := map[string]int{
 		"compliance.cattle.io/stigatron": nodeCount,
 	}
+	metadata := map[string]string{}
 	var notBeforeTime time.Time
 	license := types.License{
 		Id:        uuid.NewString(),
 		Grants:    grants,
+		Metadata:  metadata,
 		NotAfter:  expirationDate,
 		NotBefore: notBeforeTime,
 		Licensee:  customerID,
 	}
 	keystring, err := golicense.GenerateLicenseKey(PRIVATEKEY, license)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return keystring, nil
+	return &keystring, nil
 }

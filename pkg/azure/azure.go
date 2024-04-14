@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
@@ -43,22 +44,21 @@ func NewAzureClients() (*armcontainerregistry.ClientFactory, error) {
 	return clientFactory, err
 }
 
-func CreateCarbideAccount(clientFactory *armcontainerregistry.ClientFactory, customerID string, expiry time.Time) (armcontainerregistry.Token, *armcontainerregistry.TokenPassword, error) {
+func CreateCarbideAccount(clientFactory *armcontainerregistry.ClientFactory, customerID string, expiry time.Time) (*armcontainerregistry.Token, *armcontainerregistry.TokenPassword, error) {
 	tokensclient := clientFactory.NewTokensClient()
 	token, err := createNewReadToken(tokensclient, customerID)
 	if err != nil {
-		return armcontainerregistry.Token{}, &armcontainerregistry.TokenPassword{}, err
+		return &armcontainerregistry.Token{}, &armcontainerregistry.TokenPassword{}, err
 	}
 	registriesClient := clientFactory.NewRegistriesClient()
-	password, err := createNewPassword(registriesClient, customerID, expiry)
+	password, err := createNewPassword(registriesClient, *token.ID, expiry)
 	if err != nil {
-		return armcontainerregistry.Token{}, &armcontainerregistry.TokenPassword{}, err
+		return &armcontainerregistry.Token{}, &armcontainerregistry.TokenPassword{}, err
 	}
 	return token, password, nil
 }
 
-// returns token ID
-func createNewReadToken(tokensClient *armcontainerregistry.TokensClient, customerID string) (armcontainerregistry.Token, error) {
+func createNewReadToken(tokensClient *armcontainerregistry.TokensClient, customerID string) (*armcontainerregistry.Token, error) {
 	tokenName := customerID + "-read-token"
 	scopeMapID := SCOPE_MAP_ID
 	tokenStatus := armcontainerregistry.TokenStatusEnabled
@@ -71,12 +71,14 @@ func createNewReadToken(tokensClient *armcontainerregistry.TokensClient, custome
 	}, nil)
 	if err != nil {
 		log.Errorf("failed to finish the request: %v", err)
+		return &armcontainerregistry.Token{}, err
 	}
 	res, err := poller.PollUntilDone(ctx, nil)
 	if err != nil {
 		log.Errorf("failed to pull the result: %v", err)
+		return &armcontainerregistry.Token{}, err
 	}
-	return res.Token, nil
+	return &res.Token, nil
 }
 
 // assumes customer token already exists in registry
@@ -90,10 +92,12 @@ func createNewPassword(registriesClient *armcontainerregistry.RegistriesClient, 
 	}, nil)
 	if err != nil {
 		log.Errorf("failed to finish the request: %v", err)
+		return &armcontainerregistry.TokenPassword{}, err
 	}
 	res, err := poller.PollUntilDone(ctx, nil)
 	if err != nil {
 		log.Errorf("failed to pull the result: %v", err)
+		return &armcontainerregistry.TokenPassword{}, err
 	}
 	return res.Passwords[0], nil
 }
