@@ -44,7 +44,6 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
 | AZURE_CLIENT_SECRET   | Azure client secret/password      | false                     |
 
 ## REST Schema
-> \* requires user to be authorized
 - /user
     - POST: accepts username and password
         - creates user account
@@ -54,33 +53,32 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
 - /login
     - POST: should accept username and password
         - returns authentication cookie/token (stored in browser by frontend)  
-- /carbide/license
-    - *POST: provision new carbide license and pull token
+>The following require the user to have provide their auth token via cookie:
 - /product
     - GET: get all products
-    - *POST: create new product
+    - POST: create new product
 - /product/{product_name}
     - GET: get product
-    - *PUT: update product
-    - *DELETE: delete product
+    - PUT: update product
+    - DELETE: delete product
 - /product/{product_name}/release
     - GET: get all releases for product
-    - *POST: create new release for product
+    - POST: create new release for product
 - /product/{product_name}/release/{release_name}
     - GET: get release
-    - *PUT: update release
-    - *DELETE: delete release
+    - PUT: update release
+    - DELETE: delete release
 - /image
     - GET: get all images
-    - *POST: create new image
+    - POST: create new image
 - /image/{image_id}
     - GET: get image
-    - *PUT: update image
-    - *DELETE: delete image
+    - PUT: update image
+    - DELETE: delete image
 - /releaseImageMapping
     - GET: get all releaseimgmappings
-    - *POST: create new releaseimgmapping
-    - *DELETE: delete releaseimgmapping
+    - POST: create new releaseimgmapping
+    - DELETE: delete releaseimgmapping
 #### Query Parameters
 The following query parameters are supported:
 | Parameter           | Description            | Default  | Max  |
