@@ -54,6 +54,8 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
     - POST: should accept username and password
         - returns authentication cookie/token (stored in browser by frontend)  
 >The following require the user to have provide their auth token via cookie:
+- /carbide/license
+    - POST: provision new license and pull token
 - /product
     - GET: get all products
     - POST: create new product
