@@ -1,10 +1,10 @@
 package api
 
 import (
-	"carbide-images-api/pkg/api/utils"
-	"carbide-images-api/pkg/azure"
-	"carbide-images-api/pkg/license"
-	"carbide-images-api/pkg/objects"
+	"carbide-registry-api/pkg/api/utils"
+	"carbide-registry-api/pkg/azure"
+	"carbide-registry-api/pkg/license"
+	"carbide-registry-api/pkg/objects"
 	"net/http"
 	"time"
 

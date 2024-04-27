@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"carbide-images-api/pkg/azure"
-	"carbide-images-api/pkg/objects"
+	"carbide-registry-api/pkg/azure"
+	"carbide-registry-api/pkg/objects"
 )
 
 func TestCreateCarbideAccountHandler(t *testing.T) {

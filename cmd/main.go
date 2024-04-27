@@ -1,9 +1,9 @@
 package main
 
 import (
-	"carbide-images-api/pkg/api"
-	"carbide-images-api/pkg/azure"
-	"carbide-images-api/pkg/database"
+	"carbide-registry-api/pkg/api"
+	"carbide-registry-api/pkg/azure"
+	"carbide-registry-api/pkg/database"
 	"net/http"
 	"os"
 
