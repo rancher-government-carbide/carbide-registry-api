@@ -7,9 +7,9 @@ import (
 	"testing"
 )
 
-func TestHTTPJSONError(t *testing.T) {
+func TestRespondError(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := HttpJSONError(w, "Test Error Message", http.StatusBadRequest)
+		err := RespondError(w, "Test Error Message", http.StatusBadRequest)
 		if err != nil {
 			t.Fatalf("httpJSONError failed: %v", err)
 		}

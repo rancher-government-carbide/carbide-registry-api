@@ -18,25 +18,25 @@ func createCarbideAccountHandler(clientFactory *armcontainerregistry.ClientFacto
 		err := utils.DecodeJSONObject(w, r, &newLicense)
 		if err != nil {
 			log.Error(err)
-			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
+			utils.RespondError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		if newLicense.CustomerID == nil || newLicense.DaysTillExpiry == nil || newLicense.NodeCount == nil {
 			log.Errorf("missing customerID, daysTillExpiry, or nodeCount")
-			utils.HttpJSONError(w, "missing customerID, daysTillExpiry, or nodeCount", http.StatusBadRequest)
+			utils.RespondError(w, "missing customerID, daysTillExpiry, or nodeCount", http.StatusBadRequest)
 			return
 		}
 		expiry := time.Now().Add(time.Hour * 24 * time.Duration(*newLicense.DaysTillExpiry))
 		newLicense.License, err = license.CreateCarbideLicense(*newLicense.NodeCount, *newLicense.CustomerID, expiry)
 		if err != nil {
 			log.Error(err)
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		newLicense.Token, newLicense.Password, err = azure.CreateCarbideAccount(clientFactory, *newLicense.CustomerID, expiry)
 		if err != nil {
 			log.Error(err)
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)

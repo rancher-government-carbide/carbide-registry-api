@@ -23,7 +23,7 @@ func getAllProductsHandler(db *sql.DB) http.Handler {
 		limit, offset := utils.GetLimitAndOffset(r)
 		products, err := DB.GetAllProducts(db, limit, offset)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -50,13 +50,13 @@ func createProductHandler(db *sql.DB) http.Handler {
 		}
 		err = DB.AddProduct(db, createdProduct)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		createdProduct, err = DB.GetProduct(db, *createdProduct.Name)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -82,7 +82,7 @@ func getProductHandler(db *sql.DB) http.Handler {
 		productName := productNameFromPath(r)
 		retrievedProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
+			utils.RespondError(w, err.Error(), http.StatusBadRequest)
 			log.Error(err)
 			return
 		}
@@ -139,7 +139,7 @@ func deleteProductHandler(db *sql.DB) http.Handler {
 		productName := productNameFromPath(r)
 		err := DB.DeleteProduct(db, productName)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}

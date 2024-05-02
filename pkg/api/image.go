@@ -15,12 +15,12 @@ import (
 func imageIDFromPath(w http.ResponseWriter, r *http.Request) int32 {
 	imageID64, err := strconv.ParseInt(r.PathValue("imageID"), 10, 32)
 	if err != nil {
-		utils.HttpJSONError(w, "invalid image ID", http.StatusBadRequest)
+		utils.RespondError(w, "invalid image ID", http.StatusBadRequest)
 		log.Error(err)
 		return -1
 	}
 	if imageID64 < -2147483648 || imageID64 > 2147483647 {
-		utils.HttpJSONError(w, "invalid image ID", http.StatusBadRequest)
+		utils.RespondError(w, "invalid image ID", http.StatusBadRequest)
 		log.Error(err)
 		return -1
 	}
@@ -36,7 +36,7 @@ func getAllImagesHandler(db *sql.DB) http.Handler {
 		limit, offset := utils.GetLimitAndOffset(r)
 		images, err := DB.GetAllImages(db, limit, offset)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -61,19 +61,19 @@ func createImageHandler(db *sql.DB) http.Handler {
 			log.Error(err)
 		}
 		if newImage.ImageName == nil {
-			utils.HttpJSONError(w, "missing image name", http.StatusBadRequest)
+			utils.RespondError(w, "missing image name", http.StatusBadRequest)
 			log.Error(err)
 			return
 		}
 		err = DB.AddImage(db, newImage)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		createdImage, err := DB.GetImagebyName(db, *newImage.ImageName)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -101,7 +101,7 @@ func getImageHandler(db *sql.DB) http.Handler {
 		}
 		image, err := DB.GetImagebyId(db, imageID)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -134,13 +134,13 @@ func updateImageHandler(db *sql.DB) http.Handler {
 		updatedImage.Id = imageID
 		err = DB.UpdateImage(db, updatedImage)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		updatedImage, err = DB.GetImagebyId(db, updatedImage.Id)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -168,7 +168,7 @@ func deleteImageHandler(db *sql.DB) http.Handler {
 		}
 		err := DB.DeleteImage(db, imageID)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
