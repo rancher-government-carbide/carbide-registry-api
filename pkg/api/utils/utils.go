@@ -20,7 +20,7 @@ func SendAsJSON(w http.ResponseWriter, object interface{}) error {
 	return nil
 }
 
-func RespondWithJSON(w http.ResponseWriter, message string) error {
+func Respond(w http.ResponseWriter, message string) error {
 	var jsonResponse Response
 	jsonResponse.Message = message
 	err := SendAsJSON(w, jsonResponse)

@@ -44,7 +44,7 @@ func createUserHandler(db *sql.DB) http.Handler {
 		if err != nil {
 			log.Error(err)
 		}
-		utils.RespondWithJSON(w, "user has been created")
+		utils.Respond(w, "user has been created")
 		return
 	}
 	return http.HandlerFunc(fn)
@@ -76,7 +76,7 @@ func deleteUserHandler(db *sql.DB) http.HandlerFunc {
 		log.WithFields(log.Fields{
 			"user": *userToDelete.Username,
 		}).Info("user has been successfully deleted")
-		utils.RespondWithJSON(w, "user has been deleted")
+		utils.Respond(w, "user has been deleted")
 		return
 	}
 	return http.HandlerFunc(fn)
@@ -107,7 +107,7 @@ func loginHandler(db *sql.DB) http.HandlerFunc {
 		log.WithFields(log.Fields{
 			"user": *userLoggingIn.Username,
 		}).Info("user logged in successfully")
-		utils.RespondWithJSON(w, "login successfull")
+		utils.Respond(w, "login successfull")
 	}
 	return http.HandlerFunc(fn)
 }
