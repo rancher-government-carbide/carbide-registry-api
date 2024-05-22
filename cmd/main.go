@@ -2,6 +2,7 @@ package main
 
 import (
 	"carbide-images-api/pkg/api"
+	"carbide-images-api/pkg/azure"
 	"carbide-images-api/pkg/database"
 	"net/http"
 	"os"
@@ -48,6 +49,8 @@ func main() {
 		log.Error("Database schema init failed, exiting...")
 		log.Fatal(err)
 	}
+
+	clientFactory, err := azure.NewAzureClients()
 	log.Info("Starting server on port " + port + "...")
-	log.Fatal(http.ListenAndServe(":"+port, api.NewRouter(db)))
+	log.Fatal(http.ListenAndServe(":"+port, api.NewRouter(db, clientFactory)))
 }
