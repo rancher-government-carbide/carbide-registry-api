@@ -9,7 +9,7 @@ import (
 
 func authCheckHandler() http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		if !middleware.Authorized(w, r) {
+		if !middleware.Authorized(r) {
 			utils.HttpJSONError(w, "unauthorized", http.StatusUnauthorized)
 		}
 		return

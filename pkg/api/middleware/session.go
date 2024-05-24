@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"carbide-images-api/pkg/api/utils"
-	"carbide-images-api/pkg/objects"
+	"carbide-registry-api/pkg/api/utils"
+	"carbide-registry-api/pkg/objects"
 	"crypto/rsa"
 	"errors"
 	"net/http"
@@ -15,7 +15,7 @@ import (
 
 func SessionAuth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		if !Authorized(w, r) {
+		if !Authorized(r) {
 			utils.HttpJSONError(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}

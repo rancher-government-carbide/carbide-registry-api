@@ -8,6 +8,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry v1.2.0
 	github.com/ebauman/golicense v0.0.2
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/rs/zerolog v1.32.0

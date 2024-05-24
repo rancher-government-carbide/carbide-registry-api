@@ -1,7 +1,7 @@
 package objects
 
 import (
-	"carbide-images-api/pkg/license"
+	"carbide-registry-api/pkg/license"
 	"crypto/rsa"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
