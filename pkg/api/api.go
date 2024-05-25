@@ -2,19 +2,20 @@ package api
 
 import (
 	"carbide-registry-api/pkg/api/middleware"
+	"crypto/rsa"
 	"database/sql"
 	"net/http"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
-func NewRouter(db *sql.DB, clientFactory *armcontainerregistry.ClientFactory) http.Handler {
+func NewRouter(db *sql.DB, clientFactory *armcontainerregistry.ClientFactory, licensePrivkey *rsa.PrivateKey, licensePubkeys []*rsa.PublicKey) http.Handler {
 	mux := http.NewServeMux()
 	withAuth := middleware.SessionAuth
 	mux.Handle("GET /healthcheck", middleware.Healthcheck())
-	mux.Handle("POST /carbide/license", withAuth(createCarbideAccountHandler(clientFactory)))
+	mux.Handle("POST /carbide/license", withAuth(createCarbideAccountHandler(clientFactory, licensePrivkey)))
 	mux.Handle("GET /auth", authCheckHandler())
-	mux.Handle("POST /auth", loginHandler())
+	mux.Handle("POST /auth", loginHandler(licensePubkeys))
 	mux.Handle("GET /product", withAuth(getAllProductsHandler(db)))
 	mux.Handle("POST /product", withAuth(createProductHandler(db)))
 	mux.Handle("GET /product/{productName}", withAuth(getProductHandler(db)))

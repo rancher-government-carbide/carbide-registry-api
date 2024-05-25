@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"carbide-registry-api/pkg/api/utils"
-	"carbide-registry-api/pkg/objects"
+	license "carbide-registry-api/pkg/license"
 	"crypto/rsa"
 	"errors"
 	"net/http"
@@ -24,8 +24,8 @@ func SessionAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func Login(w http.ResponseWriter, license objects.CarbideLicense) error {
-	userID, err := Authenticate(license)
+func Login(w http.ResponseWriter, license license.CarbideLicense, licensePubkeys []*rsa.PublicKey) error {
+	userID, err := Authenticate(license, licensePubkeys)
 	if err != nil {
 		utils.HttpJSONError(w, err.Error(), http.StatusUnauthorized)
 		return err
@@ -40,15 +40,14 @@ func Login(w http.ResponseWriter, license objects.CarbideLicense) error {
 }
 
 // parse customerID from a valid license
-func Authenticate(license objects.CarbideLicense) (string, error) {
-	var pubkeys []*rsa.PublicKey
-	// get these ^
-	if !license.Valid(pubkeys) {
-		err := errors.New("invalid carbide license - authentication failed")
+func Authenticate(carbideLicense license.CarbideLicense, licensePubkeys []*rsa.PublicKey) (string, error) {
+	customerID, err := license.ParseCarbideLicense(*carbideLicense.License, licensePubkeys)
+	if err != nil {
 		log.Error().Err(err)
 		return "", err
 	}
-	return *license.CustomerID, nil
+	log.Info().Str("customerID", *customerID).Msg("license parsed successfully")
+	return *customerID, nil
 }
 
 // provide user with session token
@@ -66,7 +65,7 @@ func Authorize(w http.ResponseWriter, userID string) error {
 func Authorized(r *http.Request) bool {
 	token, err := parseSessionToken(r)
 	if err != nil {
-		log.Info().Msg("failed to parse session token")
+		log.Error().Msg("failed to parse session token")
 		return false
 	}
 	err = verifySessionToken(token)
