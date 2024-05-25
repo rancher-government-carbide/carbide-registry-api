@@ -17,24 +17,28 @@ fullnameOverride: ""
 podAnnotations: {}
 
 podSecurityContext:
-  runAsUser: 1001
-  runAsGroup: 2000
-  fsGroup: 2000
+ fsGroup: 2000
 
 securityContext:
-  capabilities:
-    drop:
-    - ALL
-  readOnlyRootFilesystem: true
+  runAsUser: 1001
   runAsNonRoot: true
+  capabilities:
+   drop:
+   - ALL
+  readOnlyRootFilesystem: true
 
 env:
- DBNAME: "carbide"
- DBUSER: ""
- DBPASS: ""
- DBHOST: ""
- DBPORT: "3306"
- JWTSECRET: ""
+  DBNAME: carbide
+  DBUSER: ""
+  DBPASS: ""
+  DBHOST: ""
+  DBPORT: "3306"
+  JWTSECRET: ""
+  GOLICENSE_KEY: ""
+  AZURE_TENANT_ID: ""
+  AZURE_CLIENT_ID: ""
+  AZURE_CLIENT_SECRET: ""
+  AZURE_SUBSCRIPTION_ID: ""
 
 service:
   type: ClusterIP

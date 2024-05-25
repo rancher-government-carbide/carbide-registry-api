@@ -27,6 +27,22 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: init-db
+          image: mysql:8.4
+          command:
+              - /bin/bash
+              - -c
+              - |
+                mysql -u"$DBUSER" -p"$DBPASS" -h"$DBHOST" -e "CREATE DATABASE IF NOT EXISTS \`$DBNAME\`;"
+          securityContext:
+            capabilities:
+             drop:
+             - ALL
+            readOnlyRootFilesystem: false
+          envFrom:
+          - configMapRef:
+              name: {{ include "carbide-registry-api.fullname" . }}-env
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
