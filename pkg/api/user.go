@@ -29,7 +29,7 @@ func createUserHandler(db *sql.DB) http.Handler {
 		}
 		if err := DB.AddUser(db, newUser); err != nil {
 			log.Error(err)
-			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
+			utils.RespondError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		newUser, err = DB.GetUser(db, *newUser.Username)
@@ -44,7 +44,7 @@ func createUserHandler(db *sql.DB) http.Handler {
 		if err != nil {
 			log.Error(err)
 		}
-		utils.RespondWithJSON(w, "user has been created")
+		utils.Respond(w, "user has been created")
 		return
 	}
 	return http.HandlerFunc(fn)
@@ -63,7 +63,7 @@ func deleteUserHandler(db *sql.DB) http.HandlerFunc {
 				"username": *userToDelete.Username,
 				"error":    err,
 			}).Error("invalid username or password")
-			utils.HttpJSONError(w, "invalid username or password", http.StatusBadRequest)
+			utils.RespondError(w, "invalid username or password", http.StatusBadRequest)
 			return
 		}
 		if err := DB.DeleteUserByUsername(db, *userToDelete.Username); err != nil {
@@ -76,7 +76,7 @@ func deleteUserHandler(db *sql.DB) http.HandlerFunc {
 		log.WithFields(log.Fields{
 			"user": *userToDelete.Username,
 		}).Info("user has been successfully deleted")
-		utils.RespondWithJSON(w, "user has been deleted")
+		utils.Respond(w, "user has been deleted")
 		return
 	}
 	return http.HandlerFunc(fn)
@@ -92,7 +92,7 @@ func loginHandler(db *sql.DB) http.HandlerFunc {
 		}
 		if err := DB.VerifyUser(db, userLoggingIn); err != nil {
 			log.Error(err)
-			utils.HttpJSONError(w, "invalid username or password", http.StatusUnauthorized)
+			utils.RespondError(w, "invalid username or password", http.StatusUnauthorized)
 			return
 		}
 		userLoggingIn, err = DB.GetUser(db, *userLoggingIn.Username)
@@ -107,7 +107,7 @@ func loginHandler(db *sql.DB) http.HandlerFunc {
 		log.WithFields(log.Fields{
 			"user": *userLoggingIn.Username,
 		}).Info("user logged in successfully")
-		utils.RespondWithJSON(w, "login successfull")
+		utils.Respond(w, "login successfull")
 	}
 	return http.HandlerFunc(fn)
 }

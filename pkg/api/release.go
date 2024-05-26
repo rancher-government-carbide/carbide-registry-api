@@ -25,7 +25,7 @@ func getAllReleasesHandler(db *sql.DB) http.Handler {
 		limit, offset := utils.GetLimitAndOffset(r)
 		allReleases, err := DB.GetAllReleasesforProduct(db, productName, limit, offset)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -53,20 +53,20 @@ func createReleaseHandler(db *sql.DB) http.Handler {
 		}
 		parentProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		newRelease.ProductId = &parentProduct.Id
 		err = DB.AddRelease(db, newRelease)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		createdRelease, err := DB.GetRelease(db, newRelease)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -94,14 +94,14 @@ func getReleaseHandler(db *sql.DB) http.Handler {
 		retrievedRelease.Name = &releaseName
 		parentProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		retrievedRelease.ProductId = &parentProduct.Id
 		retrievedRelease, err = DB.GetRelease(db, retrievedRelease)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -131,20 +131,20 @@ func updateReleaseHandler(db *sql.DB) http.Handler {
 		receivedRelease.Name = &releaseName
 		parentProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		receivedRelease.ProductId = &parentProduct.Id
 		err = DB.UpdateRelease(db, receivedRelease)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		updatedRelease, err := DB.GetRelease(db, receivedRelease)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -172,14 +172,14 @@ func deleteReleaseHandler(db *sql.DB) http.Handler {
 		releaseToDelete.Name = &releaseName
 		parentProduct, err := DB.GetProduct(db, productName)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		releaseToDelete.ProductId = &parentProduct.Id
 		err = DB.DeleteRelease(db, releaseToDelete)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}

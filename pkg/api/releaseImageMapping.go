@@ -18,7 +18,7 @@ func getAllReleaseImageMappingsHandler(db *sql.DB) http.Handler {
 		limit, offset := utils.GetLimitAndOffset(r)
 		allReleaseImageMappings, err := DB.GetAllReleaseImgMappings(db, limit, offset)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -45,13 +45,13 @@ func createReleaseImageMappingHandler(db *sql.DB) http.Handler {
 		}
 		err = DB.AddReleaseImgMapping(db, receivedReleaseImageMapping)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
 		newReleaseImageMapping, err := DB.GetReleaseImageMapping(db, receivedReleaseImageMapping)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
@@ -78,13 +78,13 @@ func deleteReleaseImageMappingHandler(db *sql.DB) http.Handler {
 		var receivedReleaseImageMapping objects.ReleaseImageMapping
 		err := utils.DecodeJSONObject(w, r, &receivedReleaseImageMapping)
 		if err != nil || receivedReleaseImageMapping.ReleaseId == nil || receivedReleaseImageMapping.ImageId == nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
+			utils.RespondError(w, err.Error(), http.StatusBadRequest)
 			log.Error(err)
 			return
 		}
 		err = DB.DeleteReleaseImgMapping(db, receivedReleaseImageMapping)
 		if err != nil {
-			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}

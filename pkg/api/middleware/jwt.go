@@ -23,7 +23,7 @@ func Authorized(w http.ResponseWriter, r *http.Request) bool {
 	_, err := verifyJWT(r)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		utils.RespondWithJSON(w, "user is unauthorized")
+		utils.Respond(w, "user is unauthorized")
 		return false
 	}
 	return true
