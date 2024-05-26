@@ -9,7 +9,7 @@ func AddProduct(db *sql.DB, newProduct objects.Product) error {
 	if err := newProduct.Validate(); err != nil {
 		return err
 	}
-	_, err := db.Exec("INSERT INTO product (name) VALUES (?)", *newProduct.Name)
+	_, err := db.Exec("INSERT INTO product (name, logo_url) VALUES (?, ?)", *newProduct.Name, *newProduct.LogoUrl)
 	if err != nil {
 		return err
 	}
