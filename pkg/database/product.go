@@ -49,9 +49,9 @@ func GetAllProducts(db *sql.DB, limit int, offset int) ([]objects.Product, error
 	return products, nil
 }
 
-func UpdateProduct(db *sql.DB, newName string, name string) error {
+func UpdateProduct(db *sql.DB, newProduct objects.Product, name string) error {
 	if _, err := db.Exec(
-		`UPDATE product SET name = ? WHERE name = ?`, newName, name); err != nil {
+		`UPDATE product SET name = ?, logo_url ? WHERE name = ?`, *newProduct.Name, *newProduct.LogoUrl, name); err != nil {
 		return err
 	}
 	return nil

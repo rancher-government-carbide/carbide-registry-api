@@ -108,7 +108,7 @@ func updateProductHandler(db *sql.DB) http.Handler {
 			log.Error(err)
 			return
 		}
-		err = DB.UpdateProduct(db, *updatedProduct.Name, productName)
+		err = DB.UpdateProduct(db, updatedProduct, productName)
 		if err != nil {
 			log.Error(err)
 			return
