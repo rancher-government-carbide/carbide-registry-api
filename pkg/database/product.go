@@ -18,7 +18,7 @@ func AddProduct(db *sql.DB, newProduct objects.Product) error {
 
 func GetProduct(db *sql.DB, name string) (objects.Product, error) {
 	var retrievedProduct objects.Product
-	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrievedProduct.Id, &retrievedProduct.Name, &retrievedProduct.CreatedAt, &retrievedProduct.UpdatedAt)
+	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrievedProduct.Id, &retrievedProduct.Name, &retrievedProduct.LogoUrl, &retrievedProduct.CreatedAt, &retrievedProduct.UpdatedAt)
 	if err != nil {
 		return retrievedProduct, err
 	}
@@ -35,7 +35,7 @@ func GetAllProducts(db *sql.DB, limit int, offset int) ([]objects.Product, error
 	defer rows.Close()
 	for rows.Next() {
 		var product objects.Product
-		err = rows.Scan(&product.Id, &product.Name, &product.CreatedAt, &product.UpdatedAt)
+		err = rows.Scan(&product.Id, &product.Name, &product.LogoUrl, &product.CreatedAt, &product.UpdatedAt)
 		if err != nil {
 			products = nil
 			return products, err
