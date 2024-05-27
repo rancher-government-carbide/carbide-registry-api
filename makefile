@@ -1,6 +1,7 @@
 BINARY_NAME=carbide-registry-api
 ORG=rancher-government-carbide
-CONTAINER_TAG=$(ORG)/$(BINARY_NAME)
+CONTAINERNAME=$(ORG)/$(BINARY_NAME)
+CONTAINERTAG=dev
 CONTAINERFILE=./Containerfile
 COMPILATION_SRC=./cmd
 SRC=./cmd
@@ -10,7 +11,7 @@ GOENV=CGO_ENABLED=0
 BUILD_FLAGS=-ldflags="-X 'main.Version=$(VERSION)'"
 TEST_FLAGS=-v -cover -count 1
 ARTIFACT_DIR=dist
-CLI=nerdctl
+CLI=sudo nerdctl
 
 $(BINARY_NAME):
 	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOENV) go build $(BUILD_FLAGS) -o $(BINARY_NAME) $(SRC) ## Build binary (default)
@@ -27,16 +28,16 @@ lint: ## Run go vet and staticcheck against codebase
 	go vet ./...
 	staticcheck ./...
 
-.PHONY: container
-container: clean ## Build the container
-	$(CLI) build -t $(CONTAINER_TAG):$(COMMIT_HASH) .
+.PHONY: build-container
+build-container: clean ## Build the container
+	$(CLI) build -t $(CONTAINERNAME):$(CONTAINERTAG) .
 	
-.PHONY: container-push
-container-push: ## Push the container
-	$(CLI) push $(CONTAINER_TAG):$(COMMIT_HASH)
+.PHONY: push-container
+push-container: ## Push the container
+	$(CLI) push $(CONTAINERNAME):$(CONTAINERTAG)
 
 .PHONY: container-push
-container-build-and-push: container container-push ## Build and push the container
+build-and-push-container: build-container push-container ## Build and push the container
 
 .PHONY: dependencies
 dependencies: ## Run go mod and go get to ensure dependencies
