@@ -63,7 +63,7 @@ func GetRelease(db *sql.DB, release objects.Release) (objects.Release, error) {
 
 func GetAllReleasesforProduct(db *sql.DB, productName string, limit int, offset int) ([]objects.Release, error) {
 	var releases []objects.Release
-	product, err := GetProduct(db, productName)
+	product, err := GetProductByName(db, productName)
 	if err != nil {
 		releases = nil
 		return releases, err

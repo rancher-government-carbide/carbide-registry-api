@@ -6,18 +6,27 @@ import (
 	"errors"
 )
 
-func AddProduct(db *sql.DB, newProduct objects.Product) error {
+func AddProduct(db *sql.DB, newProduct objects.Product) (int64, error) {
 	if err := newProduct.Validate(); err != nil {
-		return err
+		return -1, err
 	}
-	_, err := db.Exec("INSERT INTO product (name, logo_url) VALUES (?, ?)", *newProduct.Name, *newProduct.LogoUrl)
+	result, err := db.Exec("INSERT INTO product (name, logo_url) VALUES (?, ?)", *newProduct.Name, *newProduct.LogoUrl)
 	if err != nil {
-		return err
+		return -1, err
 	}
-	return nil
+	return result.LastInsertId()
 }
 
-func GetProduct(db *sql.DB, name string) (objects.Product, error) {
+func GetProduct(db *sql.DB, id int32) (objects.Product, error) {
+	var retrievedProduct objects.Product
+	err := db.QueryRow(`SELECT * FROM product WHERE id = ?`, id).Scan(&retrievedProduct.Id, &retrievedProduct.Name, &retrievedProduct.LogoUrl, &retrievedProduct.CreatedAt, &retrievedProduct.UpdatedAt)
+	if err != nil {
+		return retrievedProduct, err
+	}
+	return retrievedProduct, nil
+}
+
+func GetProductByName(db *sql.DB, name string) (objects.Product, error) {
 	var retrievedProduct objects.Product
 	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrievedProduct.Id, &retrievedProduct.Name, &retrievedProduct.LogoUrl, &retrievedProduct.CreatedAt, &retrievedProduct.UpdatedAt)
 	if err != nil {
@@ -50,27 +59,29 @@ func GetAllProducts(db *sql.DB, limit int, offset int) ([]objects.Product, error
 	return products, nil
 }
 
-func UpdateProduct(db *sql.DB, newProduct objects.Product, name string) error {
+func UpdateProduct(db *sql.DB, newProduct objects.Product, name string) (int64, error) {
 	if newProduct.Name == nil && newProduct.LogoUrl == nil {
-		return errors.New("invalid product")
+		return -1, errors.New("invalid product")
 	}
 	if newProduct.Name == nil {
-		if _, err := db.Exec(
-			`UPDATE product SET logo_url = ? WHERE name = ?`, *newProduct.LogoUrl, name); err != nil {
-			return err
+		result, err := db.Exec(`UPDATE product SET logo_url = ? WHERE name = ?`, *newProduct.LogoUrl, name)
+		if err != nil {
+			return -1, err
 		}
+		return result.LastInsertId()
 	}
 	if newProduct.LogoUrl == nil {
-		if _, err := db.Exec(
-			`UPDATE product SET name = ? WHERE name = ?`, *newProduct.Name, name); err != nil {
-			return err
+		result, err := db.Exec(`UPDATE product SET name = ? WHERE name = ?`, *newProduct.Name, name)
+		if err != nil {
+			return -1, err
 		}
+		return result.LastInsertId()
 	}
-	if _, err := db.Exec(
-		`UPDATE product SET name = ?, logo_url = ? WHERE name = ?`, *newProduct.Name, *newProduct.LogoUrl, name); err != nil {
-		return err
+	result, err := db.Exec(`UPDATE product SET name = ?, logo_url = ? WHERE name = ?`, *newProduct.Name, *newProduct.LogoUrl, name)
+	if err != nil {
+		return -1, err
 	}
-	return nil
+	return result.LastInsertId()
 }
 
 func DeleteProduct(db *sql.DB, name string) error {
