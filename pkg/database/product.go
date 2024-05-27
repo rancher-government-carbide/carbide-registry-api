@@ -3,6 +3,7 @@ package database
 import (
 	"carbide-registry-api/pkg/objects"
 	"database/sql"
+	"errors"
 )
 
 func AddProduct(db *sql.DB, newProduct objects.Product) error {
@@ -50,8 +51,23 @@ func GetAllProducts(db *sql.DB, limit int, offset int) ([]objects.Product, error
 }
 
 func UpdateProduct(db *sql.DB, newProduct objects.Product, name string) error {
+	if newProduct.Name == nil && newProduct.LogoUrl == nil {
+		return errors.New("invalid product")
+	}
+	if newProduct.Name == nil {
+		if _, err := db.Exec(
+			`UPDATE product SET logo_url = ? WHERE name = ?`, *newProduct.LogoUrl, name); err != nil {
+			return err
+		}
+	}
+	if newProduct.LogoUrl == nil {
+		if _, err := db.Exec(
+			`UPDATE product SET name = ? WHERE name = ?`, *newProduct.Name, name); err != nil {
+			return err
+		}
+	}
 	if _, err := db.Exec(
-		`UPDATE product SET name = ?, logo_url ? WHERE name = ?`, *newProduct.Name, *newProduct.LogoUrl, name); err != nil {
+		`UPDATE product SET name = ?, logo_url = ? WHERE name = ?`, *newProduct.Name, *newProduct.LogoUrl, name); err != nil {
 		return err
 	}
 	return nil
