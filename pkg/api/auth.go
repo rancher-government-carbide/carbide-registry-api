@@ -30,3 +30,10 @@ func loginHandler(licensePubkeys []*rsa.PublicKey) http.HandlerFunc {
 	}
 	return http.HandlerFunc(fn)
 }
+
+func logoutHandler() http.HandlerFunc {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		middleware.Logout(w)
+	}
+	return http.HandlerFunc(fn)
+}

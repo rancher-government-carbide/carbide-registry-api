@@ -4,27 +4,31 @@ import (
 	"carbide-registry-api/pkg/objects"
 	"database/sql"
 	"errors"
-	"fmt"
 )
 
-func AddProduct(db *sql.DB, newProduct objects.Product) error {
-	const requiredField string = "missing field \"%s\" required when creating a new product"
-	const sqlError string = "error creating new product: %w"
-	if newProduct.Name == nil {
-		errMsg := fmt.Sprintf(requiredField, "Name")
-		return errors.New(errMsg)
-	} else {
-		_, err := db.Exec("INSERT INTO product (name) VALUES (?)", *newProduct.Name)
-		if err != nil {
-			return fmt.Errorf(sqlError, err)
-		}
+func AddProduct(db *sql.DB, newProduct objects.Product) (int64, error) {
+	if err := newProduct.Validate(); err != nil {
+		return -1, err
 	}
-	return nil
+	result, err := db.Exec("INSERT INTO product (name, logo_url) VALUES (?, ?)", *newProduct.Name, *newProduct.LogoUrl)
+	if err != nil {
+		return -1, err
+	}
+	return result.LastInsertId()
 }
 
-func GetProduct(db *sql.DB, name string) (objects.Product, error) {
+func GetProduct(db *sql.DB, id int32) (objects.Product, error) {
 	var retrievedProduct objects.Product
-	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrievedProduct.Id, &retrievedProduct.Name, &retrievedProduct.CreatedAt, &retrievedProduct.UpdatedAt)
+	err := db.QueryRow(`SELECT * FROM product WHERE id = ?`, id).Scan(&retrievedProduct.Id, &retrievedProduct.Name, &retrievedProduct.LogoUrl, &retrievedProduct.CreatedAt, &retrievedProduct.UpdatedAt)
+	if err != nil {
+		return retrievedProduct, err
+	}
+	return retrievedProduct, nil
+}
+
+func GetProductByName(db *sql.DB, name string) (objects.Product, error) {
+	var retrievedProduct objects.Product
+	err := db.QueryRow(`SELECT * FROM product WHERE name = ?`, name).Scan(&retrievedProduct.Id, &retrievedProduct.Name, &retrievedProduct.LogoUrl, &retrievedProduct.CreatedAt, &retrievedProduct.UpdatedAt)
 	if err != nil {
 		return retrievedProduct, err
 	}
@@ -41,7 +45,7 @@ func GetAllProducts(db *sql.DB, limit int, offset int) ([]objects.Product, error
 	defer rows.Close()
 	for rows.Next() {
 		var product objects.Product
-		err = rows.Scan(&product.Id, &product.Name, &product.CreatedAt, &product.UpdatedAt)
+		err = rows.Scan(&product.Id, &product.Name, &product.LogoUrl, &product.CreatedAt, &product.UpdatedAt)
 		if err != nil {
 			products = nil
 			return products, err
@@ -55,12 +59,29 @@ func GetAllProducts(db *sql.DB, limit int, offset int) ([]objects.Product, error
 	return products, nil
 }
 
-func UpdateProduct(db *sql.DB, newName string, name string) error {
-	if _, err := db.Exec(
-		`UPDATE product SET name = ? WHERE name = ?`, newName, name); err != nil {
-		return err
+func UpdateProduct(db *sql.DB, newProduct objects.Product, name string) (int64, error) {
+	if newProduct.Name == nil && newProduct.LogoUrl == nil {
+		return -1, errors.New("invalid product")
 	}
-	return nil
+	if newProduct.Name == nil {
+		result, err := db.Exec(`UPDATE product SET logo_url = ? WHERE name = ?`, *newProduct.LogoUrl, name)
+		if err != nil {
+			return -1, err
+		}
+		return result.LastInsertId()
+	}
+	if newProduct.LogoUrl == nil {
+		result, err := db.Exec(`UPDATE product SET name = ? WHERE name = ?`, *newProduct.Name, name)
+		if err != nil {
+			return -1, err
+		}
+		return result.LastInsertId()
+	}
+	result, err := db.Exec(`UPDATE product SET name = ?, logo_url = ? WHERE name = ?`, *newProduct.Name, *newProduct.LogoUrl, name)
+	if err != nil {
+		return -1, err
+	}
+	return result.LastInsertId()
 }
 
 func DeleteProduct(db *sql.DB, name string) error {

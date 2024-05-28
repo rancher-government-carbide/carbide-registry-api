@@ -39,6 +39,15 @@ func Login(w http.ResponseWriter, license license.CarbideLicense, licensePubkeys
 	return nil
 }
 
+func Logout(w http.ResponseWriter) error {
+	if err := terminateSessionToken(w); err != nil {
+		return err
+	}
+	log.Info().Msg("logout succeeded")
+	utils.RespondWithJSON(w, "logout succeeded")
+	return nil
+}
+
 // parse customerID from a valid license
 func Authenticate(carbideLicense license.CarbideLicense, licensePubkeys []*rsa.PublicKey) (string, error) {
 	customerID, err := license.ParseCarbideLicense(*carbideLicense.License, licensePubkeys)
@@ -141,8 +150,8 @@ func verifySessionToken(token *jwt.Token) error {
 	return nil
 }
 
-func terminateSessionToken(w http.ResponseWriter, userID string) error {
-	if err := setSessionToken(w, userID, time.Now()); err != nil {
+func terminateSessionToken(w http.ResponseWriter) error {
+	if err := setSessionToken(w, "", time.Now()); err != nil {
 		return err
 	}
 	return nil

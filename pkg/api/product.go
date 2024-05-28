@@ -48,13 +48,13 @@ func createProductHandler(db *sql.DB) http.Handler {
 			log.Error(err)
 			return
 		}
-		err = DB.AddProduct(db, createdProduct)
+		_, err = DB.AddProduct(db, createdProduct)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
 			return
 		}
-		createdProduct, err = DB.GetProduct(db, *createdProduct.Name)
+		createdProduct, err = DB.GetProductByName(db, *createdProduct.Name)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
@@ -80,7 +80,7 @@ func getProductHandler(db *sql.DB) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var retrievedProduct objects.Product
 		productName := productNameFromPath(r)
-		retrievedProduct, err := DB.GetProduct(db, productName)
+		retrievedProduct, err := DB.GetProductByName(db, productName)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
 			log.Error(err)
@@ -108,12 +108,12 @@ func updateProductHandler(db *sql.DB) http.Handler {
 			log.Error(err)
 			return
 		}
-		err = DB.UpdateProduct(db, *updatedProduct.Name, productName)
+		_, err = DB.UpdateProduct(db, updatedProduct, productName)
 		if err != nil {
 			log.Error(err)
 			return
 		}
-		updatedProduct, err = DB.GetProduct(db, *updatedProduct.Name)
+		updatedProduct, err = DB.GetProductByName(db, productName)
 		if err != nil {
 			log.Error(err)
 			return
