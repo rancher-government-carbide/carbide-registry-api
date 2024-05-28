@@ -1,0 +1,6 @@
+FROM opensuse/tumbleweed:latest
+RUN zypper in -y git-core fish make lazygit neovim gcc gcc-c++ go1.22 find
+RUN nvim --headless +TSUpdateSync +q
+RUN chsh -s /usr/bin/fish
+RUN mkdir /workspace
+WORKDIR /workspace

@@ -1,0 +1,128 @@
+version: v2beta1
+name: carbide-registry-api
+
+# This is a list of `pipelines` that DevSpace can execute (you can define your own)
+pipelines:
+  # This is the pipeline for the main command: `devspace dev` (or `devspace run-pipeline dev`)
+  dev:
+    run: |-
+      run_dependencies --all       # 1. Deploy any projects this project needs (see "dependencies")
+      ensure_pull_secrets --all    # 2. Ensure pull secrets
+      create_deployments --all     # 3. Deploy Helm charts and manifests specfied as "deployments"
+      start_dev app                # 4. Start dev mode "app" (see "dev" section)
+  # You can run this pipeline via `devspace deploy` (or `devspace run-pipeline deploy`)
+  deploy:
+    run: |-
+      run_dependencies --all                            # 1. Deploy any projects this project needs (see "dependencies")
+      ensure_pull_secrets --all                         # 2. Ensure pull secrets
+      build_images --all -t $(git describe --always)    # 3. Build, tag (git commit hash) and push all images (see "images")
+      create_deployments --all                          # 4. Deploy Helm charts and manifests specfied as "deployments"
+
+# This is a list of `deployments` that DevSpace can create for this project
+deployments:
+  app:
+    # This deployment uses `helm` but you can also define `kubectl` deployments or kustomizations
+    helm:
+      # We are deploying this project with the Helm chart you provided
+      chart:
+        name: ./chart
+      # Under `values` we can define the values for this Helm chart used during `helm install/upgrade`
+      # You may also use `valuesFiles` to load values from files, e.g. valuesFiles: ["values.yaml"]
+      values:
+        replicaCount: 3
+        image:
+          repository: clanktron/carbide-registry-api
+          pullPolicy: Always
+          tag: dev
+        env:
+          # AZURE_TENANT_ID: "3e70bb5f-85c6-4482-8e6e-d8c2f70e5f60"
+          # AZURE_CLIENT_ID: "c2bc97d3-6b54-4a7f-8720-41da1191f224"
+          # AZURE_CLIENT_SECRET: "gadHU-4Q9L605~dofY6r_tu.9gu~-nL07R"
+          # AZURE_SUBSCRIPTION_ID: "b82373d0-f87a-45fd-b466-f1f97e68fcd1"
+          DBNAME: carbide-registry
+          DBUSER: carbide-registry-api
+          DBPASS: carbidecarbidecarbide
+          DBHOST: carbide-registry-db
+          DBPORT: 3306
+          JWTSECRET: oogabooga
+          GOLICENSE_KEY: |-
+            -----BEGIN RSA PRIVATE KEY-----
+            MIIEowIBAAKCAQEAzTaVLFeBFy12HxlDSoZi8exsSSirNXpcsSUkhyV4BXXAhCdx
+            fWoK5j3/lhBCWs+sAHwOC3uh6QLVE9ZCjAihnx9FSEeUIq0y5M8R1XPFGzU2PAle
+            xRBQvjOfwV+HgHqsPpsAJ69aUhsvtDZKt1fHlJofDCK719ilkJhBirCUjEF20LzT
+            gRbpeSQZJp/nft4Bq40VkH3dDDNfkfPPKRvOpYbhGpa0RYSUDQGdt5aHpxlsLRWr
+            ON4vxEjPM2+yNUXyRsyMChc2aLpyuytKP1Ihd1/oXPL8vc+xg12ol/3ldLWVb7pF
+            jrqyBKqUOy3no3kwbfK1E+7b/IGn73exWXYxTQIDAQABAoIBACxLddOGZ8Ta+T4p
+            M88oRr81awI3lw0KBmvuOn45Zji3fACKiwKpGwUrqLl5dPkpDlVkcZuk6gPjqp6H
+            hwG28zvnggrh+GWrwOqGj7DlNkxzJeu7kgszRFppxjf1KMhgskEpL9VhEjvaxmc9
+            uM7uUZQP2FfEP4uNpd8aHjuTddz3+XyBPUHx+oOUjZv3L4/Pl/esDWt99/D6vQ3B
+            PJekR/RVsEFhxf2HUSy+/PRsyO83CSJkkXBZc+QX2ukvxxqZnBgQMsiKPC7fgNBm
+            1GWE7BF93D0svrh5m9sOWjNf7dfx4ZxFWmF78ORZTrsHev+Zzh63PrWZ1d0vYgqy
+            4vgOQYECgYEA5mkgzX3QHyOmjJVQhtma4C8j5B4UkAN3y8YRwRpwrAcbRYwiWx5r
+            bVkXp+OnoeHSLwQwe8P8uFZ3yaT4ciDcxzpfCvLLUCeVkpJE6opZUaoIDtsCgN7R
+            4GRAfa/DHaU1M3Q4FssBfnZVW8fbulRlgXlUzjceQgKq6Fpmg1spONECgYEA5AEP
+            DV/7rfdCGNiZCnMc13JGt3tA9HNGhoEZ3Bf9oOy24WQ3MRk/nNa6xMuviJI1iKJw
+            pNEow6lleKJutAnUSi5omk4KHzQn9TCwJA2NCJU+aP96fk9nbMehG6ym5/P9cORB
+            Kp+PUXJseUSN+AxI0jw4UNK+OYAh1COVClNDD70CgYA7EHf4NWhEkz7+isg5yU6K
+            aYspzww2Xq02729dsQlxD+FN0r573TBst4n438L5HIpkww4qq/L8zi2m40NM/l+a
+            MrxqchLsWTleeWBxP0XmSVAHft0FbBkhDJH7pjK+Rrt8lS5LqX6YjH0VKgaJnVjn
+            99JlinuXMFffeE0PHy9SAQKBgQDRybuc1d0Qc7pofBtMxyAZiHdS6eCZS9vvdKhj
+            n9tpj4SyHHDAB3hFijotSzEG22jQgI5eyGjWp23LMsHjfEvNuafbmsSrc2T0sMjR
+            U3qaFCBpofCGee8y4vf1K8YjFJf0oMDpRAktqrfuWMq8GimC74/tpgsLgz8dH2RK
+            LNQ+jQKBgGDBAbOYojz5k1W3ivRbd5xBE3znGJsD+VI8GRDljSxX3ev3agax247C
+            jbY2HMSqCmfxwGGo1ftVU5MvyRShN3Hob/9186hRmXr/arJlJppxH5MTxgqU7zLQ
+            BIkEnVCAQQBS3VlWcehlZJOKDtADuxvOP5lM3RUwIff507Vabuzg
+            -----END RSA PRIVATE KEY-----
+
+        podSecurityContext:
+         fsGroup: 2000
+        
+        securityContext:
+          runAsUser: 0
+          runAsNonRoot: false
+          readOnlyRootFilesystem: false
+
+# This is a list of `dev` containers that are based on the containers created by your deployments
+dev:
+  app:
+    # Search for the container that runs this image
+    imageSelector: clanktron/carbide-registry-api:dev
+    # Replace the container image with this dev-optimized image (allows to skip image building during development)
+    devImage: clanktron/devcontainer
+    # Sync files between the local filesystem and the development container
+    sync:
+      - path: ./:/workspace
+    # Open a terminal and use the following command to start it
+    terminal:
+      command: ./devspace_start.sh
+    # Inject a lightweight SSH server into the container (so your IDE can connect to the remote dev env)
+    ssh:
+      enabled: true
+    # Make the following commands from my local machine available inside the dev container
+    proxyCommands:
+      - command: devspace
+      - command: kubectl
+      - command: helm
+      - gitCredentials: true
+    # Forward the following ports to be able access your application via localhost
+    ports:
+      - port: "2345"
+      - port: "5000"
+    # Open the following URLs once they return an HTTP status code other than 502 or 503
+    open:
+      - url: http://localhost:5000
+
+# Use the `commands` section to define repeatable dev workflows for this project 
+commands:
+  migrate-db:
+    command: |-
+      echo 'This is a cross-platform, shared command that can be used to codify any kind of dev task.'
+      echo 'Anyone using this project can invoke it via "devspace run migrate-db"'
+
+# Define dependencies to other projects with a devspace.yaml
+# dependencies:
+#   api:
+#     git: https://...  # Git-based dependencies
+#     tag: v1.0.0
+#   ui:
+#     path: ./ui        # Path-based dependencies (for monorepos)
