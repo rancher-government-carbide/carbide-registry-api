@@ -1,4 +1,4 @@
-package objects
+package license
 
 import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"

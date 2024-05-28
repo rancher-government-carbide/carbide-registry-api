@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"crypto/rsa"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +10,7 @@ import (
 	"time"
 
 	"carbide-registry-api/pkg/azure"
-	"carbide-registry-api/pkg/objects"
+	"carbide-registry-api/pkg/license"
 )
 
 func TestCreateCarbideAccountHandler(t *testing.T) {
@@ -17,7 +18,6 @@ func TestCreateCarbideAccountHandler(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to initialize azure client factory")
 	}
-
 	// Define test payloads
 	testPayloads := []map[string]interface{}{
 		{
@@ -26,7 +26,6 @@ func TestCreateCarbideAccountHandler(t *testing.T) {
 			"nodeCount":      5,
 		},
 	}
-
 	// Iterate over test payloads
 	for _, testData := range testPayloads {
 		inputPayloadJSON, err := json.Marshal(testData)
@@ -38,19 +37,17 @@ func TestCreateCarbideAccountHandler(t *testing.T) {
 			t.Fatalf("Failed to create HTTP request: %v", err)
 		}
 		rr := httptest.NewRecorder()
-		handler := createCarbideAccountHandler(clientFactory)
+		handler := createCarbideAccountHandler(clientFactory, &rsa.PrivateKey{})
 		handler.ServeHTTP(rr, req)
 		t.Logf("Got here 5")
 		if status := rr.Code; status != http.StatusCreated {
 			t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusCreated)
 		}
 
-		var createdLicesnse objects.CarbideLicense
+		var createdLicesnse license.CarbideLicense
 		err = json.Unmarshal(rr.Body.Bytes(), &createdLicesnse)
 		if err != nil {
 			t.Errorf("Failed to unmarshal response body: %v", err)
 		}
-
 	}
-
 }

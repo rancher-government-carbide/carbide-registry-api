@@ -4,7 +4,7 @@ import (
 	"carbide-registry-api/pkg/api/utils"
 	"carbide-registry-api/pkg/azure"
 	"carbide-registry-api/pkg/license"
-	"carbide-registry-api/pkg/objects"
+	"crypto/rsa"
 	"net/http"
 	"time"
 
@@ -12,13 +12,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func createCarbideAccountHandler(clientFactory *armcontainerregistry.ClientFactory) http.Handler {
+func createCarbideAccountHandler(clientFactory *armcontainerregistry.ClientFactory, privateKey *rsa.PrivateKey) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		var newLicense objects.CarbideLicense
+		var newLicense license.CarbideLicense
 		err := utils.DecodeJSONObject(w, r, &newLicense)
 		if err != nil {
-			log.Error(err)
-			utils.HttpJSONError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		if newLicense.CustomerID == nil || newLicense.DaysTillExpiry == nil || newLicense.NodeCount == nil {
@@ -27,7 +25,7 @@ func createCarbideAccountHandler(clientFactory *armcontainerregistry.ClientFacto
 			return
 		}
 		expiry := time.Now().Add(time.Hour * 24 * time.Duration(*newLicense.DaysTillExpiry))
-		newLicense.License, err = license.CreateCarbideLicense(*newLicense.NodeCount, *newLicense.CustomerID, expiry)
+		newLicense.License, err = license.CreateCarbideLicense(privateKey, *newLicense.NodeCount, *newLicense.CustomerID, expiry)
 		if err != nil {
 			log.Error(err)
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)

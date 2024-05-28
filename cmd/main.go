@@ -4,39 +4,51 @@ import (
 	"carbide-registry-api/pkg/api"
 	"carbide-registry-api/pkg/azure"
 	"carbide-registry-api/pkg/database"
+	"crypto/rsa"
 	"net/http"
 	"os"
 
+	"github.com/ebauman/golicense/pkg/certificate"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	db_user := os.Getenv("DBUSER")
-	if db_user == "" {
-		db_user = "clayton"
+	DBUSER := os.Getenv("DBUSER")
+	if DBUSER == "" {
+		DBUSER = "clayton"
 	}
-	db_pass := os.Getenv("DBPASS")
-	if db_pass == "" {
-		db_pass = "applevisioncurescancer"
+	DBPASS := os.Getenv("DBPASS")
+	if DBPASS == "" {
+		DBPASS = "applevisioncurescancer"
 	}
-	db_host := os.Getenv("DBHOST")
-	if db_host == "" {
-		db_host = "127.0.0.1"
+	DBHOST := os.Getenv("DBHOST")
+	if DBHOST == "" {
+		DBHOST = "127.0.0.1"
 	}
-	db_port := os.Getenv("DBPORT")
-	if db_port == "" {
-		db_port = "3306"
+	DBPORT := os.Getenv("DBPORT")
+	if DBPORT == "" {
+		DBPORT = "3306"
 	}
-	db_name := os.Getenv("DBNAME")
-	if db_name == "" {
-		db_name = "carbide"
+	DBNAME := os.Getenv("DBNAME")
+	if DBNAME == "" {
+		DBNAME = "carbide"
 	}
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "5000"
+	PORT := os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "5000"
 	}
 
-	db, err := database.Init(db_user, db_pass, db_host, db_port, db_name)
+	GOLICENSE_KEY := os.Getenv("GOLICENSE_KEY")
+	if GOLICENSE_KEY == "" {
+		log.Fatal("Missing GOLICENSE_KEY env variable (carbide license private key), exiting...")
+	}
+	licensePrivkey, err := certificate.PEMToPrivateKey([]byte(GOLICENSE_KEY))
+	if err != nil {
+		panic(err)
+	}
+	licensePubkeys := []*rsa.PublicKey{&licensePrivkey.PublicKey}
+
+	db, err := database.Init(DBUSER, DBPASS, DBHOST, DBPORT, DBNAME)
 	if err != nil {
 		log.Error("Database connection failed, exiting...")
 		log.Fatal(err)
@@ -51,6 +63,6 @@ func main() {
 	}
 
 	clientFactory, err := azure.NewAzureClients()
-	log.Info("Starting server on port " + port + "...")
-	log.Fatal(http.ListenAndServe(":"+port, api.NewRouter(db, clientFactory)))
+	log.Info("Starting server on PORT " + PORT + "...")
+	log.Fatal(http.ListenAndServe(":"+PORT, api.NewRouter(db, clientFactory, licensePrivkey, licensePubkeys)))
 }

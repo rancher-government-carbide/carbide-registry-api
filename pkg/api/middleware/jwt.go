@@ -14,12 +14,12 @@ import (
 	// "github.com/rs/zerolog/log"
 )
 
-func Authenticate(w http.ResponseWriter, user objects.User) error {
+func jwtAuthenticate(w http.ResponseWriter, user objects.User) error {
 	err := setAuthCookie(w, user)
 	return err
 }
 
-func Authorized(w http.ResponseWriter, r *http.Request) bool {
+func jwtAuthorized(w http.ResponseWriter, r *http.Request) bool {
 	_, err := verifyJWT(r)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
