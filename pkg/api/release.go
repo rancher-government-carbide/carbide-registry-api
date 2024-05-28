@@ -51,7 +51,7 @@ func createReleaseHandler(db *sql.DB) http.Handler {
 			log.Error(err)
 			return
 		}
-		parentProduct, err := DB.GetProduct(db, productName)
+		parentProduct, err := DB.GetProductByName(db, productName)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
@@ -92,7 +92,7 @@ func getReleaseHandler(db *sql.DB) http.Handler {
 		productName := productNameFromPath(r)
 		releaseName := releaseNameFromPath(r)
 		retrievedRelease.Name = &releaseName
-		parentProduct, err := DB.GetProduct(db, productName)
+		parentProduct, err := DB.GetProductByName(db, productName)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
@@ -129,7 +129,7 @@ func updateReleaseHandler(db *sql.DB) http.Handler {
 			return
 		}
 		receivedRelease.Name = &releaseName
-		parentProduct, err := DB.GetProduct(db, productName)
+		parentProduct, err := DB.GetProductByName(db, productName)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
@@ -170,7 +170,7 @@ func deleteReleaseHandler(db *sql.DB) http.Handler {
 		productName := productNameFromPath(r)
 		releaseName := releaseNameFromPath(r)
 		releaseToDelete.Name = &releaseName
-		parentProduct, err := DB.GetProduct(db, productName)
+		parentProduct, err := DB.GetProductByName(db, productName)
 		if err != nil {
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
 			log.Error(err)
