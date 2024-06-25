@@ -1,10 +1,9 @@
-BINARY_NAME=carbide-registry-api
-ORG=rancher-government-carbide
+BINARY_NAME=carbide
+ORG=clanktron
 CONTAINERNAME=$(ORG)/$(BINARY_NAME)
 CONTAINERTAG=dev
 CONTAINERFILE=./Containerfile
-COMPILATION_SRC=./cmd
-SRC=./cmd
+SRC=
 VERSION=0.1.2
 COMMIT_HASH=$(shell git rev-parse HEAD)
 GOENV=CGO_ENABLED=0
