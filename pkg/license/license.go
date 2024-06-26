@@ -2,6 +2,7 @@ package license
 
 import (
 	"crypto/rsa"
+	"math"
 	"time"
 
 	golicense "github.com/ebauman/golicense/pkg/license"
@@ -37,7 +38,7 @@ func ParseCarbideLicense(licenseString string, licensePubkeys []*rsa.PublicKey) 
 	}
 	var parsedLicense CarbideLicense
 	parsedLicense.CustomerID = &license.Licensee
-	daysTillExpiry := int(license.NotAfter.Sub(time.Now()).Hours() / 24)
+	daysTillExpiry := int(math.Ceil(license.NotAfter.Sub(time.Now()).Hours() / 24))
 	parsedLicense.DaysTillExpiry = &daysTillExpiry
 	nodeCount := license.Grants["compliance.cattle.io/stigatron"]
 	parsedLicense.NodeCount = &nodeCount
