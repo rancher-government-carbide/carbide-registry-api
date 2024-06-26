@@ -9,7 +9,7 @@ type CarbideLicense struct {
 	DaysTillExpiry *int
 	NodeCount      *int
 
-	License  *string
-	Token    *armcontainerregistry.Token
-	Password *armcontainerregistry.TokenPassword
+	LicenseString *string                             `json:"license,omitempty"`
+	Token         *armcontainerregistry.Token         `json:"token,omitempty"`
+	Password      *armcontainerregistry.TokenPassword `json:"password,omitempty"`
 }

@@ -30,11 +30,16 @@ func CreateCarbideLicense(privateKey *rsa.PrivateKey, nodeCount int, customerID 
 	return &keystring, nil
 }
 
-// returns customer ID if valid, err if not
-func ParseCarbideLicense(licenseString string, licensePubkeys []*rsa.PublicKey) (*string, error) {
+func ParseCarbideLicense(licenseString string, licensePubkeys []*rsa.PublicKey) (CarbideLicense, error) {
 	license, err := golicense.ParseLicenseKey([]byte(licenseString), licensePubkeys)
 	if err != nil {
-		return nil, err
+		return CarbideLicense{}, err
 	}
-	return &license.Licensee, nil
+	var parsedLicense CarbideLicense
+	parsedLicense.CustomerID = &license.Licensee
+	daysTillExpiry := int(license.NotAfter.Sub(time.Now()).Hours() / 24)
+	parsedLicense.DaysTillExpiry = &daysTillExpiry
+	nodeCount := license.Grants["compliance.cattle.io/stigatron"]
+	parsedLicense.NodeCount = &nodeCount
+	return parsedLicense, nil
 }

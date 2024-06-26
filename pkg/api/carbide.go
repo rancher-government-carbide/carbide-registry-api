@@ -25,7 +25,7 @@ func createCarbideAccountHandler(clientFactory *armcontainerregistry.ClientFacto
 			return
 		}
 		expiry := time.Now().Add(time.Hour * 24 * time.Duration(*newLicense.DaysTillExpiry))
-		newLicense.License, err = license.CreateCarbideLicense(privateKey, *newLicense.NodeCount, *newLicense.CustomerID, expiry)
+		newLicense.LicenseString, err = license.CreateCarbideLicense(privateKey, *newLicense.NodeCount, *newLicense.CustomerID, expiry)
 		if err != nil {
 			log.Error(err)
 			utils.HttpJSONError(w, err.Error(), http.StatusInternalServerError)
