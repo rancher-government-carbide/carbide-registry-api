@@ -9,7 +9,7 @@ VERSION=0.1.2
 COMMIT_HASH=$(shell git rev-parse HEAD)
 GOENV=CGO_ENABLED=0
 BUILD_FLAGS=-ldflags="-X 'main.Version=$(VERSION)'"
-TEST_FLAGS=-v -cover -count 1
+TEST_FLAGS=-cover -count 1
 ARTIFACT_DIR=dist
 CLI=sudo nerdctl
 
