@@ -1,6 +1,6 @@
 BINARY_NAME=carbide
 ORG=clanktron
-CONTAINERNAME=$(ORG)/$(BINARY_NAME)
+CONTAINERNAME=$(ORG)/carbide-registry-api
 CONTAINERTAG=dev
 CONTAINERFILE=./Containerfile
 SRC=
