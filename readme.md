@@ -44,10 +44,15 @@ You can either follow their instructions or run `./bin/mysql.sh` which should de
 | AZURE_CLIENT_SECRET   | Azure client secret/password      | false                     |
 
 ## REST Schema
-- /auth
-    - POST: should accept username and password
-        - returns authentication cookie/token (stored in browser by frontend)  
+- /login
+    - POST: accepts a carbide license
+        - sets session cookie/token
+        - returns decoded carbide license
+- /logout
+    - POST: unsets session cookie
 >The following require the user to have provide their auth token via cookie:
+- /auth
+    - GET: returns 200 if session cookie is valid
 - /carbide/license
     - POST: provision new license and pull token
 - /product
@@ -102,4 +107,3 @@ The following query parameters are supported:
     - GET: get release
     - PUT: update release
     - DELETE: delete release
-
