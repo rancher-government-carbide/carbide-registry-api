@@ -9,11 +9,14 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
-func NewRouter(db *sql.DB, clientFactory *armcontainerregistry.ClientFactory, licensePrivkey *rsa.PrivateKey, licensePubkeys []*rsa.PublicKey) http.Handler {
+// api schema for public usage
+//
+// enables authentication;
+// disables carbide account creation endpoint
+func PublicRouter(db *sql.DB, licensePubkeys []*rsa.PublicKey) http.Handler {
 	mux := http.NewServeMux()
 	withAuth := middleware.SessionAuth
 	mux.Handle("GET /healthcheck", middleware.Healthcheck())
-	mux.Handle("POST /carbide/license", withAuth(createCarbideAccountHandler(clientFactory, licensePrivkey)))
 	mux.Handle("GET /auth", authCheckHandler())
 	mux.Handle("POST /login", loginHandler(licensePubkeys))
 	mux.Handle("POST /logout", logoutHandler())
@@ -35,6 +38,37 @@ func NewRouter(db *sql.DB, clientFactory *armcontainerregistry.ClientFactory, li
 	mux.Handle("GET /releaseImageMapping", withAuth(getAllReleaseImageMappingsHandler(db)))
 	mux.Handle("POST /releaseImageMapping", withAuth(createReleaseImageMappingHandler(db)))
 	mux.Handle("DELETE /releaseImageMapping", withAuth(deleteReleaseImageMappingHandler(db)))
+	withCors := middleware.CORS
+	newMux := withCors(mux)
+	return newMux
+}
+
+// api schema for internal ssf usage
+//
+// disables authentication;
+// enables carbide account creation endpoint
+func PrivateRouter(db *sql.DB, clientFactory *armcontainerregistry.ClientFactory, licensePrivkey *rsa.PrivateKey) http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("GET /healthcheck", middleware.Healthcheck())
+	mux.Handle("POST /carbide/license", createCarbideAccountHandler(clientFactory, licensePrivkey))
+	mux.Handle("GET /product", getAllProductsHandler(db))
+	mux.Handle("POST /product", createProductHandler(db))
+	mux.Handle("GET /product/{productName}", getProductHandler(db))
+	mux.Handle("PUT /product/{productName}", updateProductHandler(db))
+	mux.Handle("DELETE /product/{productName}", deleteProductHandler(db))
+	mux.Handle("GET /product/{productName}/release", getAllReleasesHandler(db))
+	mux.Handle("POST /product/{productName}/release", createReleaseHandler(db))
+	mux.Handle("GET /product/{productName}/release/{releaseName}", getReleaseHandler(db))
+	mux.Handle("PUT /product/{productName}/release/{releaseName}", updateReleaseHandler(db))
+	mux.Handle("DELETE /product/{proudctName}/release/{releaseName}", deleteReleaseHandler(db))
+	mux.Handle("GET /image", getAllImagesHandler(db))
+	mux.Handle("POST /image", createImageHandler(db))
+	mux.Handle("GET /image/{imageID}", getImageHandler(db))
+	mux.Handle("PUT /image/{imageID}", updateImageHandler(db))
+	mux.Handle("DELETE /image/{imageID}", deleteImageHandler(db))
+	mux.Handle("GET /releaseImageMapping", getAllReleaseImageMappingsHandler(db))
+	mux.Handle("POST /releaseImageMapping", createReleaseImageMappingHandler(db))
+	mux.Handle("DELETE /releaseImageMapping", deleteReleaseImageMappingHandler(db))
 	withCors := middleware.CORS
 	newMux := withCors(mux)
 	return newMux

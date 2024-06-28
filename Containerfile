@@ -13,5 +13,5 @@ COPY --from=builder /permissions/passwd /etc/passwd
 COPY --from=builder /permissions/group /etc/group
 USER carbide-registry-api
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /build/carbide-registry-api /
-ENTRYPOINT ["/carbide-registry-api"]
+COPY --from=builder /build/carbide /
+ENTRYPOINT ["/carbide"]

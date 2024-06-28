@@ -52,6 +52,7 @@ spec:
               name: {{ include "carbide-registry-api.fullname" . }}-env
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: [ "serve" ]
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
