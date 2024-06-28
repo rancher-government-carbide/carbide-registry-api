@@ -24,7 +24,7 @@ func loginHandler(licensePubkeys []*rsa.PublicKey) http.HandlerFunc {
 		if err := utils.DecodeJSONObject(w, r, &license); err != nil {
 			return
 		}
-		if err := middleware.Login(w, license, licensePubkeys); err != nil {
+		if err := middleware.Login(w, *license.LicenseString, licensePubkeys); err != nil {
 			return
 		}
 	}

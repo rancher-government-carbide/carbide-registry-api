@@ -24,18 +24,20 @@ func SessionAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func Login(w http.ResponseWriter, license license.CarbideLicense, licensePubkeys []*rsa.PublicKey) error {
-	userID, err := Authenticate(license, licensePubkeys)
+func Login(w http.ResponseWriter, license string, licensePubkeys []*rsa.PublicKey) error {
+	parsedLicense, err := Authenticate(license, licensePubkeys)
 	if err != nil {
 		utils.HttpJSONError(w, err.Error(), http.StatusUnauthorized)
 		return err
 	}
-	err = Authorize(w, userID)
+	err = Authorize(w, *parsedLicense.CustomerID)
 	if err != nil {
 		return err
 	}
-	log.Info().Str("customerID", userID).Msg("login succeeded")
-	utils.RespondWithJSON(w, "login succeeded")
+	log.Info().
+		Str("customerID", *parsedLicense.CustomerID).
+		Msg("login succeeded")
+	utils.SendAsJSON(w, parsedLicense)
 	return nil
 }
 
@@ -48,15 +50,18 @@ func Logout(w http.ResponseWriter) error {
 	return nil
 }
 
-// parse customerID from a valid license
-func Authenticate(carbideLicense license.CarbideLicense, licensePubkeys []*rsa.PublicKey) (string, error) {
-	customerID, err := license.ParseCarbideLicense(*carbideLicense.License, licensePubkeys)
+func Authenticate(carbideLicense string, licensePubkeys []*rsa.PublicKey) (license.CarbideLicense, error) {
+	parsedLicense, err := license.ParseCarbideLicense(carbideLicense, licensePubkeys)
 	if err != nil {
 		log.Error().Err(err)
-		return "", err
+		return license.CarbideLicense{}, err
 	}
-	log.Info().Str("customerID", *customerID).Msg("license parsed successfully")
-	return *customerID, nil
+	log.Debug().
+		Str("customerID", *parsedLicense.CustomerID).
+		Int("nodeCount", *parsedLicense.NodeCount).
+		Int("daysTillExpiry", *parsedLicense.DaysTillExpiry).
+		Msg("license parsed successfully")
+	return parsedLicense, nil
 }
 
 // provide user with session token
